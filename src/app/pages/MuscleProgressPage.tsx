@@ -3,13 +3,24 @@ import { Trophy, TrendingUp } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, Tooltip, CartesianGrid } from 'recharts';
 import { Header } from '../components/Header';
 import { getMuscleProgressInsights } from '../data/profileInsights';
+import { useAppData } from '../data/AppDataContext';
 
 const weekLabels = ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4', 'Sem 5', 'Sem 6', 'Sem 7', 'Sem 8'];
 
 export default function MuscleProgressPage() {
   const { id } = useParams();
-  const muscleProgress = getMuscleProgressInsights();
+  const { appContext, sessionHistory } = useAppData();
+  const muscleProgress = getMuscleProgressInsights(sessionHistory, appContext.todayIso);
   const muscle = muscleProgress.find((item) => item.id === id) ?? muscleProgress[0];
+
+  if (!muscle) {
+    return (
+      <div className="flex flex-col" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+        <Header showBack title="Progreso" />
+        <div className="px-5 py-5 text-sm text-[#ADAAAA]">No hay datos para ese grupo muscular.</div>
+      </div>
+    );
+  }
 
   const chartData = muscle.weeklyDirectCounts.map((directCount, index) => ({
     week: weekLabels[index],
@@ -74,8 +85,8 @@ export default function MuscleProgressPage() {
 
         <div className="grid grid-cols-3 gap-3">
           {[
-            { label: 'Máx. semanal', value: maxDirect.toString(), unit: 'directos' },
-            { label: 'Mín. semanal', value: minDirect.toString(), unit: 'directos' },
+            { label: 'Max. semanal', value: maxDirect.toString(), unit: 'directos' },
+            { label: 'Min. semanal', value: minDirect.toString(), unit: 'directos' },
             { label: 'Tendencia', value: `${trend >= 0 ? '+' : ''}${trend}`, unit: 'directos', color: '#12EFD3' },
           ].map(({ label, value, unit, color }) => (
             <div key={label} className="rounded-xl border border-[#262626] bg-[#131313] p-3">
@@ -96,7 +107,7 @@ export default function MuscleProgressPage() {
         <div>
           <div className="mb-3 flex items-center gap-2">
             <TrendingUp size={16} className="text-[#12EFD3]" />
-            <h2 className="text-lg font-bold text-white">Estímulo directo semanal (8 semanas)</h2>
+            <h2 className="text-lg font-bold text-white">Estimulo directo semanal (8 semanas)</h2>
           </div>
           <div className="rounded-2xl border border-[#262626] bg-[#131313] p-4">
             <ResponsiveContainer width="100%" height={180}>
@@ -140,7 +151,7 @@ export default function MuscleProgressPage() {
         <div>
           <div className="mb-3 flex items-center gap-2">
             <Trophy size={16} className="text-[#FFD700]" />
-            <h2 className="text-lg font-bold text-white">Récords personales</h2>
+            <h2 className="text-lg font-bold text-white">Records personales</h2>
           </div>
           <div className="flex flex-col gap-3">
             {muscle.exercises.map((exercise, index) => (
@@ -151,7 +162,7 @@ export default function MuscleProgressPage() {
                 <div>
                   <p className="text-sm font-semibold text-white">{exercise.name}</p>
                   <p className="mt-0.5 text-xs text-[#ADAAAA]" style={{ fontFamily: "'Inter', sans-serif" }}>
-                    Récord personal
+                    Record personal
                   </p>
                 </div>
                 <div className="flex items-center gap-1">

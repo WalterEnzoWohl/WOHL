@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { Plus, Trash2, ChevronDown, ChevronUp, Save, Search } from 'lucide-react';
+import { ActiveWorkoutEditLockModal } from '../components/ActiveWorkoutEditLockModal';
 import { Header } from '../components/Header';
-import { routines } from '../data/mockData';
+import { useAppData } from '../data/AppDataContext';
 
 const muscleOptions = ['Todos', 'Pecho', 'Espalda', 'Hombros', 'Tríceps', 'Bíceps', 'Piernas', 'Core', 'Full Body'];
 
@@ -28,8 +29,10 @@ const exerciseLibrary = [
 export default function RoutineEditorPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { activeWorkout, routines, saveRoutine } = useAppData();
   const isNew = id === 'new';
   const existing = !isNew ? routines.find((r) => r.id === Number(id)) : null;
+  const isEditingBlocked = Boolean(activeWorkout && !isNew && existing);
 
   const [name, setName] = useState(existing?.name || '');
   const [daysPerWeek, setDaysPerWeek] = useState(existing?.daysPerWeek || 4);
@@ -92,15 +95,49 @@ export default function RoutineEditorPage() {
     );
   };
 
-  const handleSave = () => {
-    navigate(-1);
+  const handleSave = async () => {
+    const routineToSave = {
+      id: existing?.id ?? 0,
+      name: name.trim() || 'Nueva rutina',
+      daysPerWeek,
+      color: existing?.color ?? '#12EFD3',
+      categories: existing?.categories ?? [],
+      description: existing?.description ?? 'Rutina personalizada creada en GYMUP.',
+      tags: existing?.tags ?? ['PERSONALIZADA'],
+      avgMinutes: existing?.avgMinutes ?? 75,
+      days: days.map((day, dayIndex) => ({
+        id: existing?.days[dayIndex]?.id,
+        name: day.name,
+        focus: day.exercises.map((exercise) => exercise.muscle).slice(0, 3).join(', ') || 'Sesión personalizada',
+        description: existing?.days[dayIndex]?.description ?? undefined,
+        exercises: day.exercises.map((exercise, exerciseIndex) => ({
+          id: existing?.days[dayIndex]?.exercises[exerciseIndex]?.id ?? exerciseIndex + 1,
+          name: exercise.name,
+          muscle: exercise.muscle,
+          implement: existing?.days[dayIndex]?.exercises[exerciseIndex]?.implement,
+          secondaryMuscles: existing?.days[dayIndex]?.exercises[exerciseIndex]?.secondaryMuscles,
+          notes: existing?.days[dayIndex]?.exercises[exerciseIndex]?.notes,
+          sets: Array.from({ length: exercise.sets }, (_, setIndex) => ({
+            id: setIndex + 1,
+            kg: existing?.days[dayIndex]?.exercises[exerciseIndex]?.sets[setIndex]?.kg ?? 0,
+            reps: exercise.reps,
+            rpe: existing?.days[dayIndex]?.exercises[exerciseIndex]?.sets[setIndex]?.rpe ?? 8,
+            completed: false,
+          })),
+        })),
+      })),
+    };
+
+    await saveRoutine(routineToSave);
+    navigate('/workouts');
   };
 
   return (
-    <div className="flex flex-col" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+    <div className="relative flex flex-col" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
       <Header showBack title={isNew ? 'Crear Rutina' : 'Editar Rutina'} />
 
-      <div className="flex flex-col gap-5 px-5 py-5 pb-6">
+      {!isEditingBlocked ? (
+        <div className="flex flex-col gap-5 px-5 py-5 pb-6">
         {/* Name input */}
         <div>
           <label className="text-[#ADAAAA] text-xs uppercase tracking-widest font-semibold mb-2 block" style={{ fontFamily: "'Inter', sans-serif" }}>
@@ -239,16 +276,19 @@ export default function RoutineEditorPage() {
 
         {/* Save button */}
         <button
-          onClick={handleSave}
+          onClick={() => void handleSave()}
           className="w-full bg-[#12EFD3] rounded-2xl py-4 flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(18,239,211,0.2)]"
         >
           <Save size={18} className="text-black" />
           <span className="text-black font-bold text-base">Guardar Rutina</span>
         </button>
-      </div>
+        </div>
+      ) : (
+        <div className="flex-1" />
+      )}
 
       {/* Exercise search bottom sheet */}
-      {showExSearch !== null && (
+      {showExSearch !== null && !isEditingBlocked && (
         <div className="absolute inset-0 z-50">
           <div className="absolute inset-0 bg-black/60" onClick={() => setShowExSearch(null)} />
           <div
@@ -304,6 +344,15 @@ export default function RoutineEditorPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {isEditingBlocked && activeWorkout && (
+        <ActiveWorkoutEditLockModal
+          activeWorkoutName={activeWorkout.sessionName}
+          onResume={() => navigate('/session')}
+          onFinish={() => navigate('/session', { state: { action: 'finish' } })}
+          onCancel={() => navigate(-1)}
+        />
       )}
     </div>
   );

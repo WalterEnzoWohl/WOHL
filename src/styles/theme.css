@@ -179,3 +179,25 @@
     line-height: 1.5;
   }
 }
+
+.gymup-stage {
+  background: #050710;
+  transition: background 160ms ease;
+}
+
+.gymup-light-stage {
+  background: #e7edf5;
+}
+
+.gymup-shell {
+  background: #0a0d12;
+  transition: filter 180ms ease;
+}
+
+.gymup-shell.gymup-light-mode {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+.gymup-shell.gymup-light-mode .theme-preserve {
+  filter: invert(1) hue-rotate(180deg);
+}

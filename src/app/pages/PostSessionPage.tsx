@@ -1,6 +1,8 @@
 import { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import { BarChart2, Check, Home, TrendingUp } from 'lucide-react';
+import { useAppData } from '../data/AppDataContext';
+import { formatWeightNumber, formatWeightWithUnit, getWeightUnitLabel } from '../data/unitUtils';
 
 type CompletedSet = {
   kg: number;
@@ -37,6 +39,7 @@ function formatTime(seconds: number) {
 export default function PostSessionPage() {
   const navigate = useNavigate();
   const { state } = useLocation() as { state?: PostSessionState };
+  const { appSettings } = useAppData();
 
   const duration = state?.duration ?? 2595;
   const volume = state?.volume ?? 12450;
@@ -47,6 +50,7 @@ export default function PostSessionPage() {
   const sessionName = state?.sessionName ?? 'Upper B';
   const sessionFocus = state?.sessionFocus ?? 'Espalda, pecho y hombros';
   const previousVolume = state?.previousVolume ?? 0;
+  const weightUnitLabel = getWeightUnitLabel(appSettings.weightUnit);
 
   const completedSets = exercises.flatMap((exercise) => exercise.sets.filter((set) => set.completed));
   const avgRpe =
@@ -153,8 +157,10 @@ export default function PostSessionPage() {
           <div className="rounded-2xl border border-[rgba(18,239,211,0.15)] bg-[#131313] p-4" style={{ borderLeftWidth: 4 }}>
             <p className="mb-2 text-[10px] uppercase tracking-widest text-[#ADAAAA]">Volumen total</p>
             <div className="flex items-baseline gap-1">
-              <span className="text-2xl font-normal text-white">{volume.toLocaleString()}</span>
-              <span className="text-xs font-bold italic text-[#ADAAAA]">kg</span>
+              <span className="text-2xl font-normal text-white">
+                {formatWeightNumber(volume, appSettings.weightUnit, 0)}
+              </span>
+              <span className="text-xs font-bold italic text-[#ADAAAA]">{weightUnitLabel}</span>
             </div>
             <div className="mt-1 flex items-center gap-1">
               <TrendingUp size={10} className="text-[#12EFD3]" />
@@ -207,7 +213,7 @@ export default function PostSessionPage() {
                     </div>
                     <div className="text-right">
                       <span className="text-sm font-bold text-[#12EFD3]">
-                        {maxKg > 0 ? `${maxKg} kg` : 'Peso corporal'}
+                        {maxKg > 0 ? formatWeightWithUnit(maxKg, appSettings.weightUnit) : 'Peso corporal'}
                       </span>
                       <p className="text-xs text-[#ADAAAA]">máx.</p>
                     </div>

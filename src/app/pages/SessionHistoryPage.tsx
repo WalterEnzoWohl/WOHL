@@ -1,19 +1,62 @@
-import { useParams } from 'react-router';
-import { BarChart2, Clock, TrendingUp, Zap } from 'lucide-react';
+import { useState } from 'react';
+import { useNavigate, useParams } from 'react-router';
+import { BarChart2, Clock, Pencil, TrendingUp, Zap } from 'lucide-react';
+import { ActiveWorkoutEditLockModal } from '../components/ActiveWorkoutEditLockModal';
 import { Header } from '../components/Header';
-import { sessionHistory } from '../data/mockData';
+import { useAppData } from '../data/AppDataContext';
+import { formatWeightNumber, formatWeightWithUnit, getWeightUnitLabel } from '../data/unitUtils';
 
 export default function SessionHistoryPage() {
+  const navigate = useNavigate();
   const { id } = useParams();
+  const { activeWorkout, appSettings, sessionHistory } = useAppData();
+  const [showEditLockModal, setShowEditLockModal] = useState(false);
   const session = sessionHistory.find((item) => item.id === Number(id)) ?? sessionHistory[0];
+  const weightUnitLabel = getWeightUnitLabel(appSettings.weightUnit);
+
+  if (!session) {
+    return (
+      <div className="flex flex-col" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+        <Header showBack title="Sesion" />
+        <div className="px-5 py-5 text-sm text-[#ADAAAA]">No se encontró la sesión.</div>
+      </div>
+    );
+  }
+
   const delta = session.comparisonDelta ?? 0;
   const deltaText = `${delta > 0 ? '+' : ''}${delta.toFixed(1)}%`;
   const currentBar = delta >= 0 ? 88 : 74;
   const previousBar = delta >= 0 ? 78 : 84;
+  const handleEditSession = () => {
+    if (activeWorkout) {
+      setShowEditLockModal(true);
+      return;
+    }
+
+    navigate('/session', {
+      state: {
+        mode: 'history-edit',
+        sessionId: session.id,
+      },
+    });
+  };
 
   return (
-    <div className="flex flex-col" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-      <Header showBack title={session.name} />
+    <div className="relative flex flex-col" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+      <Header
+        showBack
+        title={session.name}
+        rightContent={
+          <button
+            onClick={handleEditSession}
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-[rgba(127,152,255,0.2)] bg-[rgba(127,152,255,0.08)] text-[#D8E4FF]"
+            type="button"
+            aria-label="Editar sesión"
+          >
+            <Pencil size={16} />
+          </button>
+        }
+      />
 
       <div className="flex flex-col gap-5 px-5 py-5 pb-6">
         <div>
@@ -39,8 +82,10 @@ export default function SessionHistoryPage() {
               <p className="text-[10px] uppercase tracking-widest text-[#ADAAAA]">Volumen</p>
             </div>
             <div className="flex items-baseline gap-1">
-              <span className="text-2xl font-normal text-white">{session.volume.toLocaleString()}</span>
-              <span className="text-xs font-bold italic text-[#ADAAAA]">kg</span>
+              <span className="text-2xl font-normal text-white">
+                {formatWeightNumber(session.volume, appSettings.weightUnit, 0)}
+              </span>
+              <span className="text-xs font-bold italic text-[#ADAAAA]">{weightUnitLabel}</span>
             </div>
           </div>
           <div
@@ -49,7 +94,7 @@ export default function SessionHistoryPage() {
           >
             <div className="mb-2 flex items-center gap-2">
               <Clock size={14} className="text-[#7F98FF]" />
-              <p className="text-[10px] uppercase tracking-widest text-[#ADAAAA]">Duración</p>
+              <p className="text-[10px] uppercase tracking-widest text-[#ADAAAA]">Duracion</p>
             </div>
             <div className="flex items-baseline gap-1">
               <span className="text-2xl font-normal text-white">{session.duration}</span>
@@ -59,7 +104,7 @@ export default function SessionHistoryPage() {
           <div className="rounded-2xl bg-[#131313] p-4">
             <div className="mb-2 flex items-center gap-2">
               <Zap size={14} className="text-orange-400" />
-              <p className="text-[10px] uppercase tracking-widest text-[#ADAAAA]">Calorías</p>
+              <p className="text-[10px] uppercase tracking-widest text-[#ADAAAA]">Calorias</p>
             </div>
             <div className="flex items-baseline gap-1">
               <span className="text-2xl font-normal text-white">{session.kcal}</span>
@@ -79,13 +124,13 @@ export default function SessionHistoryPage() {
         </div>
 
         <div className="rounded-2xl border border-[#262626] bg-[#131313] p-4">
-          <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-[#ADAAAA]">Vs. sesión anterior</p>
+            <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-[#ADAAAA]">Vs. sesión anterior</p>
           <div className="flex items-center gap-3">
             <div className="flex-1">
               <div className="mb-1 h-2 overflow-hidden rounded-full bg-[#262626]">
                 <div className="h-full rounded-full bg-[#12EFD3]" style={{ width: `${currentBar}%` }} />
               </div>
-              <p className="text-sm font-bold text-white">Sesión actual</p>
+              <p className="text-sm font-bold text-white">Sesion actual</p>
             </div>
             <div className={`text-sm font-bold ${delta >= 0 ? 'text-[#12EFD3]' : 'text-[#E53935]'}`}>
               {deltaText}
@@ -94,7 +139,7 @@ export default function SessionHistoryPage() {
               <div className="mb-1 h-2 overflow-hidden rounded-full bg-[#262626]">
                 <div className="h-full rounded-full bg-[#ADAAAA]" style={{ width: `${previousBar}%` }} />
               </div>
-              <p className="text-sm text-[#ADAAAA]">Sesión anterior</p>
+              <p className="text-sm text-[#ADAAAA]">Sesion anterior</p>
             </div>
           </div>
         </div>
@@ -112,7 +157,7 @@ export default function SessionHistoryPage() {
                     <div>
                       <p className="text-sm font-semibold text-white">{exercise.name}</p>
                       <p className="mt-0.5 text-xs text-[#ADAAAA]" style={{ fontFamily: "'Inter', sans-serif" }}>
-                        Máx: {exercise.maxKg > 0 ? `${exercise.maxKg} kg` : 'Peso corporal'}
+                        Max: {exercise.maxKg > 0 ? formatWeightWithUnit(exercise.maxKg, appSettings.weightUnit) : 'Peso corporal'}
                         {exercise.implement ? ` - ${exercise.implement}` : ''}
                       </p>
                     </div>
@@ -152,7 +197,9 @@ export default function SessionHistoryPage() {
                         className="grid grid-cols-4 gap-2 border-t border-[rgba(255,255,255,0.03)] px-4 py-2"
                       >
                         <span className="text-center text-xs text-[#ADAAAA]">{index + 1}</span>
-                        <span className="text-center text-xs font-medium text-white">{set.kg > 0 ? set.kg : '-'}</span>
+                        <span className="text-center text-xs font-medium text-white">
+                          {set.kg > 0 ? formatWeightNumber(set.kg, appSettings.weightUnit) : '-'}
+                        </span>
                         <span className="text-center text-xs font-medium text-white">{set.reps}</span>
                         <span className="text-center text-xs text-[#ADAAAA]">{set.rpe ?? '-'}</span>
                       </div>
@@ -168,6 +215,19 @@ export default function SessionHistoryPage() {
           </div>
         )}
       </div>
+
+      {showEditLockModal && activeWorkout && (
+        <ActiveWorkoutEditLockModal
+          activeWorkoutName={activeWorkout.sessionName}
+          eyebrow="Edición bloqueada"
+          title="No podés editar este entrenamiento ahora"
+          description="Ya tenés un entrenamiento en curso. Para evitar inconsistencias entre esa sesión activa y tu historial, primero volvé a entrenar o cerrá esa sesión."
+          subjectLabel="Entrenamiento activo"
+          onResume={() => navigate('/session')}
+          onFinish={() => navigate('/session', { state: { action: 'finish' } })}
+          onCancel={() => setShowEditLockModal(false)}
+        />
+      )}
     </div>
   );
 }

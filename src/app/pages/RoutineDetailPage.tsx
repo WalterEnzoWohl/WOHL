@@ -1,19 +1,32 @@
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { ChevronDown, ChevronUp, Clock, Dumbbell, Pencil, Play } from 'lucide-react';
+import { ActiveWorkoutEditLockModal } from '../components/ActiveWorkoutEditLockModal';
 import { Header } from '../components/Header';
-import { appContext, routines } from '../data/mockData';
+import { useAppData } from '../data/AppDataContext';
 
 export default function RoutineDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const routine = routines.find((item) => item.id === Number(id)) ?? routines[0];
+  const { activeWorkout, appContext, routines } = useAppData();
+  const routine = routines.find((item) => item.id === Number(id)) ?? routines[0] ?? null;
+
+  if (!routine) {
+    return (
+      <div className="flex flex-col" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+        <Header showBack title="Rutina" />
+        <div className="px-5 py-5 text-sm text-[#ADAAAA]">No se encontró la rutina.</div>
+      </div>
+    );
+  }
+
   const initialDayIndex = Math.max(
     0,
     routine.days.findIndex((day) => day.name === appContext.currentDayName)
   );
   const [activeDay, setActiveDay] = useState(initialDayIndex);
   const [expandedExercises, setExpandedExercises] = useState<Set<number>>(new Set([0]));
+  const [showEditLockModal, setShowEditLockModal] = useState(false);
 
   const selectedDay = routine.days[activeDay] ?? routine.days[0];
   const totalExercises = routine.days.reduce((acc, day) => acc + day.exercises.length, 0);
@@ -34,14 +47,23 @@ export default function RoutineDetailPage() {
     });
   };
 
+  const tryEditRoutine = () => {
+    if (activeWorkout) {
+      setShowEditLockModal(true);
+      return;
+    }
+
+    navigate(`/routine-editor/${routine.id}`);
+  };
+
   return (
-    <div className="flex flex-col" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+    <div className="relative flex flex-col" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
       <Header
         showBack
         onBack={() => navigate(-1)}
         rightContent={
           <button
-            onClick={() => navigate(`/routine-editor/${routine.id}`)}
+            onClick={tryEditRoutine}
             className="flex h-9 w-9 items-center justify-center rounded-xl border border-[#262626] bg-[#1C2030]"
           >
             <Pencil size={14} className="text-[#ADAAAA]" />
@@ -82,7 +104,7 @@ export default function RoutineDetailPage() {
 
         <div className="grid grid-cols-3 gap-3">
           {[
-            { label: 'Días/sem', value: routine.daysPerWeek.toString(), icon: <Clock size={14} style={{ color: routine.color }} /> },
+            { label: 'Dias/sem', value: routine.daysPerWeek.toString(), icon: <Clock size={14} style={{ color: routine.color }} /> },
             { label: 'Ejercicios', value: totalExercises.toString(), icon: <Dumbbell size={14} style={{ color: routine.color }} /> },
             { label: 'Series', value: totalSets.toString(), icon: <div className="h-3.5 w-3.5 rounded-full border-2" style={{ borderColor: routine.color }} /> },
           ].map(({ label, value, icon }) => (
@@ -231,13 +253,22 @@ export default function RoutineDetailPage() {
             <span className="font-bold text-black">Iniciar {selectedDay.name}</span>
           </button>
           <button
-            onClick={() => navigate(`/routine-editor/${routine.id}`)}
+            onClick={tryEditRoutine}
             className="flex w-14 items-center justify-center rounded-2xl border border-[#262626] bg-[#1C2030]"
           >
             <Pencil size={18} className="text-[#ADAAAA]" />
           </button>
         </div>
       </div>
+
+      {showEditLockModal && activeWorkout && (
+        <ActiveWorkoutEditLockModal
+          activeWorkoutName={activeWorkout.sessionName}
+          onResume={() => navigate('/session')}
+          onFinish={() => navigate('/session', { state: { action: 'finish' } })}
+          onCancel={() => setShowEditLockModal(false)}
+        />
+      )}
     </div>
   );
 }

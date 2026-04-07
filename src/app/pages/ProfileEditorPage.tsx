@@ -2,10 +2,9 @@ import { useEffect, useState } from 'react';
 import { Save } from 'lucide-react';
 import { useNavigate } from 'react-router';
 import { Header } from '../components/Header';
-import { activityLevelOptions } from '../data/mockData';
+import { ACTIVITY_LEVEL_OPTIONS, TRAINING_LEVEL_OPTIONS } from '../data/constants';
 import { GOAL_OPTIONS } from '../data/profileInsights';
-import { updateUserProfile, useUserProfile } from '../data/userProfileStore';
-const trainingLevelOptions = ['Principiante', 'Intermedio', 'Avanzado'];
+import { useAppData } from '../data/AppDataContext';
 
 type ProfileFormState = {
   firstName: string;
@@ -18,20 +17,6 @@ type ProfileFormState = {
   trainingLevel: string;
   memberSince: string;
 };
-
-function buildFormState(profile: ReturnType<typeof useUserProfile>): ProfileFormState {
-  return {
-    firstName: profile.firstName,
-    lastName: profile.lastName,
-    age: profile.age,
-    heightCm: profile.heightCm,
-    weightKg: profile.weightKg,
-    goal: profile.goal,
-    activityLevel: profile.activityLevel,
-    trainingLevel: profile.trainingLevel,
-    memberSince: profile.memberSince,
-  };
-}
 
 function Field({
   label,
@@ -70,19 +55,39 @@ function Field({
 
 export default function ProfileEditorPage() {
   const navigate = useNavigate();
-  const userProfile = useUserProfile();
-  const [formData, setFormData] = useState<ProfileFormState>(() => buildFormState(userProfile));
+  const { updateUserProfile, userProfile } = useAppData();
+  const [formData, setFormData] = useState<ProfileFormState>({
+    firstName: userProfile.firstName,
+    lastName: userProfile.lastName,
+    age: userProfile.age,
+    heightCm: userProfile.heightCm,
+    weightKg: userProfile.weightKg,
+    goal: userProfile.goal,
+    activityLevel: userProfile.activityLevel,
+    trainingLevel: userProfile.trainingLevel,
+    memberSince: userProfile.memberSince,
+  });
 
   useEffect(() => {
-    setFormData(buildFormState(userProfile));
+    setFormData({
+      firstName: userProfile.firstName,
+      lastName: userProfile.lastName,
+      age: userProfile.age,
+      heightCm: userProfile.heightCm,
+      weightKg: userProfile.weightKg,
+      goal: userProfile.goal,
+      activityLevel: userProfile.activityLevel,
+      trainingLevel: userProfile.trainingLevel,
+      memberSince: userProfile.memberSince,
+    });
   }, [userProfile]);
 
   const setField = <K extends keyof ProfileFormState>(field: K, value: ProfileFormState[K]) => {
     setFormData((previous) => ({ ...previous, [field]: value }));
   };
 
-  const saveProfile = () => {
-    updateUserProfile({
+  const saveProfile = async () => {
+    await updateUserProfile({
       firstName: formData.firstName,
       lastName: formData.lastName,
       age: formData.age,
@@ -104,53 +109,21 @@ export default function ProfileEditorPage() {
         <div>
           <h1 className="text-3xl font-extrabold tracking-tight text-white">Datos personales</h1>
           <p className="mt-1 text-sm text-[#ADAAAA]" style={{ fontFamily: "'Inter', sans-serif" }}>
-            Actualizá tu perfil para que GYMUP use tus datos reales en el mockeo.
+            Actualizá tu perfil para que GYMUP use tus datos reales en cálculos y progreso.
           </p>
         </div>
 
         <div className="grid grid-cols-2 gap-3">
-          <Field
-            label="Nombre"
-            value={formData.firstName}
-            onChange={(value) => setField('firstName', value)}
-          />
-          <Field
-            label="Apellido"
-            value={formData.lastName}
-            onChange={(value) => setField('lastName', value)}
-          />
-          <Field
-            label="Edad"
-            type="number"
-            value={formData.age}
-            onChange={(value) => setField('age', Number(value) || 0)}
-            suffix="años"
-          />
-          <Field
-            label="Miembro desde"
-            value={formData.memberSince}
-            onChange={(value) => setField('memberSince', value)}
-          />
-          <Field
-            label="Altura"
-            type="number"
-            value={formData.heightCm}
-            onChange={(value) => setField('heightCm', Number(value) || 0)}
-            suffix="cm"
-          />
-          <Field
-            label="Peso"
-            type="number"
-            value={formData.weightKg}
-            onChange={(value) => setField('weightKg', Number(value) || 0)}
-            suffix="kg"
-          />
+          <Field label="Nombre" value={formData.firstName} onChange={(value) => setField('firstName', value)} />
+          <Field label="Apellido" value={formData.lastName} onChange={(value) => setField('lastName', value)} />
+          <Field label="Edad" type="number" value={formData.age} onChange={(value) => setField('age', Number(value) || 0)} suffix="años" />
+          <Field label="Miembro desde" value={formData.memberSince} onChange={(value) => setField('memberSince', value)} />
+          <Field label="Altura" type="number" value={formData.heightCm} onChange={(value) => setField('heightCm', Number(value) || 0)} suffix="cm" />
+          <Field label="Peso" type="number" value={formData.weightKg} onChange={(value) => setField('weightKg', Number(value) || 0)} suffix="kg" />
         </div>
 
         <div className="rounded-2xl border border-[rgba(255,255,255,0.05)] bg-[#131313] p-4">
-          <p className="mb-3 text-[10px] font-bold uppercase tracking-widest text-[#12EFD3]">
-            Objetivo
-          </p>
+          <p className="mb-3 text-[10px] font-bold uppercase tracking-widest text-[#12EFD3]">Objetivo</p>
           <div className="flex flex-wrap gap-2">
             {GOAL_OPTIONS.map((objective) => (
               <button
@@ -173,7 +146,7 @@ export default function ProfileEditorPage() {
             Nivel de entrenamiento
           </p>
           <div className="flex flex-wrap gap-2">
-            {trainingLevelOptions.map((level) => (
+            {TRAINING_LEVEL_OPTIONS.map((level) => (
               <button
                 key={level}
                 onClick={() => setField('trainingLevel', level)}
@@ -194,7 +167,7 @@ export default function ProfileEditorPage() {
             Nivel de actividad
           </p>
           <div className="flex flex-col gap-2">
-            {activityLevelOptions.map((option) => (
+            {ACTIVITY_LEVEL_OPTIONS.map((option) => (
               <button
                 key={option.label}
                 onClick={() => setField('activityLevel', option.label)}
@@ -217,7 +190,7 @@ export default function ProfileEditorPage() {
         </div>
 
         <button
-          onClick={saveProfile}
+          onClick={() => void saveProfile()}
           className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#12EFD3] py-4 shadow-[0_0_15px_rgba(18,239,211,0.18)]"
         >
           <Save size={18} className="text-black" />

@@ -1,4 +1,5 @@
-import { appContext, muscleGroups, sessionHistory, type UserProfile } from './mockData';
+import { MUSCLE_GROUPS } from './constants';
+import type { SessionHistory, UserProfile } from './models';
 
 export const GOAL_OPTIONS = ['Definición', 'Volumen', 'Mantenimiento', 'Recomposición'] as const;
 
@@ -11,9 +12,10 @@ type GoalConfig = {
   title: string;
 };
 
-type StaticMuscleGroup = (typeof muscleGroups)[number];
-
-export type MuscleProgressInsight = StaticMuscleGroup & {
+export type MuscleProgressInsight = (typeof MUSCLE_GROUPS)[number] & {
+  level: number;
+  xp: number;
+  xpNeeded: number;
   monthlyDirectCount: number;
   monthlyTarget: number;
   progressPercent: number;
@@ -75,7 +77,7 @@ function normalizeText(value: string) {
 }
 
 function parseIsoDate(isoDate: string) {
-  return new Date(`${isoDate}T12:00:00`);
+  return new Date(`${isoDate}T12:00:00-03:00`);
 }
 
 function startOfWeek(date: Date) {
@@ -132,15 +134,18 @@ export function calculateNutritionTargets(profile: UserProfile) {
   };
 }
 
-export function getMuscleProgressInsights(referenceIso = appContext.todayIso): MuscleProgressInsight[] {
+export function getMuscleProgressInsights(
+  sessions: SessionHistory[],
+  referenceIso: string
+): MuscleProgressInsight[] {
   const monthKey = referenceIso.slice(0, 7);
   const currentWeekStart = startOfWeek(parseIsoDate(referenceIso));
   const weekStarts = Array.from({ length: 8 }, (_, index) =>
     addDays(currentWeekStart, (index - 7) * 7)
   );
 
-  return muscleGroups.map((group) => {
-    const monthlyDirectCount = sessionHistory
+  return MUSCLE_GROUPS.map((group) => {
+    const monthlyDirectCount = sessions
       .filter((session) => session.isoDate.startsWith(monthKey))
       .reduce((total, session) => {
         const sessionDirectCount = session.exercises.filter(
@@ -153,7 +158,7 @@ export function getMuscleProgressInsights(referenceIso = appContext.todayIso): M
     const weeklyDirectCounts = weekStarts.map((weekStart) => {
       const weekEnd = addDays(weekStart, 6);
 
-      return sessionHistory.reduce((total, session) => {
+      return sessions.reduce((total, session) => {
         const sessionDate = parseIsoDate(session.isoDate);
         const isInsideWeek = sessionDate >= weekStart && sessionDate <= weekEnd;
 

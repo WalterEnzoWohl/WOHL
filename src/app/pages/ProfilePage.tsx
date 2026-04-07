@@ -3,30 +3,26 @@ import { Bell, ChevronRight, Flame, LogOut, Pencil, Settings, X } from 'lucide-r
 import { useNavigate } from 'react-router';
 import { userProfileAvatar } from '@/assets';
 import { Header } from '../components/Header';
-import { appContext, sessionHistory } from '../data/mockData';
 import { calculateNutritionTargets, getMuscleProgressInsights, GOAL_OPTIONS } from '../data/profileInsights';
-import { updateUserProfile, useUserProfile } from '../data/userProfileStore';
-
-const historyDays = [
-  { day: 'LUN', num: 6, isoDate: '2026-04-06' },
-  { day: 'MAR', num: 7, isoDate: '2026-04-07' },
-  { day: 'MIÉ', num: 8, isoDate: '2026-04-08' },
-  { day: 'JUE', num: 9, isoDate: '2026-04-09' },
-  { day: 'VIE', num: 10, isoDate: '2026-04-10' },
-  { day: 'SÁB', num: 11, isoDate: '2026-04-11' },
-  { day: 'DOM', num: 12, isoDate: '2026-04-12' },
-];
+import { useAppData } from '../data/AppDataContext';
+import { formatWeightNumber, getWeightUnitLabel } from '../data/unitUtils';
+import { getSupabaseClient } from '../lib/supabase';
 
 export default function ProfilePage() {
   const navigate = useNavigate();
-  const userProfile = useUserProfile();
-  const [selectedDate, setSelectedDate] = useState('2026-04-07');
+  const { appContext, appSettings, historyDays, sessionHistory, updateUserProfile, userProfile } = useAppData();
+  const [selectedDate, setSelectedDate] = useState(sessionHistory[0]?.isoDate ?? appContext.todayIso);
   const [showObjectiveModal, setShowObjectiveModal] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const filteredSessions = sessionHistory.filter((session) => session.isoDate === selectedDate);
   const nutritionTargets = calculateNutritionTargets(userProfile);
-  const monthlyMuscleProgress = getMuscleProgressInsights(appContext.todayIso);
+  const monthlyMuscleProgress = getMuscleProgressInsights(sessionHistory, appContext.todayIso);
+  const weightUnitLabel = getWeightUnitLabel(appSettings.weightUnit);
+
+  const signOut = async () => {
+    await getSupabaseClient().auth.signOut();
+  };
 
   return (
     <div className="flex flex-col" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
@@ -65,7 +61,7 @@ export default function ProfilePage() {
             </div>
             <div className="flex h-36 w-36 flex-shrink-0 items-start justify-center pt-4">
               <div className="relative h-[104px] w-[104px] overflow-hidden rounded-full border-2 border-[rgba(18,239,211,0.35)] bg-[#1C2030] shadow-[0_0_28px_rgba(18,239,211,0.18)]">
-                <img src={userProfileAvatar} alt={userProfile.fullName} className="h-full w-full object-cover" />
+                <img src={userProfileAvatar} alt={userProfile.fullName} className="theme-preserve h-full w-full object-cover" />
               </div>
             </div>
           </div>
@@ -73,7 +69,11 @@ export default function ProfilePage() {
 
         <div className="grid grid-cols-3 gap-3">
           {[
-            { label: 'PESO', value: userProfile.weightKg.toString(), unit: 'kg' },
+            {
+              label: 'PESO',
+              value: formatWeightNumber(userProfile.weightKg, appSettings.weightUnit),
+              unit: weightUnitLabel,
+            },
             { label: 'ALTURA', value: userProfile.heightCm.toString(), unit: 'cm' },
             { label: 'EDAD', value: userProfile.age.toString(), unit: 'años' },
           ].map(({ label, value, unit }) => (
@@ -118,7 +118,7 @@ export default function ProfilePage() {
           <div className="flex items-start justify-between gap-4">
             <div>
               <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-[#12EFD3]">
-                Calorías recomendadas para {nutritionTargets.goalTitle}
+                Calorias recomendadas para {nutritionTargets.goalTitle}
               </p>
               <p className="text-sm leading-6 text-white" style={{ fontFamily: "'Inter', sans-serif" }}>
                 Estimado con Harris-Benedict y tu factor de actividad {userProfile.activityFactor}. Tu mantenimiento ronda las {nutritionTargets.maintenanceCalories} kcal.
@@ -132,7 +132,7 @@ export default function ProfilePage() {
 
           <div className="mt-4 grid grid-cols-3 gap-3">
             {[
-              { label: 'Proteínas', value: nutritionTargets.proteinGrams, unit: 'g' },
+              { label: 'Proteinas', value: nutritionTargets.proteinGrams, unit: 'g' },
               { label: 'Carbos', value: nutritionTargets.carbGrams, unit: 'g' },
               { label: 'Grasas', value: nutritionTargets.fatGrams, unit: 'g' },
             ].map(({ label, value, unit }) => (
@@ -261,7 +261,7 @@ export default function ProfilePage() {
         </div>
 
         <div className="flex flex-col gap-4 pb-2">
-          <h2 className="text-2xl font-bold tracking-tight text-white">Configuración</h2>
+          <h2 className="text-2xl font-bold tracking-tight text-white">Configuracion</h2>
           <div className="overflow-hidden rounded-2xl border border-[rgba(255,255,255,0.05)] bg-[#131313]">
             {[
               { label: 'Ajustes de cuenta', icon: <Settings size={18} className="text-[#12EFD3]" />, path: '/config' },
@@ -309,19 +309,18 @@ export default function ProfilePage() {
             <div className="grid grid-cols-2 gap-2">
               {GOAL_OPTIONS.map((objective) => (
                 <button
-                    key={objective}
-                    onClick={() => {
-                      updateUserProfile({ goal: objective });
-                      setShowObjectiveModal(false);
-                    }}
+                  key={objective}
+                  onClick={() => {
+                    void updateUserProfile({ goal: objective });
+                    setShowObjectiveModal(false);
+                  }}
                   className={`flex items-center justify-between rounded-2xl px-4 py-4 text-left transition-all ${
                     userProfile.goal === objective
                       ? 'bg-[#12EFD3] text-black'
                       : 'bg-[#262626] text-white hover:bg-[#333]'
                   }`}
                 >
-                  <span className="font-semibold">{objective}</span>
-                  {userProfile.goal === objective && <X size={16} className="rotate-45 text-black" />}
+                  <span className="text-sm font-bold uppercase tracking-widest">{objective}</span>
                 </button>
               ))}
             </div>
@@ -335,11 +334,11 @@ export default function ProfilePage() {
           <div className="relative w-full rounded-3xl p-6" style={{ background: '#1C2030' }}>
             <h3 className="mb-2 text-center text-xl font-bold text-white">Cerrar sesión</h3>
             <p className="mb-6 text-center text-sm text-[#ADAAAA]" style={{ fontFamily: "'Inter', sans-serif" }}>
-              ¿Seguro que querés salir de tu cuenta?
+              Vas a salir de tu cuenta de GYMUP en este dispositivo.
             </p>
             <div className="flex flex-col gap-3">
               <button
-                onClick={() => setShowLogoutModal(false)}
+                onClick={() => void signOut()}
                 className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#E53935] py-4 font-bold text-white"
               >
                 <LogOut size={16} />
