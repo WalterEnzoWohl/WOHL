@@ -5,6 +5,7 @@ import { Header } from '../components/Header';
 import { normalizeGoal } from '../data/profileInsights';
 import { useAppData } from '../data/AppDataContext';
 import { formatWeightNumber, getWeightUnitLabel } from '../data/unitUtils';
+import { getUserFirstName } from '../data/userProfileUtils';
 
 function buildFocusPreview(day: { exercises: Array<{ muscle: string }> }) {
   const counts = day.exercises.reduce<Record<string, number>>((acc, exercise) => {
@@ -30,6 +31,7 @@ export default function HomePage() {
   const activeGoal = normalizeGoal(userProfile.goal).toLowerCase();
   const currentRoutine = routines.find((routine) => routine.id === appContext.activeRoutineId) ?? null;
   const weightUnitLabel = getWeightUnitLabel(appSettings.weightUnit);
+  const greetingName = getUserFirstName(userProfile);
 
   if (routines.length === 0) {
     return (
@@ -49,7 +51,7 @@ export default function HomePage() {
             <span className="text-[10px] font-bold uppercase tracking-[0.24em] text-[#12EFD3]">
               {appContext.todayLabel}
             </span>
-            <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-white">Hola, {userProfile.firstName}</h1>
+            <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-white">Hola, {greetingName}</h1>
             <p className="mt-2 text-sm text-[#A1A1A1]" style={{ fontFamily: "'Inter', sans-serif" }}>
               Necesitás elegir una rutina activa para ver tus entrenamientos, el resumen del día y las opciones de inicio.
             </p>
@@ -132,7 +134,7 @@ export default function HomePage() {
           <span className="text-[10px] font-bold uppercase tracking-[0.24em] text-[#12EFD3]">
             {appContext.todayLabel}
           </span>
-          <h1 className="text-3xl font-extrabold tracking-tight text-white">Hola, {userProfile.firstName}</h1>
+          <h1 className="text-3xl font-extrabold tracking-tight text-white">Hola, {greetingName}</h1>
           <p className="text-sm text-[#A1A1A1]" style={{ fontFamily: "'Inter', sans-serif" }}>
             {statusMessage}
           </p>

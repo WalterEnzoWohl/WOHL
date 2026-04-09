@@ -1,7 +1,7 @@
 import type { Session, User } from '@supabase/supabase-js';
 import { ACTIVITY_LEVEL_OPTIONS } from './constants';
 import { formatDayLabel, formatSessionDate, getTodayIso } from './dateUtils';
-import { DEFAULT_ROUTINES, DEFAULT_USER_PROFILE } from './seedData';
+import { DEFAULT_USER_PROFILE } from './seedData';
 import { getSupabaseClient } from '../lib/supabase';
 import type {
   CompletedSessionInput,
@@ -105,15 +105,26 @@ function resolveActivityLevel(label: string) {
   );
 }
 
+function formatMemberSince(date = new Date()) {
+  const formatter = new Intl.DateTimeFormat('es-AR', {
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'America/Argentina/Buenos_Aires',
+  });
+  const label = formatter.format(date);
+  return label.charAt(0).toUpperCase() + label.slice(1);
+}
+
 function buildUserProfile(row: DbProfileRow): UserProfile {
   const activity = resolveActivityLevel(row.activity_level);
-  const firstName = row.first_name.trim() || DEFAULT_USER_PROFILE.firstName;
-  const lastName = row.last_name.trim() || DEFAULT_USER_PROFILE.lastName;
+  const firstName = row.first_name.trim();
+  const lastName = row.last_name.trim();
+  const fullName = `${firstName} ${lastName}`.trim() || 'Tu perfil';
 
   return {
     firstName,
     lastName,
-    fullName: `${firstName} ${lastName}`.trim(),
+    fullName,
     age: row.age,
     heightCm: row.height_cm,
     weightKg: row.weight_kg,
@@ -122,7 +133,7 @@ function buildUserProfile(row: DbProfileRow): UserProfile {
     activityFactor: activity.factor,
     activityDescription: activity.description,
     trainingLevel: row.training_level,
-    memberSince: row.member_since,
+    memberSince: row.member_since || formatMemberSince(),
     activeRoutineId: row.active_routine_id,
   };
 }
@@ -131,15 +142,15 @@ function buildProfileInsert(user: User) {
   return {
     id: user.id,
     email: user.email ?? null,
-    first_name: DEFAULT_USER_PROFILE.firstName,
-    last_name: DEFAULT_USER_PROFILE.lastName,
+    first_name: '',
+    last_name: '',
     age: DEFAULT_USER_PROFILE.age,
     height_cm: DEFAULT_USER_PROFILE.heightCm,
     weight_kg: DEFAULT_USER_PROFILE.weightKg,
     goal: DEFAULT_USER_PROFILE.goal,
     activity_level: DEFAULT_USER_PROFILE.activityLevel,
     training_level: DEFAULT_USER_PROFILE.trainingLevel,
-    member_since: DEFAULT_USER_PROFILE.memberSince,
+    member_since: formatMemberSince(),
   };
 }
 
@@ -312,31 +323,6 @@ export async function ensureUserBootstrapped(session: Session) {
     const { error } = await client.from('profiles').insert(buildProfileInsert(session.user));
     if (error) {
       throw error;
-    }
-  }
-
-  const { data: routineCountRows, error: routineCountError } = await client
-    .from('routines')
-    .select('id')
-    .eq('owner_id', userId)
-    .limit(1);
-
-  if (routineCountError) {
-    throw routineCountError;
-  }
-
-  if (!routineCountRows || routineCountRows.length === 0) {
-    const savedRoutines: Routine[] = [];
-    for (const routine of DEFAULT_ROUTINES) {
-      const savedRoutine = await saveRoutine(userId, { ...routine, id: 0 });
-      savedRoutines.push(savedRoutine);
-    }
-
-    if (savedRoutines[0]) {
-      await client
-        .from('profiles')
-        .update({ active_routine_id: savedRoutines[0].id })
-        .eq('id', userId);
     }
   }
 }

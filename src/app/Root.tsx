@@ -1,17 +1,24 @@
 import { useEffect } from 'react';
-import { Outlet, useLocation } from 'react-router';
+import { Navigate, Outlet, useLocation, useNavigate } from 'react-router';
 import { ActiveWorkoutDock } from './components/ActiveWorkoutDock';
 import { BottomNav } from './components/BottomNav';
 import { useAppData } from './data/AppDataContext';
+import { isUserProfileComplete } from './data/userProfileUtils';
 
-const HIDE_NAV_PATHS = ['/session', '/post-session'];
+const HIDE_NAV_PATHS = ['/session', '/post-session', '/onboarding'];
 
 export default function Root() {
+  const navigate = useNavigate();
   const location = useLocation();
-  const { activeWorkout, appSettings, status, error, refreshAppData } = useAppData();
+  const { activeWorkout, appSettings, error, refreshAppData, routines, status, userProfile } = useAppData();
   const hideNav = HIDE_NAV_PATHS.some((p) => location.pathname === p || location.pathname.startsWith(p + '/'));
   const showActiveWorkoutDock = !hideNav && status === 'ready' && Boolean(activeWorkout);
   const isLightMode = appSettings.theme === 'light';
+  const profileComplete = isUserProfileComplete(userProfile);
+  const isOnboardingRoute = location.pathname === '/onboarding';
+  const needsOnboarding = status === 'ready' && !profileComplete;
+  const showEmptyAccountState =
+    status === 'ready' && profileComplete && location.pathname === '/' && routines.length === 0;
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', appSettings.theme === 'dark');
@@ -45,6 +52,43 @@ export default function Root() {
               Reintentar
             </button>
           </div>
+        ) : needsOnboarding && !isOnboardingRoute ? (
+          <Navigate to="/onboarding" replace />
+        ) : !needsOnboarding && isOnboardingRoute ? (
+          <Navigate to="/" replace />
+        ) : showEmptyAccountState ? (
+          <div className="flex flex-col gap-6 px-5 py-6 pb-4">
+            <div>
+              <span className="text-[10px] font-bold uppercase tracking-[0.24em] text-[#12EFD3]">
+                Bienvenido
+              </span>
+              <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-white">Tu cuenta ya esta creada</h1>
+              <p className="mt-2 text-sm text-[#A1A1A1]">
+                Empieza creando tu primera rutina. Desde ahi ya podras guardar sesiones reales y usar GYMUP como una cuenta propia.
+              </p>
+            </div>
+
+            <div className="rounded-3xl border border-[rgba(127,152,255,0.16)] bg-[rgba(127,152,255,0.07)] p-5">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[#7F98FF]">Siguiente paso</p>
+              <h2 className="mt-2 text-xl font-bold tracking-tight text-white">Crea tu primera rutina</h2>
+              <p className="mt-2 text-sm text-[#C7D2FE]">
+                Puedes arrancar con una Upper/Lower, Push Pull Legs o una estructura totalmente personalizada.
+              </p>
+              <button
+                onClick={() => navigate('/routine-editor/new')}
+                className="mt-4 flex w-full items-center justify-center rounded-2xl bg-[#7F98FF] py-4 font-extrabold text-[#0B1020] transition-colors active:bg-[#6F89F0]"
+              >
+                Crear primera rutina
+              </button>
+            </div>
+
+            <button
+              onClick={() => navigate('/session', { state: { mode: 'free' } })}
+              className="flex w-full items-center justify-center rounded-2xl border border-[rgba(245,185,66,0.24)] bg-[rgba(245,185,66,0.08)] py-4 font-bold text-[#F5B942] transition-colors active:bg-[rgba(245,185,66,0.14)]"
+            >
+              Empezar entrenamiento vacio
+            </button>
+          </div>
         ) : (
           <div
             className="flex-1 overflow-y-auto overflow-x-hidden min-h-0"
@@ -55,7 +99,7 @@ export default function Root() {
         )}
 
         {showActiveWorkoutDock && <ActiveWorkoutDock />}
-        {!hideNav && status === 'ready' && <BottomNav />}
+        {!hideNav && status === 'ready' && !showEmptyAccountState && <BottomNav />}
       </div>
     </div>
   );

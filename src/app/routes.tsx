@@ -16,6 +16,7 @@ import MuscleProgressPage from './pages/MuscleProgressPage';
 import HistoryPage from './pages/HistoryPage';
 import SupportContactPage from './pages/SupportContactPage';
 import TermsPage from './pages/TermsPage';
+import OnboardingPage from './pages/OnboardingPage';
 
 export const router = createBrowserRouter([
   {
@@ -28,6 +29,7 @@ export const router = createBrowserRouter([
       { path: 'workouts', Component: WorkoutsPage },
       { path: 'profile', Component: ProfilePage },
       { path: 'profile/edit', Component: ProfileEditorPage },
+      { path: 'onboarding', Component: OnboardingPage },
       { path: 'config', Component: ConfigPage },
       { path: 'config/password', Component: ChangePasswordPage },
       { path: 'config/help', Component: HelpCenterPage },

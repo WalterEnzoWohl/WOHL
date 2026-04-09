@@ -103,6 +103,40 @@ function getDirectGroupId(muscleName: string) {
   )?.[0];
 }
 
+function buildPersonalRecords(
+  sessions: SessionHistory[],
+  groupId: string
+) {
+  const records = new Map<string, { name: string; pr: number; unit: string }>();
+
+  sessions.forEach((session) => {
+    session.exercises.forEach((exercise) => {
+      if (getDirectGroupId(exercise.muscle) !== groupId) {
+        return;
+      }
+
+      const nextPr =
+        exercise.implement?.toLowerCase().includes('peso corporal') ||
+        exercise.implement?.toLowerCase().includes('bodyweight')
+          ? 0
+          : Math.max(exercise.maxKg, ...exercise.sets.map((set) => set.kg), 0);
+      const previousRecord = records.get(exercise.name);
+
+      if (!previousRecord || nextPr > previousRecord.pr) {
+        records.set(exercise.name, {
+          name: exercise.name,
+          pr: nextPr,
+          unit: nextPr > 0 ? 'kg' : 'peso corporal',
+        });
+      }
+    });
+  });
+
+  return Array.from(records.values())
+    .sort((a, b) => b.pr - a.pr || a.name.localeCompare(b.name))
+    .slice(0, 3);
+}
+
 export function normalizeGoal(goal: string): GoalOption {
   const normalized = normalizeText(goal);
   return GOAL_ALIASES[normalized] ?? 'Definición';
@@ -176,6 +210,7 @@ export function getMuscleProgressInsights(
 
     return {
       ...group,
+      exercises: buildPersonalRecords(sessions, group.id),
       level: monthlyDirectCount,
       xp: monthlyDirectCount,
       xpNeeded: MONTHLY_DIRECT_TARGET,

@@ -1,16 +1,22 @@
-import { routines as mockRoutines, userProfile as mockUserProfile } from './mockData';
-import { repairEncodingValue } from './encoding';
+import { ACTIVITY_LEVEL_OPTIONS } from './constants';
 import type { Routine, UserProfile } from './models';
 
-const repairedProfile = repairEncodingValue(mockUserProfile) as UserProfile;
-const repairedRoutines = repairEncodingValue(mockRoutines) as Routine[];
+const DEFAULT_ACTIVITY_LEVEL = ACTIVITY_LEVEL_OPTIONS[0];
 
 export const DEFAULT_USER_PROFILE: UserProfile = {
-  ...repairedProfile,
-  goal: 'Definición',
-  activityLevel: 'Actividad moderada',
-  activityFactor: 1.55,
-  activityDescription: 'Entrenamiento regular 3 a 5 dias por semana, como un esquema de gym 4 dias.',
+  firstName: '',
+  lastName: '',
+  fullName: 'Tu perfil',
+  age: 0,
+  heightCm: 0,
+  weightKg: 0,
+  goal: 'Mantenimiento',
+  activityLevel: DEFAULT_ACTIVITY_LEVEL.label,
+  activityFactor: DEFAULT_ACTIVITY_LEVEL.factor,
+  activityDescription: DEFAULT_ACTIVITY_LEVEL.description,
+  trainingLevel: 'Principiante',
+  memberSince: '',
+  activeRoutineId: null,
 };
 
-export const DEFAULT_ROUTINES: Routine[] = repairedRoutines;
+export const DEFAULT_ROUTINES: Routine[] = [];

@@ -153,26 +153,32 @@ export default function MuscleProgressPage() {
             <Trophy size={16} className="text-[#FFD700]" />
             <h2 className="text-lg font-bold text-white">Records personales</h2>
           </div>
-          <div className="flex flex-col gap-3">
-            {muscle.exercises.map((exercise, index) => (
-              <div
-                key={exercise.name}
-                className="flex items-center justify-between rounded-2xl border border-[#262626] bg-[#131313] px-4 py-4"
-              >
-                <div>
-                  <p className="text-sm font-semibold text-white">{exercise.name}</p>
-                  <p className="mt-0.5 text-xs text-[#ADAAAA]" style={{ fontFamily: "'Inter', sans-serif" }}>
-                    Record personal
-                  </p>
+          {muscle.exercises.length > 0 ? (
+            <div className="flex flex-col gap-3">
+              {muscle.exercises.map((exercise, index) => (
+                <div
+                  key={exercise.name}
+                  className="flex items-center justify-between rounded-2xl border border-[#262626] bg-[#131313] px-4 py-4"
+                >
+                  <div>
+                    <p className="text-sm font-semibold text-white">{exercise.name}</p>
+                    <p className="mt-0.5 text-xs text-[#ADAAAA]" style={{ fontFamily: "'Inter', sans-serif" }}>
+                      Record personal
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <span className="text-xl font-bold text-[#12EFD3]">{exercise.pr > 0 ? exercise.pr : 'PC'}</span>
+                    <span className="text-sm text-[#ADAAAA]">{exercise.pr > 0 ? exercise.unit : ''}</span>
+                    {index === 0 && <Trophy size={14} className="ml-1 text-[#FFD700]" />}
+                  </div>
                 </div>
-                <div className="flex items-center gap-1">
-                  <span className="text-xl font-bold text-[#12EFD3]">{exercise.pr}</span>
-                  <span className="text-sm text-[#ADAAAA]">{exercise.unit}</span>
-                  {index === 0 && <Trophy size={14} className="ml-1 text-[#FFD700]" />}
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-2xl border border-[#262626] bg-[#131313] px-4 py-4 text-sm text-[#ADAAAA]">
+              Todavia no hay records personales para este grupo muscular. Se van a generar cuando empieces a registrar sesiones reales.
+            </div>
+          )}
         </div>
       </div>
     </div>
