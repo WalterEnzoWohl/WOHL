@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { LoaderCircle, LockKeyhole, Mail } from 'lucide-react';
 import { brandLogoWhite } from '@/assets';
-import { getSupabaseClient } from '../lib/supabase';
+import { getAuthRedirectUrl, getSupabaseClient } from '../lib/supabase';
 
 export function AuthScreen() {
   const [mode, setMode] = useState<'signin' | 'signup'>('signin');
@@ -18,10 +18,19 @@ export function AuthScreen() {
 
     try {
       const client = getSupabaseClient();
+      const emailRedirectTo = getAuthRedirectUrl();
       const response =
         mode === 'signin'
           ? await client.auth.signInWithPassword({ email: email.trim(), password })
-          : await client.auth.signUp({ email: email.trim(), password });
+          : await client.auth.signUp({
+              email: email.trim(),
+              password,
+              options: emailRedirectTo
+                ? {
+                    emailRedirectTo,
+                  }
+                : undefined,
+            });
 
       if (response.error) {
         throw response.error;

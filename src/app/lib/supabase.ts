@@ -2,6 +2,7 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL?.trim() ?? '';
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY?.trim() ?? '';
+const siteUrlFromEnv = import.meta.env.VITE_SITE_URL?.trim() ?? '';
 
 export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey);
 
@@ -25,4 +26,12 @@ export function getSupabaseClient() {
   }
 
   return client;
+}
+
+export function getAuthRedirectUrl() {
+  if (typeof window !== 'undefined' && window.location.origin) {
+    return window.location.origin;
+  }
+
+  return siteUrlFromEnv || undefined;
 }
