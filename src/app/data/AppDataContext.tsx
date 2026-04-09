@@ -18,6 +18,7 @@ import type {
 import {
   completeSession as completeSessionRecord,
   createRoutineCopy,
+  deleteSession as deleteSessionRecord,
   deleteRoutine as deleteRoutineRecord,
   loadAppData,
   saveRoutine as saveRoutineRecord,
@@ -38,6 +39,7 @@ type AppDataContextValue = {
   appSettings: AppSettings;
   refreshAppData: () => Promise<void>;
   updateUserProfile: (updates: Partial<UserProfile>) => Promise<void>;
+  updateProfileAvatar: (avatarUrl: string | null) => void;
   updateAppSettings: (updates: Partial<AppSettings>) => void;
   setActiveRoutine: (routineId: number | null) => Promise<void>;
   saveRoutine: (routine: Routine) => Promise<Routine | undefined>;
@@ -45,6 +47,7 @@ type AppDataContextValue = {
   deleteRoutine: (routineId: number) => Promise<void>;
   completeSession: (input: CompletedSessionInput) => Promise<SessionHistory | undefined>;
   updateSession: (input: UpdateSessionInput) => Promise<SessionHistory | undefined>;
+  deleteSession: (sessionId: number) => Promise<void>;
   activeWorkout: ActiveWorkoutDraft | null;
   saveActiveWorkout: (draft: ActiveWorkoutDraft) => void;
   clearActiveWorkout: () => void;
@@ -68,6 +71,10 @@ function getActiveWorkoutStorageKey(userId: string) {
 
 function getAppSettingsStorageKey(userId: string) {
   return `gymup.appSettings.${userId}`;
+}
+
+function getProfileAvatarStorageKey(userId: string) {
+  return `gymup.profileAvatar.${userId}`;
 }
 
 function readActiveWorkout(userId: string): ActiveWorkoutDraft | null {
@@ -101,6 +108,28 @@ function writeActiveWorkout(userId: string, draft: ActiveWorkoutDraft | null) {
   }
 
   window.localStorage.setItem(storageKey, JSON.stringify(draft));
+}
+
+function readProfileAvatar(userId: string): string | null {
+  if (typeof window === 'undefined') {
+    return null;
+  }
+
+  return window.localStorage.getItem(getProfileAvatarStorageKey(userId));
+}
+
+function writeProfileAvatar(userId: string, avatarUrl: string | null) {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  const storageKey = getProfileAvatarStorageKey(userId);
+  if (!avatarUrl) {
+    window.localStorage.removeItem(storageKey);
+    return;
+  }
+
+  window.localStorage.setItem(storageKey, avatarUrl);
 }
 
 function readAppSettings(userId: string): AppSettings {
@@ -170,7 +199,11 @@ export function AppDataProvider({
 
     try {
       const nextData = await loadAppData(session);
-      setUserProfile(nextData.userProfile);
+      const storedAvatarUrl = readProfileAvatar(session.user.id);
+      setUserProfile({
+        ...nextData.userProfile,
+        avatarUrl: storedAvatarUrl ?? undefined,
+      });
       setRoutines(nextData.routines);
       setSessionHistory(nextData.sessionHistory);
       setStatus('ready');
@@ -219,16 +252,33 @@ export function AppDataProvider({
     [session.user.id]
   );
 
+  const updateProfileAvatar = useCallback(
+    (avatarUrl: string | null) => {
+      setUserProfile((previous) => ({
+        ...previous,
+        avatarUrl: avatarUrl ?? undefined,
+      }));
+      writeProfileAvatar(session.user.id, avatarUrl);
+    },
+    [session.user.id]
+  );
+
   const updateUserProfile = async (updates: Partial<UserProfile>) => {
     const nextProfile = await updateProfile(session.user.id, updates);
-    setUserProfile(nextProfile);
+    setUserProfile({
+      ...nextProfile,
+      avatarUrl: readProfileAvatar(session.user.id) ?? undefined,
+    });
   };
 
   const setActiveRoutine = async (routineId: number | null) => {
     const nextProfile = await updateProfile(session.user.id, {
       activeRoutineId: routineId,
     });
-    setUserProfile(nextProfile);
+    setUserProfile({
+      ...nextProfile,
+      avatarUrl: readProfileAvatar(session.user.id) ?? undefined,
+    });
   };
 
   const saveRoutine = async (routine: Routine) => {
@@ -285,6 +335,11 @@ export function AppDataProvider({
     return sessionRecord;
   };
 
+  const deleteSession = async (sessionId: number) => {
+    await deleteSessionRecord(session.user.id, sessionId);
+    setSessionHistory((previous) => previous.filter((sessionItem) => sessionItem.id !== sessionId));
+  };
+
   const derivedState =
     status === 'ready'
       ? withDerivedState(userProfile, routines, sessionHistory)
@@ -306,6 +361,7 @@ export function AppDataProvider({
         appSettings,
         refreshAppData,
         updateUserProfile,
+        updateProfileAvatar,
         updateAppSettings,
         setActiveRoutine,
         saveRoutine,
@@ -313,6 +369,7 @@ export function AppDataProvider({
         deleteRoutine,
         completeSession,
         updateSession,
+        deleteSession,
         activeWorkout,
         saveActiveWorkout,
         clearActiveWorkout,

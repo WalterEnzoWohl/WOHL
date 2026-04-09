@@ -93,6 +93,7 @@ export interface UserProfile {
   firstName: string;
   lastName: string;
   fullName: string;
+  avatarUrl?: string;
   age: number;
   heightCm: number;
   weightKg: number;

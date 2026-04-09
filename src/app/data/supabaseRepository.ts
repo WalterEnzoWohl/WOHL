@@ -734,3 +734,16 @@ export async function updateSession(userId: string, input: UpdateSessionInput) {
   const sessions = await loadSessionHistory(userId);
   return sessions.find((session) => session.id === input.sessionId) ?? sessions[0];
 }
+
+export async function deleteSession(userId: string, sessionId: number) {
+  const client = getSupabaseClient();
+  const { error } = await client
+    .from('workout_sessions')
+    .delete()
+    .eq('owner_id', userId)
+    .eq('id', sessionId);
+
+  if (error) {
+    throw error;
+  }
+}

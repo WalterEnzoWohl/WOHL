@@ -1,7 +1,8 @@
 import type { ReactNode } from 'react'
 import { ArrowLeft } from 'lucide-react'
 import { useNavigate } from 'react-router'
-import { brandLogoWhite, userProfileAvatar } from '@/assets'
+import { brandLogoWhite } from '@/assets'
+import { UserAvatar } from './UserAvatar'
 
 interface HeaderProps {
   showBack?: boolean
@@ -14,9 +15,7 @@ interface HeaderProps {
 export function Header({ showBack, backLabel, title, rightContent, onBack }: HeaderProps) {
   const navigate = useNavigate()
   const resolvedRightContent = rightContent !== undefined ? rightContent : (
-    <div className="w-10 h-10 rounded-full overflow-hidden border border-[rgba(18,239,211,0.2)] bg-[#262626]">
-      <img src={userProfileAvatar} alt="Profile" className="theme-preserve w-full h-full object-cover" />
-    </div>
+    <UserAvatar />
   )
 
   const handleBack = () => {

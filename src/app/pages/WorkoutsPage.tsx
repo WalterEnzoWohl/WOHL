@@ -2,9 +2,9 @@ import type { MouseEvent } from 'react';
 import { useState } from 'react';
 import { CheckCircle2, Clock, Copy, Pencil, Plus, Target, Trash2, TrendingUp } from 'lucide-react';
 import { useNavigate } from 'react-router';
-import { userProfileAvatar } from '@/assets';
 import { ActiveWorkoutEditLockModal } from '../components/ActiveWorkoutEditLockModal';
 import { Header } from '../components/Header';
+import { UserAvatar } from '../components/UserAvatar';
 import type { Routine } from '../data/models';
 import { useAppData } from '../data/AppDataContext';
 import { formatCompactWeight } from '../data/unitUtils';
@@ -62,9 +62,7 @@ export default function WorkoutsPage() {
     <div className="relative flex flex-col" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
       <Header
         rightContent={
-          <div className="h-10 w-10 overflow-hidden rounded-full border border-[rgba(18,239,211,0.2)] bg-[#262626]">
-            <img src={userProfileAvatar} alt="Profile" className="theme-preserve h-full w-full object-cover" />
-          </div>
+          <UserAvatar />
         }
       />
 

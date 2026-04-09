@@ -14,8 +14,9 @@ import {
   Trash2,
 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router';
-import { brandLogoWhite, userProfileAvatar } from '@/assets';
+import { brandLogoWhite } from '@/assets';
 import { ActiveWorkoutEditLockModal } from '../components/ActiveWorkoutEditLockModal';
+import { UserAvatar } from '../components/UserAvatar';
 import { useAppData } from '../data/AppDataContext';
 import type { ActiveWorkoutDraft, ExerciseData, SessionHistory } from '../data/models';
 import {
@@ -207,6 +208,11 @@ function getActiveSetIndex(exercise: ExerciseState) {
   return firstPendingSet === -1 ? Math.max(0, exercise.sets.length - 1) : firstPendingSet;
 }
 
+function isBodyweightExercise(exercise: Pick<ExerciseState, 'implement'>) {
+  const implement = exercise.implement?.trim().toLowerCase() ?? '';
+  return implement.includes('peso corporal') || implement.includes('bodyweight');
+}
+
 export default function TrainingSessionPage() {
   const navigate = useNavigate();
   const { state } = useLocation() as { state?: SessionLocationState };
@@ -216,6 +222,7 @@ export default function TrainingSessionPage() {
     appSettings,
     clearActiveWorkout,
     completeSession: completeSessionRecord,
+    deleteSession: deleteSessionRecord,
     routines,
     saveActiveWorkout,
     sessionHistory,
@@ -355,6 +362,7 @@ export default function TrainingSessionPage() {
   const [newExerciseName, setNewExerciseName] = useState('');
   const [newExerciseMuscle, setNewExerciseMuscle] = useState('');
   const [newExerciseImplement, setNewExerciseImplement] = useState('');
+  const [showDeleteSessionModal, setShowDeleteSessionModal] = useState(false);
 
   useEffect(() => {
     if (isHistoryEditSession) {
@@ -775,6 +783,17 @@ export default function TrainingSessionPage() {
     navigate('/');
   };
 
+  const deleteHistoricalSession = async () => {
+    if (!historicalSession) {
+      return;
+    }
+
+    await deleteSessionRecord(historicalSession.id);
+    setShowDeleteSessionModal(false);
+    setShowFinishModal(false);
+    navigate('/history');
+  };
+
   const deleteCurrentExercise = () => {
     if (!currentExercise) {
       setShowMenu(false);
@@ -897,9 +916,7 @@ export default function TrainingSessionPage() {
                 {formatTime(elapsed)}
               </span>
             </div>
-            <div className="h-9 w-9 overflow-hidden rounded-full border border-[rgba(18,239,211,0.2)]">
-              <img src={userProfileAvatar} alt="Profile" className="theme-preserve h-full w-full object-cover" />
-            </div>
+            <UserAvatar className="h-9 w-9 overflow-hidden rounded-full border border-[rgba(18,239,211,0.2)]" imageClassName="theme-preserve h-full w-full object-cover" />
           </div>
         </div>
       </div>
@@ -1011,6 +1028,7 @@ export default function TrainingSessionPage() {
             <div className="flex flex-col gap-4">
               {exerciseList.map((exercise, exerciseIdx) => {
                 const activeSetIdxForExercise = getActiveSetIndex(exercise);
+                const bodyweightExercise = isBodyweightExercise(exercise);
 
                 return (
                   <div
@@ -1114,7 +1132,18 @@ export default function TrainingSessionPage() {
                               </div>
 
                               <div>
-                                {isActive ? (
+                                {bodyweightExercise ? (
+                                  <div className="rounded-lg bg-[rgba(245,185,66,0.12)] px-1 py-2 text-center">
+                                    <span
+                                      className={`block font-semibold uppercase tracking-widest ${
+                                        isActive ? 'text-sm text-[#F5B942]' : isCompleted ? 'text-sm text-[#F5B942]' : 'text-xs text-[#C6A866]'
+                                      }`}
+                                      style={{ fontFamily: "'Inter', sans-serif" }}
+                                    >
+                                      PC
+                                    </span>
+                                  </div>
+                                ) : isActive ? (
                                   <div className="rounded-lg border border-[rgba(18,239,211,0.3)] bg-[#262626] px-1 py-2 shadow-[0_0_10px_rgba(18,239,211,0.1)]">
                                     <input
                                       type="number"
@@ -1134,7 +1163,11 @@ export default function TrainingSessionPage() {
                                     <span
                                       className={`block font-normal ${isCompleted ? 'text-base text-white' : 'text-sm text-white/40'}`}
                                     >
-                                      {set.kg > 0 ? formatWeightNumber(set.kg, appSettings.weightUnit) : '-'}
+                                      {bodyweightExercise
+                                        ? 'PC'
+                                        : set.kg > 0
+                                        ? formatWeightNumber(set.kg, appSettings.weightUnit)
+                                        : '-'}
                                     </span>
                                   </div>
                                 )}
@@ -1341,6 +1374,17 @@ export default function TrainingSessionPage() {
               )}
             </button>
           </div>
+
+          {isHistoryEditSession && (
+            <button
+              onClick={() => setShowDeleteSessionModal(true)}
+              className="flex w-full items-center justify-center gap-2 rounded-2xl border border-[rgba(229,57,53,0.22)] bg-[rgba(229,57,53,0.08)] py-4 text-[#FF7D7D] transition-colors active:bg-[rgba(229,57,53,0.14)]"
+              type="button"
+            >
+              <Trash2 size={18} />
+              <span className="text-sm font-bold uppercase tracking-widest">Eliminar entrenamiento</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -1847,6 +1891,42 @@ export default function TrainingSessionPage() {
                 type="button"
               >
                 {isHistoryEditSession ? 'Descartar cambios' : 'Descartar entrenamiento'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showDeleteSessionModal && historicalSession && (
+        <div className="absolute inset-0 z-40 flex items-center justify-center px-5">
+          <button
+            aria-label="Cerrar confirmación de borrado"
+            className="absolute inset-0 bg-black/70"
+            onClick={() => setShowDeleteSessionModal(false)}
+            type="button"
+          />
+          <div className="relative z-10 w-full max-w-sm rounded-3xl bg-[#1C2030] p-6">
+            <h3 className="text-center text-3xl font-bold tracking-tight text-white">
+              ¿Estás seguro de eliminar este entrenamiento?
+            </h3>
+            <p className="mt-3 text-center text-base text-[#D4D4D4]" style={{ fontFamily: "'Inter', sans-serif" }}>
+              Vas a borrar esta sesión del historial y no se va a poder recuperar.
+            </p>
+
+            <div className="mt-6 flex flex-col gap-3">
+              <button
+                onClick={() => void deleteHistoricalSession()}
+                className="w-full rounded-2xl bg-[#F43A33] py-4 font-bold text-white"
+                type="button"
+              >
+                Sí, eliminar entrenamiento
+              </button>
+              <button
+                onClick={() => setShowDeleteSessionModal(false)}
+                className="w-full rounded-2xl bg-[#2A2A2A] py-4 font-semibold text-white"
+                type="button"
+              >
+                Cancelar
               </button>
             </div>
           </div>
