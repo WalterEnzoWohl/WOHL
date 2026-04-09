@@ -32,31 +32,31 @@ export const MUSCLE_GROUPS: MuscleGroupRecord[] = [
   {
     id: 'pecho',
     name: 'Pecho',
-    color: '#12EFD3',
+    color: '#00C9A7',
     exercises: [],
   },
   {
     id: 'espalda',
     name: 'Espalda',
-    color: '#12EFD3',
+    color: '#00C9A7',
     exercises: [],
   },
   {
     id: 'piernas',
     name: 'Piernas',
-    color: '#12EFD3',
+    color: '#00C9A7',
     exercises: [],
   },
   {
     id: 'hombros',
     name: 'Hombros',
-    color: '#12EFD3',
+    color: '#00C9A7',
     exercises: [],
   },
   {
     id: 'brazos',
     name: 'Brazos',
-    color: '#12EFD3',
+    color: '#00C9A7',
     exercises: [],
   },
 ];

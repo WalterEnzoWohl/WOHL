@@ -1,8 +1,8 @@
 {
-  "name": "gymup",
+  "name": "wohl",
   "private": true,
   "version": "0.0.1",
-  "description": "GYMUP workout tracking web app prototype",
+  "description": "WOHL premium personal performance system",
   "type": "module",
   "scripts": {
     "build": "vite build",

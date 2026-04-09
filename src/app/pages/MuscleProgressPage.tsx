@@ -17,7 +17,7 @@ export default function MuscleProgressPage() {
     return (
       <div className="flex flex-col" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
         <Header showBack title="Progreso" />
-        <div className="px-5 py-5 text-sm text-[#ADAAAA]">No hay datos para ese grupo muscular.</div>
+        <div className="px-5 py-5 text-sm text-[#9BAEC1]">No hay datos para ese grupo muscular.</div>
       </div>
     );
   }
@@ -55,27 +55,27 @@ export default function MuscleProgressPage() {
           <div>
             <div className="mb-2 flex items-center justify-between">
               <span
-                className="text-xs font-semibold uppercase tracking-widest text-[#ADAAAA]"
+                className="text-xs font-semibold uppercase tracking-widest text-[#9BAEC1]"
                 style={{ fontFamily: "'Inter', sans-serif" }}
               >
                 Ejercicios directos del mes
               </span>
-              <span className="text-xs font-bold text-[#12EFD3]">
+              <span className="text-xs font-bold text-[#00C9A7]">
                 {muscle.monthlyDirectCount} / {muscle.monthlyTarget}
               </span>
             </div>
-            <div className="h-3 overflow-hidden rounded-full bg-[#262626]">
+            <div className="h-3 overflow-hidden rounded-full bg-[#203347]">
               <div
                 className="relative h-full rounded-full"
                 style={{
                   width: `${muscle.progressPercent}%`,
-                  background: 'linear-gradient(135deg, #12EFD3 0%, #00A894 100%)',
+                  background: 'linear-gradient(135deg, #00C9A7 0%, #00A894 100%)',
                 }}
               >
                 <div className="absolute right-0 top-0 bottom-0 w-3 rounded-full bg-white/30" />
               </div>
             </div>
-            <p className="mt-1 text-xs text-[#ADAAAA]" style={{ fontFamily: "'Inter', sans-serif" }}>
+            <p className="mt-1 text-xs text-[#9BAEC1]" style={{ fontFamily: "'Inter', sans-serif" }}>
               {missingDirectWork > 0
                 ? `Faltan ${missingDirectWork} ejercicios directos para completar la referencia mensual.`
                 : `Ya superaste la referencia mensual por ${muscle.monthlyDirectCount - muscle.monthlyTarget} ejercicios.`}
@@ -87,11 +87,11 @@ export default function MuscleProgressPage() {
           {[
             { label: 'Max. semanal', value: maxDirect.toString(), unit: 'directos' },
             { label: 'Min. semanal', value: minDirect.toString(), unit: 'directos' },
-            { label: 'Tendencia', value: `${trend >= 0 ? '+' : ''}${trend}`, unit: 'directos', color: '#12EFD3' },
+            { label: 'Tendencia', value: `${trend >= 0 ? '+' : ''}${trend}`, unit: 'directos', color: '#00C9A7' },
           ].map(({ label, value, unit, color }) => (
-            <div key={label} className="rounded-xl border border-[#262626] bg-[#131313] p-3">
+            <div key={label} className="rounded-xl border border-[#203347] bg-[#13263A] p-3">
               <p
-                className="mb-1 text-[10px] uppercase tracking-wider text-[#ADAAAA]"
+                className="mb-1 text-[10px] uppercase tracking-wider text-[#9BAEC1]"
                 style={{ fontFamily: "'Inter', sans-serif" }}
               >
                 {label}
@@ -99,36 +99,36 @@ export default function MuscleProgressPage() {
               <span className="text-base font-bold" style={{ color: color ?? 'white' }}>
                 {value}
               </span>
-              {unit && <span className="ml-1 text-xs text-[#ADAAAA]">{unit}</span>}
+              {unit && <span className="ml-1 text-xs text-[#9BAEC1]">{unit}</span>}
             </div>
           ))}
         </div>
 
         <div>
           <div className="mb-3 flex items-center gap-2">
-            <TrendingUp size={16} className="text-[#12EFD3]" />
+            <TrendingUp size={16} className="text-[#00C9A7]" />
             <h2 className="text-lg font-bold text-white">Estimulo directo semanal (8 semanas)</h2>
           </div>
-          <div className="rounded-2xl border border-[#262626] bg-[#131313] p-4">
+          <div className="rounded-2xl border border-[#203347] bg-[#13263A] p-4">
             <ResponsiveContainer width="100%" height={180}>
               <LineChart data={chartData} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#262626" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#203347" />
                 <XAxis
                   dataKey="week"
-                  tick={{ fill: '#ADAAAA', fontSize: 10 }}
+                  tick={{ fill: '#9BAEC1', fontSize: 10 }}
                   axisLine={false}
                   tickLine={false}
                 />
                 <YAxis
-                  tick={{ fill: '#ADAAAA', fontSize: 10 }}
+                  tick={{ fill: '#9BAEC1', fontSize: 10 }}
                   axisLine={false}
                   tickLine={false}
                   allowDecimals={false}
                 />
                 <Tooltip
                   contentStyle={{
-                    background: '#1C2030',
-                    border: '1px solid #262626',
+                    background: '#1A2D42',
+                    border: '1px solid #203347',
                     borderRadius: 12,
                     color: 'white',
                     fontSize: 12,
@@ -138,10 +138,10 @@ export default function MuscleProgressPage() {
                 <Line
                   type="monotone"
                   dataKey="directos"
-                  stroke="#12EFD3"
+                  stroke="#00C9A7"
                   strokeWidth={2}
-                  dot={{ fill: '#12EFD3', r: 4 }}
-                  activeDot={{ r: 6, fill: '#12EFD3', stroke: '#003830', strokeWidth: 2 }}
+                  dot={{ fill: '#00C9A7', r: 4 }}
+                  activeDot={{ r: 6, fill: '#00C9A7', stroke: '#003830', strokeWidth: 2 }}
                 />
               </LineChart>
             </ResponsiveContainer>
@@ -158,24 +158,24 @@ export default function MuscleProgressPage() {
               {muscle.exercises.map((exercise, index) => (
                 <div
                   key={exercise.name}
-                  className="flex items-center justify-between rounded-2xl border border-[#262626] bg-[#131313] px-4 py-4"
+                  className="flex items-center justify-between rounded-2xl border border-[#203347] bg-[#13263A] px-4 py-4"
                 >
                   <div>
                     <p className="text-sm font-semibold text-white">{exercise.name}</p>
-                    <p className="mt-0.5 text-xs text-[#ADAAAA]" style={{ fontFamily: "'Inter', sans-serif" }}>
+                    <p className="mt-0.5 text-xs text-[#9BAEC1]" style={{ fontFamily: "'Inter', sans-serif" }}>
                       Record personal
                     </p>
                   </div>
                   <div className="flex items-center gap-1">
-                    <span className="text-xl font-bold text-[#12EFD3]">{exercise.pr > 0 ? exercise.pr : 'PC'}</span>
-                    <span className="text-sm text-[#ADAAAA]">{exercise.pr > 0 ? exercise.unit : ''}</span>
+                    <span className="text-xl font-bold text-[#00C9A7]">{exercise.pr > 0 ? exercise.pr : 'PC'}</span>
+                    <span className="text-sm text-[#9BAEC1]">{exercise.pr > 0 ? exercise.unit : ''}</span>
                     {index === 0 && <Trophy size={14} className="ml-1 text-[#FFD700]" />}
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="rounded-2xl border border-[#262626] bg-[#131313] px-4 py-4 text-sm text-[#ADAAAA]">
+            <div className="rounded-2xl border border-[#203347] bg-[#13263A] px-4 py-4 text-sm text-[#9BAEC1]">
               Todavia no hay records personales para este grupo muscular. Se van a generar cuando empieces a registrar sesiones reales.
             </div>
           )}

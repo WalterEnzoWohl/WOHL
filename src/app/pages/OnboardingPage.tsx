@@ -43,59 +43,59 @@ const STEP_FLOW = [
 const WEEK_DAYS = [
   { value: 'Lunes', short: 'LU' },
   { value: 'Martes', short: 'MA' },
-  { value: 'Miércoles', short: 'MI' },
+  { value: 'MiÃ©rcoles', short: 'MI' },
   { value: 'Jueves', short: 'JU' },
   { value: 'Viernes', short: 'VI' },
-  { value: 'Sábado', short: 'SA' },
+  { value: 'SÃ¡bado', short: 'SA' },
   { value: 'Domingo', short: 'DO' },
 ] as const;
 
 const GOAL_CONTENT: Record<string, string> = {
   [GOAL_OPTIONS[0]]:
-    'Ajustamos calorías, métricas y propuesta de entrenamiento para mantener músculo y verte más definido.',
+    'Ajustamos calorÃ­as, mÃ©tricas y propuesta de entrenamiento para mantener mÃºsculo y verte mÃ¡s definido.',
   [GOAL_OPTIONS[1]]:
-    'Priorizamos progresión, recuperación y estímulos con más margen para construir masa muscular.',
+    'Priorizamos progresiÃ³n, recuperaciÃ³n y estÃ­mulos con mÃ¡s margen para construir masa muscular.',
   [GOAL_OPTIONS[2]]:
-    'Buscamos constancia, rendimiento y un plan sólido para sostener resultados sin ir a extremos.',
+    'Buscamos constancia, rendimiento y un plan sÃ³lido para sostener resultados sin ir a extremos.',
   [GOAL_OPTIONS[3]]:
-    'Balanceamos composición corporal, adherencia y progreso para mejorar músculo y porcentaje graso.',
+    'Balanceamos composiciÃ³n corporal, adherencia y progreso para mejorar mÃºsculo y porcentaje graso.',
 };
 
 const EXPERIENCE_CONTENT: Record<string, string> = {
   Principiante:
-    'Ideal si recién arrancas o si todavía estás ordenando técnica, rutina y consistencia semanal.',
+    'Ideal si reciÃ©n arrancas o si todavÃ­a estÃ¡s ordenando tÃ©cnica, rutina y consistencia semanal.',
   Intermedio:
-    'Ya entrenas con regularidad, conoces los básicos y puedes sostener progresiones reales.',
+    'Ya entrenas con regularidad, conoces los bÃ¡sicos y puedes sostener progresiones reales.',
   Avanzado:
-    'Buscas más control sobre volumen, selección de ejercicios, fatiga y seguimiento fino.',
+    'Buscas mÃ¡s control sobre volumen, selecciÃ³n de ejercicios, fatiga y seguimiento fino.',
 };
 
 const GENDER_OPTIONS = [
-  { value: 'Masculino', description: 'Usamos esta referencia para cálculos fisiológicos y reportes.' },
-  { value: 'Femenino', description: 'Ajustamos recomendaciones y métricas a partir de este dato.' },
-  { value: 'Prefiero no decirlo', description: 'Puedes continuar igual y cambiarlo más adelante cuando quieras.' },
+  { value: 'Masculino', description: 'Usamos esta referencia para cÃ¡lculos fisiolÃ³gicos y reportes.' },
+  { value: 'Femenino', description: 'Ajustamos recomendaciones y mÃ©tricas a partir de este dato.' },
+  { value: 'Prefiero no decirlo', description: 'Puedes continuar igual y cambiarlo mÃ¡s adelante cuando quieras.' },
 ] as const;
 
 const FOCUS_OPTIONS = [
-  { value: 'Balanceado', description: 'Distribución pareja para crecer de forma armónica.', badge: 'Recomendado' },
-  { value: 'Pecho', description: 'Más prioridad a presses y trabajo del torso anterior.' },
-  { value: 'Espalda', description: 'Más protagonismo para remos, jalones y densidad dorsal.' },
-  { value: 'Piernas', description: 'Más foco en cuádriceps, glúteos, isquios y gemelos.' },
-  { value: 'Hombros', description: 'Más atención a deltoides, estabilidad y detalle visual.' },
-  { value: 'Brazos', description: 'Mayor volumen para bíceps y tríceps.' },
+  { value: 'Balanceado', description: 'DistribuciÃ³n pareja para crecer de forma armÃ³nica.', badge: 'Recomendado' },
+  { value: 'Pecho', description: 'MÃ¡s prioridad a presses y trabajo del torso anterior.' },
+  { value: 'Espalda', description: 'MÃ¡s protagonismo para remos, jalones y densidad dorsal.' },
+  { value: 'Piernas', description: 'MÃ¡s foco en cuÃ¡driceps, glÃºteos, isquios y gemelos.' },
+  { value: 'Hombros', description: 'MÃ¡s atenciÃ³n a deltoides, estabilidad y detalle visual.' },
+  { value: 'Brazos', description: 'Mayor volumen para bÃ­ceps y trÃ­ceps.' },
 ] as const;
 
 const LOCATION_OPTIONS = [
   {
     value: 'Gimnasio completo',
-    description: 'Acceso a máquinas, poleas, barras, mancuernas y más variantes para progresar fuerte.',
+    description: 'Acceso a mÃ¡quinas, poleas, barras, mancuernas y mÃ¡s variantes para progresar fuerte.',
   },
   {
     value: 'Home gym',
-    description: 'Entrenas en casa con equipamiento útil y buena variedad para organizar tus sesiones.',
+    description: 'Entrenas en casa con equipamiento Ãºtil y buena variedad para organizar tus sesiones.',
   },
   {
-    value: 'Casa básica',
+    value: 'Casa bÃ¡sica',
     description: 'Prioriza practicidad con poco material o peso corporal, sin perder constancia.',
   },
 ] as const;
@@ -234,7 +234,7 @@ function SelectionCard({
       onClick={onClick}
       className={`group relative flex w-full flex-col gap-4 rounded-[28px] border px-5 py-5 text-left transition-all duration-200 active:scale-[0.985] ${
         selected
-          ? 'border-[rgba(18,239,211,0.38)] bg-[linear-gradient(180deg,rgba(18,239,211,0.18)_0%,rgba(18,239,211,0.08)_100%)] shadow-[0_18px_42px_rgba(18,239,211,0.08)]'
+          ? 'border-[rgba(0,201,167,0.38)] bg-[linear-gradient(180deg,rgba(0,201,167,0.18)_0%,rgba(0,201,167,0.08)_100%)] shadow-[0_18px_42px_rgba(0,201,167,0.08)]'
           : 'border-[rgba(255,255,255,0.06)] bg-[#111522] hover:border-[rgba(255,255,255,0.12)]'
       }`}
     >
@@ -243,7 +243,7 @@ function SelectionCard({
           {icon ? (
             <div
               className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl transition-colors ${
-                selected ? 'bg-[rgba(18,239,211,0.16)] text-[#12EFD3]' : 'bg-[#1A2130] text-[#8F9AAD]'
+                selected ? 'bg-[rgba(0,201,167,0.16)] text-[#00C9A7]' : 'bg-[#1A2130] text-[#8F9AAD]'
               }`}
             >
               {icon}
@@ -258,7 +258,7 @@ function SelectionCard({
         <div
           className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border transition-all ${
             selected
-              ? 'border-[rgba(18,239,211,0.4)] bg-[#12EFD3] text-black'
+              ? 'border-[rgba(0,201,167,0.4)] bg-[#00C9A7] text-black'
               : 'border-[rgba(255,255,255,0.14)] bg-transparent text-transparent'
           }`}
         >
@@ -267,7 +267,7 @@ function SelectionCard({
       </div>
 
       {badge ? (
-        <span className="inline-flex w-fit rounded-full border border-[rgba(18,239,211,0.16)] bg-[rgba(18,239,211,0.08)] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-[#12EFD3]">
+        <span className="inline-flex w-fit rounded-full border border-[rgba(0,201,167,0.16)] bg-[rgba(0,201,167,0.08)] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-[#00C9A7]">
           {badge}
         </span>
       ) : null}
@@ -297,7 +297,7 @@ function CompactSelectionCard({
       onClick={onClick}
       className={`relative flex min-h-[122px] flex-col justify-between rounded-[24px] border px-4 py-4 text-left transition-all duration-200 active:scale-[0.985] ${
         selected
-          ? 'border-[rgba(18,239,211,0.38)] bg-[rgba(18,239,211,0.12)] shadow-[0_18px_34px_rgba(18,239,211,0.07)]'
+          ? 'border-[rgba(0,201,167,0.38)] bg-[rgba(0,201,167,0.12)] shadow-[0_18px_34px_rgba(0,201,167,0.07)]'
           : disabled
             ? 'border-[rgba(255,255,255,0.04)] bg-[#0E1220] opacity-45'
             : 'border-[rgba(255,255,255,0.06)] bg-[#111522]'
@@ -308,7 +308,7 @@ function CompactSelectionCard({
         <div
           className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border transition-all ${
             selected
-              ? 'border-[rgba(18,239,211,0.4)] bg-[#12EFD3] text-black'
+              ? 'border-[rgba(0,201,167,0.4)] bg-[#00C9A7] text-black'
               : 'border-[rgba(255,255,255,0.14)] bg-transparent text-transparent'
           }`}
         >
@@ -318,7 +318,7 @@ function CompactSelectionCard({
       <div className="space-y-2">
         {subtitle ? <p className="text-sm leading-5 text-[#98A2B3]">{subtitle}</p> : null}
         {badge ? (
-          <span className="inline-flex w-fit rounded-full border border-[rgba(18,239,211,0.14)] bg-[rgba(18,239,211,0.08)] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-[#12EFD3]">
+          <span className="inline-flex w-fit rounded-full border border-[rgba(0,201,167,0.14)] bg-[rgba(0,201,167,0.08)] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-[#00C9A7]">
             {badge}
           </span>
         ) : null}
@@ -341,7 +341,7 @@ function PremiumInput({
   return (
     <label className="flex flex-col gap-3">
       <span className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#8D98AA]">{label}</span>
-      <div className="rounded-[24px] border border-[rgba(255,255,255,0.08)] bg-[#111522] px-5 py-4 transition-colors focus-within:border-[rgba(18,239,211,0.4)] focus-within:shadow-[0_0_0_4px_rgba(18,239,211,0.08)]">
+      <div className="rounded-[24px] border border-[rgba(255,255,255,0.08)] bg-[#111522] px-5 py-4 transition-colors focus-within:border-[rgba(0,201,167,0.4)] focus-within:shadow-[0_0_0_4px_rgba(0,201,167,0.08)]">
         <input
           value={value}
           onChange={(event) => onChange(event.target.value)}
@@ -370,10 +370,10 @@ function PickerTriggerCard({
     <button
       type="button"
       onClick={onClick}
-      className="flex w-full items-center justify-between gap-4 rounded-[26px] border border-[rgba(255,255,255,0.06)] bg-[#111522] px-5 py-5 text-left transition-all duration-200 hover:border-[rgba(18,239,211,0.16)] active:scale-[0.985]"
+      className="flex w-full items-center justify-between gap-4 rounded-[26px] border border-[rgba(255,255,255,0.06)] bg-[#111522] px-5 py-5 text-left transition-all duration-200 hover:border-[rgba(0,201,167,0.16)] active:scale-[0.985]"
     >
       <div className="flex min-w-0 items-center gap-4">
-        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#1A2130] text-[#12EFD3]">
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#1A2130] text-[#00C9A7]">
           {icon}
         </div>
         <div className="min-w-0">
@@ -398,7 +398,7 @@ function SectionIntro({
 }) {
   return (
     <div className="space-y-3">
-      <span className="inline-flex rounded-full border border-[rgba(18,239,211,0.14)] bg-[rgba(18,239,211,0.08)] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-[#12EFD3]">
+      <span className="inline-flex rounded-full border border-[rgba(0,201,167,0.14)] bg-[rgba(0,201,167,0.08)] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-[#00C9A7]">
         {eyebrow}
       </span>
       <div className="space-y-3">
@@ -433,7 +433,7 @@ function PickerSheet({
   return (
     <div className="absolute inset-0 z-50 flex items-end justify-center px-3 pb-3">
       <div className="absolute inset-0 bg-[rgba(4,7,18,0.76)] backdrop-blur-[5px]" onClick={onClose} />
-      <div className="relative w-full rounded-[30px] border border-[rgba(18,239,211,0.14)] bg-[linear-gradient(180deg,#141927_0%,#0D111C_100%)] p-5 shadow-[0_28px_80px_rgba(0,0,0,0.48)]">
+      <div className="relative w-full rounded-[30px] border border-[rgba(0,201,167,0.14)] bg-[linear-gradient(180deg,#141927_0%,#0D111C_100%)] p-5 shadow-[0_28px_80px_rgba(0,0,0,0.48)]">
         <div className="mx-auto mb-5 h-1.5 w-14 rounded-full bg-[rgba(255,255,255,0.12)]" />
         <div className="mb-5 text-center">
           <h3 className="text-xl font-bold tracking-tight text-white">{title}</h3>
@@ -461,7 +461,7 @@ function PickerSheet({
                         onClick={() => column.onSelect(option.value)}
                         className={`min-h-[48px] rounded-2xl px-3 py-3 text-center text-base font-semibold transition-all ${
                           selected
-                            ? 'bg-[rgba(18,239,211,0.16)] text-white shadow-[0_0_0_1px_rgba(18,239,211,0.2)]'
+                            ? 'bg-[rgba(0,201,167,0.16)] text-white shadow-[0_0_0_1px_rgba(0,201,167,0.2)]'
                             : 'text-[#8D98AA] hover:bg-[rgba(255,255,255,0.04)]'
                         }`}
                       >
@@ -486,7 +486,7 @@ function PickerSheet({
           <button
             type="button"
             onClick={onConfirm}
-            className="flex-1 rounded-[22px] bg-[#12EFD3] py-4 text-base font-extrabold text-[#041016] shadow-[0_18px_32px_rgba(18,239,211,0.2)] transition-transform active:scale-[0.99]"
+            className="flex-1 rounded-[22px] bg-[#00C9A7] py-4 text-base font-extrabold text-[#041016] shadow-[0_18px_32px_rgba(0,201,167,0.2)] transition-transform active:scale-[0.99]"
           >
             Guardar
           </button>
@@ -509,77 +509,77 @@ const STEP_COPY: Record<
     eyebrow: 'Tu base',
     title: 'Empecemos por vos.',
     description:
-      'GymUp va a personalizar métricas, recomendaciones y ritmo de la experiencia según tu perfil real.',
+      'WOHL va a personalizar mÃ©tricas, recomendaciones y ritmo de la experiencia segÃºn tu perfil real.',
     cta: 'Continuar',
   },
   goal: {
     eyebrow: 'Objetivo',
-    title: '¿Qué querés lograr con tu entrenamiento?',
+    title: 'Â¿QuÃ© querÃ©s lograr con tu entrenamiento?',
     description:
-      'Elegí el resultado que más te representa hoy. Después lo vas a poder cambiar desde configuración.',
+      'ElegÃ­ el resultado que mÃ¡s te representa hoy. DespuÃ©s lo vas a poder cambiar desde configuraciÃ³n.',
     cta: 'Continuar',
   },
   experience: {
     eyebrow: 'Experiencia',
-    title: '¿Qué nivel sentís que tenés hoy?',
+    title: 'Â¿QuÃ© nivel sentÃ­s que tenÃ©s hoy?',
     description:
       'Esto nos ayuda a ajustar complejidad, lectura de progreso y recomendaciones de trabajo.',
     cta: 'Continuar',
   },
   activity: {
     eyebrow: 'Contexto',
-    title: '¿Cómo es tu nivel de actividad general?',
+    title: 'Â¿CÃ³mo es tu nivel de actividad general?',
     description:
-      'No solo cuenta el gym. También importa cuánto te mueves durante el día y tu carga semanal.',
+      'No solo cuenta el gym. TambiÃ©n importa cuÃ¡nto te mueves durante el dÃ­a y tu carga semanal.',
     cta: 'Continuar',
   },
   personal: {
     eyebrow: 'Perfil',
-    title: 'Un poco más de contexto personal.',
+    title: 'Un poco mÃ¡s de contexto personal.',
     description:
-      'Con esto afinamos cálculos energéticos, edad deportiva y futuras estadísticas dentro de la app.',
+      'Con esto afinamos cÃ¡lculos energÃ©ticos, edad deportiva y futuras estadÃ­sticas dentro de la app.',
     cta: 'Continuar',
   },
   metrics: {
     eyebrow: 'Medidas',
-    title: 'Tus métricas actuales.',
+    title: 'Tus mÃ©tricas actuales.',
     description:
-      'Peso, altura y referencia objetivo para que GymUp te devuelva datos útiles y comparables.',
+      'Peso, altura y referencia objetivo para que WOHL te devuelva datos Ãºtiles y comparables.',
     cta: 'Continuar',
   },
   focus: {
     eyebrow: 'Enfoque',
-    title: '¿Querés priorizar algún grupo muscular?',
+    title: 'Â¿QuerÃ©s priorizar algÃºn grupo muscular?',
     description:
-      'Podemos dejarlo balanceado o darle un poco más de protagonismo a una zona puntual.',
+      'Podemos dejarlo balanceado o darle un poco mÃ¡s de protagonismo a una zona puntual.',
     cta: 'Continuar',
   },
   location: {
     eyebrow: 'Entorno',
-    title: '¿Dónde solés entrenar?',
+    title: 'Â¿DÃ³nde solÃ©s entrenar?',
     description:
-      'El nivel de equipamiento cambia bastante lo que conviene sugerir después para tus rutinas.',
+      'El nivel de equipamiento cambia bastante lo que conviene sugerir despuÃ©s para tus rutinas.',
     cta: 'Continuar',
   },
   days: {
     eyebrow: 'Frecuencia',
-    title: '¿Cuántos días querés entrenar?',
+    title: 'Â¿CuÃ¡ntos dÃ­as querÃ©s entrenar?',
     description:
-      'Seleccioná entre 2 y 6 días por semana. Lo usamos para ordenar tu estructura inicial.',
+      'SeleccionÃ¡ entre 2 y 6 dÃ­as por semana. Lo usamos para ordenar tu estructura inicial.',
     cta: 'Continuar',
   },
   schedule: {
     eyebrow: 'Horarios',
-    title: 'Definamos cuándo te viene mejor entrenar.',
+    title: 'Definamos cuÃ¡ndo te viene mejor entrenar.',
     description:
-      'Podés usar un horario fijo o asignar uno distinto por cada día para que la experiencia sea más real.',
+      'PodÃ©s usar un horario fijo o asignar uno distinto por cada dÃ­a para que la experiencia sea mÃ¡s real.',
     cta: 'Continuar',
   },
   summary: {
     eyebrow: 'Listo',
-    title: 'Tu perfil ya está tomando forma.',
+    title: 'Tu perfil ya estÃ¡ tomando forma.',
     description:
-      'Con esta base podemos personalizar estadísticas, cálculos y la forma en que empezás a entrenar dentro de GymUp.',
+      'Con esta base podemos personalizar estadÃ­sticas, cÃ¡lculos y la forma en que empezÃ¡s a entrenar dentro de WOHL.',
     cta: 'Crear mi primera rutina',
   },
 };
@@ -969,18 +969,18 @@ export default function OnboardingPage() {
     }
 
     if (pickerState.type === 'height') {
-      return 'Selecciona tu altura actual para mejorar cálculos y métricas.';
+      return 'Selecciona tu altura actual para mejorar cÃ¡lculos y mÃ©tricas.';
     }
 
     if (pickerState.type === 'weight') {
-      return 'Usamos este valor para estadísticas, progreso y objetivos.';
+      return 'Usamos este valor para estadÃ­sticas, progreso y objetivos.';
     }
 
     if (pickerState.type === 'targetWeight') {
-      return 'Una referencia simple para entender hacia dónde quieres ir.';
+      return 'Una referencia simple para entender hacia dÃ³nde quieres ir.';
     }
 
-    return 'Elegí una hora cómoda y realista para que GymUp te acompañe mejor.';
+    return 'ElegÃ­ una hora cÃ³moda y realista para que WOHL te acompaÃ±e mejor.';
   }, [pickerState]);
 
   const renderStepContent = () => {
@@ -988,13 +988,13 @@ export default function OnboardingPage() {
       case 'identity':
         return (
           <div className="space-y-5">
-            <div className="rounded-[30px] border border-[rgba(18,239,211,0.12)] bg-[linear-gradient(180deg,rgba(18,239,211,0.08)_0%,rgba(18,239,211,0.02)_100%)] p-5">
+            <div className="rounded-[30px] border border-[rgba(0,201,167,0.12)] bg-[linear-gradient(180deg,rgba(0,201,167,0.08)_0%,rgba(0,201,167,0.02)_100%)] p-5">
               <div className="flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#0F1726] shadow-[inset_0_0_0_1px_rgba(18,239,211,0.12)]">
-                  <img src={brandLogoWhite} alt="GymUp" className="h-7 w-7 object-contain" />
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#0F1726] shadow-[inset_0_0_0_1px_rgba(0,201,167,0.12)]">
+                  <img src={brandLogoWhite} alt="WOHL" className="h-7 w-7 object-contain" />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-white">Tu setup inicial en GymUp</p>
+                  <p className="text-sm font-semibold text-white">Tu setup inicial en WOHL</p>
                   <p className="text-sm text-[#98A2B3]">Nos lleva menos de dos minutos dejarlo bien hecho.</p>
                 </div>
               </div>
@@ -1088,8 +1088,8 @@ export default function OnboardingPage() {
               value={formatBirthDateLabel(formData.birthDate)}
               description={
                 formData.birthDate
-                  ? `Edad calculada: ${calculateAgeFromBirthDate(formData.birthDate)} años`
-                  : 'La usamos para tus métricas y referencias generales.'
+                  ? `Edad calculada: ${calculateAgeFromBirthDate(formData.birthDate)} aÃ±os`
+                  : 'La usamos para tus mÃ©tricas y referencias generales.'
               }
               icon={<CalendarDays size={20} />}
               onClick={openBirthPicker}
@@ -1102,12 +1102,12 @@ export default function OnboardingPage() {
           <div className="space-y-4">
             <div className="rounded-[30px] border border-[rgba(255,255,255,0.06)] bg-[#0F1420] p-5">
               <div className="flex items-center gap-3">
-                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[rgba(18,239,211,0.1)] text-[#12EFD3]">
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[rgba(0,201,167,0.1)] text-[#00C9A7]">
                   <Scale size={20} />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-white">Base física inicial</p>
-                  <p className="text-sm text-[#98A2B3]">Estos valores te van a acompañar en progreso, nutrición y reportes.</p>
+                  <p className="text-sm font-semibold text-white">Base fÃ­sica inicial</p>
+                  <p className="text-sm text-[#98A2B3]">Estos valores te van a acompaÃ±ar en progreso, nutriciÃ³n y reportes.</p>
                 </div>
               </div>
             </div>
@@ -1115,7 +1115,7 @@ export default function OnboardingPage() {
             <PickerTriggerCard
               label="Altura"
               value={formatMetricLabel(formData.heightCm, 'cm')}
-              description="Una referencia estable para métricas y cálculos energéticos."
+              description="Una referencia estable para mÃ©tricas y cÃ¡lculos energÃ©ticos."
               icon={<Ruler size={20} />}
               onClick={openHeightPicker}
             />
@@ -1129,7 +1129,7 @@ export default function OnboardingPage() {
             <PickerTriggerCard
               label="Peso objetivo"
               value={formatMetricLabel(formData.targetWeightKg, 'kg')}
-              description="Una referencia útil para orientar la experiencia."
+              description="Una referencia Ãºtil para orientar la experiencia."
               icon={<Target size={20} />}
               onClick={openTargetWeightPicker}
             />
@@ -1171,10 +1171,10 @@ export default function OnboardingPage() {
       case 'days':
         return (
           <div className="space-y-5">
-            <div className="rounded-[30px] border border-[rgba(18,239,211,0.12)] bg-[rgba(18,239,211,0.05)] p-5">
-              <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#12EFD3]">Rango recomendado</p>
+            <div className="rounded-[30px] border border-[rgba(0,201,167,0.12)] bg-[rgba(0,201,167,0.05)] p-5">
+              <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#00C9A7]">Rango recomendado</p>
               <p className="mt-2 text-lg font-bold tracking-tight text-white">
-                {formData.preferredTrainingDays.length}/6 días seleccionados
+                {formData.preferredTrainingDays.length}/6 dÃ­as seleccionados
               </p>
               <p className="mt-1 text-sm leading-6 text-[#98A2B3]">
                 Necesitamos al menos 2 para construir una estructura consistente y hasta 6 para no sobredimensionar tu semana.
@@ -1195,7 +1195,7 @@ export default function OnboardingPage() {
                     onClick={() => toggleTrainingDay(day.value)}
                     className={`relative flex min-h-[124px] flex-col justify-between rounded-[24px] border px-4 py-4 text-left transition-all duration-200 active:scale-[0.985] ${
                       selected
-                        ? 'border-[rgba(18,239,211,0.38)] bg-[rgba(18,239,211,0.12)] shadow-[0_18px_34px_rgba(18,239,211,0.07)]'
+                        ? 'border-[rgba(0,201,167,0.38)] bg-[rgba(0,201,167,0.12)] shadow-[0_18px_34px_rgba(0,201,167,0.07)]'
                         : disabled
                           ? 'border-[rgba(255,255,255,0.04)] bg-[#0E1220] opacity-45'
                           : 'border-[rgba(255,255,255,0.06)] bg-[#111522]'
@@ -1205,10 +1205,10 @@ export default function OnboardingPage() {
                       <span className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#8D98AA]">{day.short}</span>
                       <div
                         className={`flex h-7 min-w-7 items-center justify-center rounded-full px-2 text-xs font-bold ${
-                          selected ? 'bg-[#12EFD3] text-black' : 'bg-[#1A2130] text-[#6F7B91]'
+                          selected ? 'bg-[#00C9A7] text-black' : 'bg-[#1A2130] text-[#6F7B91]'
                         }`}
                       >
-                        {selected ? selectedOrder : '—'}
+                        {selected ? selectedOrder : 'â€”'}
                       </div>
                     </div>
                     <div>
@@ -1232,7 +1232,7 @@ export default function OnboardingPage() {
                   onClick={() => setField('preferredScheduleMode', 'same')}
                   className={`rounded-[20px] px-4 py-3 text-sm font-bold transition-all ${
                     formData.preferredScheduleMode === 'same'
-                      ? 'bg-[#12EFD3] text-[#041016]'
+                      ? 'bg-[#00C9A7] text-[#041016]'
                       : 'bg-transparent text-[#98A2B3]'
                   }`}
                 >
@@ -1243,7 +1243,7 @@ export default function OnboardingPage() {
                   onClick={() => setField('preferredScheduleMode', 'different')}
                   className={`rounded-[20px] px-4 py-3 text-sm font-bold transition-all ${
                     formData.preferredScheduleMode === 'different'
-                      ? 'bg-[#12EFD3] text-[#041016]'
+                      ? 'bg-[#00C9A7] text-[#041016]'
                       : 'bg-transparent text-[#98A2B3]'
                   }`}
                 >
@@ -1257,7 +1257,7 @@ export default function OnboardingPage() {
                 <PickerTriggerCard
                   label="Horario principal"
                   value={formatTimeLabel(formData.preferredWorkoutTime)}
-                  description="Se aplicará como referencia para todos los días seleccionados."
+                  description="Se aplicarÃ¡ como referencia para todos los dÃ­as seleccionados."
                   icon={<Clock3 size={20} />}
                   onClick={() => openTimePicker()}
                 />
@@ -1280,7 +1280,7 @@ export default function OnboardingPage() {
                     key={day.value}
                     label={day.value}
                     value={formatTimeLabel(formData.preferredWorkoutTimeByDay[day.value] || DEFAULT_TIME)}
-                    description="Tap para definir una hora dedicada para ese día."
+                    description="Tap para definir una hora dedicada para ese dÃ­a."
                     icon={<Clock3 size={20} />}
                     onClick={() => openTimePicker(day.value)}
                   />
@@ -1293,10 +1293,10 @@ export default function OnboardingPage() {
       case 'summary':
         return (
           <div className="space-y-5">
-            <div className="overflow-hidden rounded-[32px] border border-[rgba(18,239,211,0.14)] bg-[linear-gradient(180deg,rgba(18,239,211,0.12)_0%,rgba(18,239,211,0.04)_100%)] p-5">
+            <div className="overflow-hidden rounded-[32px] border border-[rgba(0,201,167,0.14)] bg-[linear-gradient(180deg,rgba(0,201,167,0.12)_0%,rgba(0,201,167,0.04)_100%)] p-5">
               <div className="flex items-center justify-between gap-4">
                 <div className="max-w-[15rem]">
-                  <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#12EFD3]">Resumen inicial</p>
+                  <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#00C9A7]">Resumen inicial</p>
                   <h3 className="mt-2 text-2xl font-black tracking-[-0.04em] text-white">
                     Perfil premium listo para arrancar.
                   </h3>
@@ -1305,7 +1305,7 @@ export default function OnboardingPage() {
                   {[30, 54, 78, 110].map((height, index) => (
                     <span
                       key={height}
-                      className={`w-3 rounded-full ${index === 3 ? 'bg-[#12EFD3]' : 'bg-[rgba(255,255,255,0.16)]'}`}
+                      className={`w-3 rounded-full ${index === 3 ? 'bg-[#00C9A7]' : 'bg-[rgba(255,255,255,0.16)]'}`}
                       style={{ height }}
                     />
                   ))}
@@ -1316,13 +1316,13 @@ export default function OnboardingPage() {
             <div className="grid grid-cols-2 gap-3">
               <CompactSelectionCard title={formData.goal} subtitle="Objetivo actual" selected onClick={() => undefined} />
               <CompactSelectionCard title={formData.trainingLevel} subtitle="Nivel declarado" selected onClick={() => undefined} />
-              <CompactSelectionCard title={`${formData.preferredTrainingDays.length} días`} subtitle="Frecuencia semanal" selected onClick={() => undefined} />
+              <CompactSelectionCard title={`${formData.preferredTrainingDays.length} dÃ­as`} subtitle="Frecuencia semanal" selected onClick={() => undefined} />
               <CompactSelectionCard title={formData.workoutLocation} subtitle="Lugar de entrenamiento" selected onClick={() => undefined} />
             </div>
 
             <div className="space-y-3 rounded-[30px] border border-[rgba(255,255,255,0.06)] bg-[#0F1420] p-5">
               <div className="flex items-center gap-3">
-                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#161E2D] text-[#12EFD3]">
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#161E2D] text-[#00C9A7]">
                   <UserRound size={20} />
                 </div>
                 <div>
@@ -1330,7 +1330,7 @@ export default function OnboardingPage() {
                     {formData.firstName.trim()} {formData.lastName.trim()}
                   </p>
                   <p className="text-sm text-[#98A2B3]">
-                    {calculateAgeFromBirthDate(formData.birthDate)} años · {formData.heightCm} cm · {formData.weightKg.toFixed(1).replace('.0', '')} kg
+                    {calculateAgeFromBirthDate(formData.birthDate)} aÃ±os Â· {formData.heightCm} cm Â· {formData.weightKg.toFixed(1).replace('.0', '')} kg
                   </p>
                 </div>
               </div>
@@ -1352,7 +1352,7 @@ export default function OnboardingPage() {
                 {selectedDaysOrdered.map((day) => (
                   <span
                     key={day.value}
-                    className="inline-flex rounded-full border border-[rgba(18,239,211,0.14)] bg-[rgba(18,239,211,0.08)] px-3 py-1.5 text-xs font-semibold text-[#12EFD3]"
+                    className="inline-flex rounded-full border border-[rgba(0,201,167,0.14)] bg-[rgba(0,201,167,0.08)] px-3 py-1.5 text-xs font-semibold text-[#00C9A7]"
                   >
                     {day.value}
                   </span>
@@ -1370,9 +1370,9 @@ export default function OnboardingPage() {
   return (
     <div className="theme-preserve relative min-h-full overflow-hidden bg-[#060914] text-white">
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute left-[-22%] top-[-6%] h-[220px] w-[220px] rounded-full bg-[rgba(18,239,211,0.08)] blur-[82px]" />
+        <div className="absolute left-[-22%] top-[-6%] h-[220px] w-[220px] rounded-full bg-[rgba(0,201,167,0.08)] blur-[82px]" />
         <div className="absolute right-[-28%] top-[18%] h-[260px] w-[260px] rounded-full bg-[rgba(79,97,255,0.07)] blur-[105px]" />
-        <div className="absolute bottom-[-12%] left-[14%] h-[240px] w-[240px] rounded-full bg-[rgba(18,239,211,0.05)] blur-[120px]" />
+        <div className="absolute bottom-[-12%] left-[14%] h-[240px] w-[240px] rounded-full bg-[rgba(0,201,167,0.05)] blur-[120px]" />
       </div>
 
       <div className="relative flex min-h-full flex-col">
@@ -1385,15 +1385,15 @@ export default function OnboardingPage() {
               className={`flex h-11 w-11 items-center justify-center rounded-full border transition-all ${
                 stepIndex === 0
                   ? 'border-[rgba(255,255,255,0.04)] bg-[rgba(255,255,255,0.02)] text-[#546071]'
-                  : 'border-[rgba(255,255,255,0.08)] bg-[#111522] text-white hover:border-[rgba(18,239,211,0.24)]'
+                  : 'border-[rgba(255,255,255,0.08)] bg-[#111522] text-white hover:border-[rgba(0,201,167,0.24)]'
               }`}
             >
               <ArrowLeft size={18} />
             </button>
 
             <div className="flex items-center gap-2">
-              <img src={brandLogoWhite} alt="GymUp" className="h-5 w-5 object-contain" />
-              <span className="text-[12px] font-bold uppercase tracking-[0.24em] text-[#B7C1D2]">GymUp setup</span>
+              <img src={brandLogoWhite} alt="WOHL" className="h-5 w-5 object-contain" />
+              <span className="text-[12px] font-bold uppercase tracking-[0.24em] text-[#B7C1D2]">WOHL setup</span>
             </div>
 
             <div className="min-w-[56px] text-right text-[12px] font-semibold tracking-wide text-[#7F8A9C]">
@@ -1403,7 +1403,7 @@ export default function OnboardingPage() {
 
           <div className="mt-5 h-1.5 overflow-hidden rounded-full bg-[rgba(255,255,255,0.06)]">
             <motion.div
-              className="h-full rounded-full bg-[#12EFD3]"
+              className="h-full rounded-full bg-[#00C9A7]"
               animate={{ width: `${progressPercent}%` }}
               transition={{ duration: 0.22, ease: 'easeOut' }}
             />
@@ -1438,7 +1438,7 @@ export default function OnboardingPage() {
               onClick={goNext}
               className={`w-full rounded-[22px] px-5 py-4 text-base font-extrabold transition-all ${
                 canContinue && !saving
-                  ? 'bg-[#12EFD3] text-[#041016] shadow-[0_20px_36px_rgba(18,239,211,0.2)] active:scale-[0.99]'
+                  ? 'bg-[#00C9A7] text-[#041016] shadow-[0_20px_36px_rgba(0,201,167,0.2)] active:scale-[0.99]'
                   : 'bg-[#151A27] text-[#667085]'
               }`}
             >
@@ -1462,7 +1462,7 @@ export default function OnboardingPage() {
       <DateWheelPicker
         open={pickerState?.type === 'birthDate'}
         title="Fecha de nacimiento"
-        subtitle="Deslizá cada columna hasta dejar tu fecha exacta en la franja central."
+        subtitle="DeslizÃ¡ cada columna hasta dejar tu fecha exacta en la franja central."
         value={birthDraft}
         onChange={setBirthDraft}
         onClose={() => setPickerState(null)}
@@ -1472,7 +1472,7 @@ export default function OnboardingPage() {
       <NumberWheelPicker
         open={pickerState?.type === 'height'}
         title="Altura actual"
-        subtitle="Seleccioná tu altura real para mejorar métricas, progreso y cálculos energéticos."
+        subtitle="SeleccionÃ¡ tu altura real para mejorar mÃ©tricas, progreso y cÃ¡lculos energÃ©ticos."
         value={{ whole: heightDraft.value }}
         onChange={(nextValue) => setHeightDraft({ value: nextValue.whole })}
         wholeOptions={buildNumberOptions(140, 220)}
@@ -1484,7 +1484,7 @@ export default function OnboardingPage() {
       <NumberWheelPicker
         open={pickerState?.type === 'weight'}
         title="Peso actual"
-        subtitle="Este valor se usa como punto de partida para estadísticas y recomendaciones."
+        subtitle="Este valor se usa como punto de partida para estadÃ­sticas y recomendaciones."
         value={weightDraft}
         onChange={(nextValue) => setWeightDraft({ whole: nextValue.whole, decimal: nextValue.decimal ?? '0' })}
         wholeOptions={buildNumberOptions(40, 180)}
@@ -1497,7 +1497,7 @@ export default function OnboardingPage() {
       <NumberWheelPicker
         open={pickerState?.type === 'targetWeight'}
         title="Peso objetivo"
-        subtitle="Una referencia simple para orientar tu progreso dentro de GymUp."
+        subtitle="Una referencia simple para orientar tu progreso dentro de WOHL."
         value={targetWeightDraft}
         onChange={(nextValue) =>
           setTargetWeightDraft({ whole: nextValue.whole, decimal: nextValue.decimal ?? '0' })
@@ -1512,7 +1512,7 @@ export default function OnboardingPage() {
       <TimeWheelPicker
         open={pickerState?.type === 'time'}
         title={pickerState?.type === 'time' && pickerState.day ? `Horario para ${pickerState.day}` : 'Horario principal'}
-        subtitle="Dejá una hora cómoda y realista. Luego podés ajustarla cuando quieras."
+        subtitle="DejÃ¡ una hora cÃ³moda y realista. Luego podÃ©s ajustarla cuando quieras."
         value={timeDraft}
         onChange={setTimeDraft}
         onClose={() => setPickerState(null)}

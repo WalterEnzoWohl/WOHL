@@ -1,6 +1,6 @@
-# GYMUP
+# WOHL
 
-GYMUP es una web app para tracking de entrenamientos de gimnasio, armada con React + Vite.
+WOHL es un sistema premium de control, progreso y optimización del rendimiento personal, construido con React + Vite.
 
 ## Scripts
 
@@ -11,7 +11,7 @@ GYMUP es una web app para tracking de entrenamientos de gimnasio, armada con Rea
 
 ## Supabase
 
-La app ya incluye la dependencia `@supabase/supabase-js` y un cliente base en [src/app/lib/supabase.ts](/C:/Users/20432013953/Desktop/GymUP/src/app/lib/supabase.ts).
+La app incluye `@supabase/supabase-js` y el cliente base en `src/app/lib/supabase.ts`.
 
 Para activar la integración real:
 
@@ -19,6 +19,6 @@ Para activar la integración real:
 2. Completá estas variables:
    - `VITE_SUPABASE_URL`
    - `VITE_SUPABASE_ANON_KEY`
-3. Ejecutá en el SQL Editor de Supabase el archivo [20260406_initial_schema.sql](/C:/Users/20432013953/Desktop/GymUP/supabase/migrations/20260406_initial_schema.sql)
+3. Ejecutá en el SQL Editor de Supabase el archivo `supabase/migrations/20260406_initial_schema.sql`
 
 No hace falta usar la contraseña de la base de datos en el frontend.

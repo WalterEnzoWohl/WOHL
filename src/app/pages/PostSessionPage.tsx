@@ -60,7 +60,7 @@ export default function PostSessionPage() {
   const estimatedKcal = Math.max(380, Math.round(duration / 60 / 5 + setsCompleted * 18));
   const delta =
     previousVolume > 0 ? ((volume - previousVolume) / previousVolume) * 100 : null;
-  const deltaText = delta !== null ? `${delta > 0 ? '+' : ''}${delta.toFixed(1)}% vs anterior` : 'Sin comparación previa';
+  const deltaText = delta !== null ? `${delta > 0 ? '+' : ''}${delta.toFixed(1)}% vs anterior` : 'Sin comparaciÃ³n previa';
 
   useEffect(() => {
     const canvas = document.getElementById('confetti-canvas') as HTMLCanvasElement | null;
@@ -85,7 +85,7 @@ export default function PostSessionPage() {
       size: number;
       life: number;
     }> = [];
-    const colors = ['#12EFD3', '#FFFFFF', '#7F98FF', '#FFD700', '#FF7F50'];
+    const colors = ['#00C9A7', '#FFFFFF', '#7F98FF', '#FFD700', '#FF7F50'];
 
     for (let index = 0; index < 80; index += 1) {
       particles.push({
@@ -125,70 +125,70 @@ export default function PostSessionPage() {
   return (
     <div
       className="relative flex min-h-screen flex-col"
-      style={{ background: '#0A0D12', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+      style={{ background: '#102235', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
     >
       <canvas id="confetti-canvas" className="pointer-events-none absolute inset-0 z-0 h-full w-full" />
 
       <div className="relative z-10 flex flex-col items-center gap-6 px-5 py-8">
         <div className="flex flex-col items-center gap-3 text-center">
-          <div className="flex h-20 w-20 items-center justify-center rounded-full border-2 border-[#12EFD3] bg-[rgba(18,239,211,0.15)] shadow-[0_0_30px_rgba(18,239,211,0.3)]">
-            <Check size={36} className="text-[#12EFD3]" strokeWidth={3} />
+          <div className="flex h-20 w-20 items-center justify-center rounded-full border-2 border-[#00C9A7] bg-[rgba(0,201,167,0.15)] shadow-[0_0_30px_rgba(0,201,167,0.3)]">
+            <Check size={36} className="text-[#00C9A7]" strokeWidth={3} />
           </div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-white">Sesión completada</h1>
-          <p className="text-sm text-[#ADAAAA]" style={{ fontFamily: "'Inter', sans-serif" }}>
+          <h1 className="text-3xl font-extrabold tracking-tight text-white">SesiÃ³n completada</h1>
+          <p className="text-sm text-[#9BAEC1]" style={{ fontFamily: "'Inter', sans-serif" }}>
             {sessionName} - {sessionFocus}
           </p>
         </div>
 
-        <div className="flex w-full items-center justify-between rounded-2xl border border-[#262626] bg-[#141720] p-5">
+        <div className="flex w-full items-center justify-between rounded-2xl border border-[#203347] bg-[#141720] p-5">
           <div>
-            <p className="mb-1 text-[10px] uppercase tracking-widest text-[#ADAAAA]">Duración total</p>
+            <p className="mb-1 text-[10px] uppercase tracking-widest text-[#9BAEC1]">DuraciÃ³n total</p>
             <span className="text-4xl font-bold tracking-tight text-white">{formatTime(duration)}</span>
           </div>
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-[rgba(18,239,211,0.2)] bg-[rgba(18,239,211,0.1)]">
+          <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-[rgba(0,201,167,0.2)] bg-[rgba(0,201,167,0.1)]">
             <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-              <circle cx="16" cy="16" r="12" stroke="#12EFD3" strokeWidth="2" />
-              <path d="M16 9v7l4 4" stroke="#12EFD3" strokeWidth="2" strokeLinecap="round" />
+              <circle cx="16" cy="16" r="12" stroke="#00C9A7" strokeWidth="2" />
+              <path d="M16 9v7l4 4" stroke="#00C9A7" strokeWidth="2" strokeLinecap="round" />
             </svg>
           </div>
         </div>
 
         <div className="grid w-full grid-cols-2 gap-3">
-          <div className="rounded-2xl border border-[rgba(18,239,211,0.15)] bg-[#131313] p-4" style={{ borderLeftWidth: 4 }}>
-            <p className="mb-2 text-[10px] uppercase tracking-widest text-[#ADAAAA]">Volumen total</p>
+          <div className="rounded-2xl border border-[rgba(0,201,167,0.15)] bg-[#13263A] p-4" style={{ borderLeftWidth: 4 }}>
+            <p className="mb-2 text-[10px] uppercase tracking-widest text-[#9BAEC1]">Volumen total</p>
             <div className="flex items-baseline gap-1">
               <span className="text-2xl font-normal text-white">
                 {formatWeightNumber(volume, appSettings.weightUnit, 0)}
               </span>
-              <span className="text-xs font-bold italic text-[#ADAAAA]">{weightUnitLabel}</span>
+              <span className="text-xs font-bold italic text-[#9BAEC1]">{weightUnitLabel}</span>
             </div>
             <div className="mt-1 flex items-center gap-1">
-              <TrendingUp size={10} className="text-[#12EFD3]" />
-              <span className="text-[10px] font-semibold text-[#12EFD3]">{deltaText}</span>
+              <TrendingUp size={10} className="text-[#00C9A7]" />
+              <span className="text-[10px] font-semibold text-[#00C9A7]">{deltaText}</span>
             </div>
           </div>
 
-          <div className="rounded-2xl border border-[rgba(127,152,255,0.15)] bg-[#131313] p-4" style={{ borderLeftWidth: 4 }}>
-            <p className="mb-2 text-[10px] uppercase tracking-widest text-[#ADAAAA]">Series</p>
+          <div className="rounded-2xl border border-[rgba(127,152,255,0.15)] bg-[#13263A] p-4" style={{ borderLeftWidth: 4 }}>
+            <p className="mb-2 text-[10px] uppercase tracking-widest text-[#9BAEC1]">Series</p>
             <div className="flex items-baseline gap-1">
               <span className="text-2xl font-normal text-white">{setsCompleted}</span>
-              <span className="text-xs font-bold italic text-[#ADAAAA]">/ {totalSets}</span>
+              <span className="text-xs font-bold italic text-[#9BAEC1]">/ {totalSets}</span>
             </div>
           </div>
 
-          <div className="rounded-2xl bg-[#131313] p-4">
-            <p className="mb-2 text-[10px] uppercase tracking-widest text-[#ADAAAA]">RPE promedio</p>
+          <div className="rounded-2xl bg-[#13263A] p-4">
+            <p className="mb-2 text-[10px] uppercase tracking-widest text-[#9BAEC1]">RPE promedio</p>
             <div className="flex items-baseline gap-1">
               <span className="text-2xl font-normal text-white">{avgRpe}</span>
-              <span className="text-xs font-bold italic text-[#ADAAAA]">/ 10</span>
+              <span className="text-xs font-bold italic text-[#9BAEC1]">/ 10</span>
             </div>
           </div>
 
-          <div className="rounded-2xl bg-[#131313] p-4">
-            <p className="mb-2 text-[10px] uppercase tracking-widest text-[#ADAAAA]">Kcal est.</p>
+          <div className="rounded-2xl bg-[#13263A] p-4">
+            <p className="mb-2 text-[10px] uppercase tracking-widest text-[#9BAEC1]">Kcal est.</p>
             <div className="flex items-baseline gap-1">
               <span className="text-2xl font-normal text-white">{estimatedKcal}</span>
-              <span className="text-xs font-bold italic text-[#ADAAAA]">kcal</span>
+              <span className="text-xs font-bold italic text-[#9BAEC1]">kcal</span>
             </div>
           </div>
         </div>
@@ -203,19 +203,19 @@ export default function PostSessionPage() {
                 return (
                   <div
                     key={exercise.name}
-                    className="flex items-center justify-between rounded-xl border border-[#262626] bg-[#131313] px-4 py-3"
+                    className="flex items-center justify-between rounded-xl border border-[#203347] bg-[#13263A] px-4 py-3"
                   >
                     <div>
                       <p className="text-sm font-semibold text-white">{exercise.name}</p>
-                      <p className="mt-0.5 text-xs text-[#ADAAAA]" style={{ fontFamily: "'Inter', sans-serif" }}>
+                      <p className="mt-0.5 text-xs text-[#9BAEC1]" style={{ fontFamily: "'Inter', sans-serif" }}>
                         {doneSets.length} series completadas
                       </p>
                     </div>
                     <div className="text-right">
-                      <span className="text-sm font-bold text-[#12EFD3]">
+                      <span className="text-sm font-bold text-[#00C9A7]">
                         {maxKg > 0 ? formatWeightWithUnit(maxKg, appSettings.weightUnit) : 'Peso corporal'}
                       </span>
-                      <p className="text-xs text-[#ADAAAA]">máx.</p>
+                      <p className="text-xs text-[#9BAEC1]">mÃ¡x.</p>
                     </div>
                   </div>
                 );
@@ -225,8 +225,8 @@ export default function PostSessionPage() {
         )}
 
         {notes && (
-          <div className="w-full rounded-2xl border border-[#262626] bg-[#131313] p-4">
-            <p className="mb-2 text-[10px] uppercase tracking-widest text-[#ADAAAA]">Notas</p>
+          <div className="w-full rounded-2xl border border-[#203347] bg-[#13263A] p-4">
+            <p className="mb-2 text-[10px] uppercase tracking-widest text-[#9BAEC1]">Notas</p>
             <p className="text-sm text-white" style={{ fontFamily: "'Inter', sans-serif" }}>
               {notes}
             </p>
@@ -236,14 +236,14 @@ export default function PostSessionPage() {
         <div className="flex w-full flex-col gap-3">
           <button
             onClick={() => navigate('/history')}
-            className="flex w-full items-center justify-center gap-2 rounded-2xl border border-[#262626] bg-[#1C2030] py-4"
+            className="flex w-full items-center justify-center gap-2 rounded-2xl border border-[#203347] bg-[#1A2D42] py-4"
           >
-            <BarChart2 size={18} className="text-[#12EFD3]" />
+            <BarChart2 size={18} className="text-[#00C9A7]" />
             <span className="font-semibold text-white">Ver historial completo</span>
           </button>
           <button
             onClick={() => navigate('/')}
-            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#12EFD3] py-4 shadow-[0_0_20px_rgba(18,239,211,0.2)]"
+            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#00C9A7] py-4 shadow-[0_0_20px_rgba(0,201,167,0.2)]"
           >
             <Home size={18} className="text-black" />
             <span className="text-base font-bold text-black">Volver al inicio</span>

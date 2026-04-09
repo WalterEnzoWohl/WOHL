@@ -15,7 +15,7 @@ export default function RoutineDetailPage() {
     return (
       <div className="flex flex-col" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
         <Header showBack title="Rutina" />
-        <div className="px-5 py-5 text-sm text-[#ADAAAA]">No se encontró la rutina.</div>
+        <div className="px-5 py-5 text-sm text-[#9BAEC1]">No se encontrÃ³ la rutina.</div>
       </div>
     );
   }
@@ -64,9 +64,9 @@ export default function RoutineDetailPage() {
         rightContent={
           <button
             onClick={tryEditRoutine}
-            className="flex h-9 w-9 items-center justify-center rounded-xl border border-[#262626] bg-[#1C2030]"
+            className="flex h-9 w-9 items-center justify-center rounded-xl border border-[#203347] bg-[#1A2D42]"
           >
-            <Pencil size={14} className="text-[#ADAAAA]" />
+            <Pencil size={14} className="text-[#9BAEC1]" />
           </button>
         }
       />
@@ -82,10 +82,10 @@ export default function RoutineDetailPage() {
               fontFamily: "'Inter', sans-serif",
             }}
           >
-            {routine.daysPerWeek} días por semana
+            {routine.daysPerWeek} dÃ­as por semana
           </div>
           <h1 className="text-3xl font-extrabold leading-tight tracking-tight text-white">{routine.name}</h1>
-          <p className="text-sm leading-6 text-[#ADAAAA]" style={{ fontFamily: "'Inter', sans-serif" }}>
+          <p className="text-sm leading-6 text-[#9BAEC1]" style={{ fontFamily: "'Inter', sans-serif" }}>
             {routine.description}
           </p>
           {routine.tags && (
@@ -93,7 +93,7 @@ export default function RoutineDetailPage() {
               {routine.tags.map((tag) => (
                 <span
                   key={tag}
-                  className="rounded-lg bg-[#262626] px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider text-[#A1A1A1]"
+                  className="rounded-lg bg-[#203347] px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider text-[#90A4B8]"
                 >
                   {tag}
                 </span>
@@ -108,10 +108,10 @@ export default function RoutineDetailPage() {
             { label: 'Ejercicios', value: totalExercises.toString(), icon: <Dumbbell size={14} style={{ color: routine.color }} /> },
             { label: 'Series', value: totalSets.toString(), icon: <div className="h-3.5 w-3.5 rounded-full border-2" style={{ borderColor: routine.color }} /> },
           ].map(({ label, value, icon }) => (
-            <div key={label} className="rounded-xl border border-[#262626] bg-[#131313] p-3">
+            <div key={label} className="rounded-xl border border-[#203347] bg-[#13263A] p-3">
               <div className="mb-1.5 flex items-center gap-1.5">
                 {icon}
-                <span className="text-[10px] uppercase tracking-wider text-[#ADAAAA]">{label}</span>
+                <span className="text-[10px] uppercase tracking-wider text-[#9BAEC1]">{label}</span>
               </div>
               <span className="text-xl font-bold text-white">{value}</span>
             </div>
@@ -126,7 +126,7 @@ export default function RoutineDetailPage() {
               className={`flex-shrink-0 whitespace-nowrap rounded-full px-4 py-2 text-xs font-bold uppercase tracking-wider transition-all ${
                 activeDay === index
                   ? 'text-black'
-                  : 'border border-[#262626] bg-[#1C2030] text-[#ADAAAA]'
+                  : 'border border-[#203347] bg-[#1A2D42] text-[#9BAEC1]'
               }`}
               style={activeDay === index ? { background: routine.color } : {}}
             >
@@ -135,15 +135,15 @@ export default function RoutineDetailPage() {
           ))}
         </div>
 
-        <div className="rounded-2xl border border-[#262626] bg-[#131313] p-4">
+        <div className="rounded-2xl border border-[#203347] bg-[#13263A] p-4">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-[#12EFD3]">Enfoque</p>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-[#00C9A7]">Enfoque</p>
               <h2 className="mt-1 text-xl font-bold text-white">{selectedDay.focus}</h2>
             </div>
             <div className="text-right">
-              <p className="text-xs text-[#ADAAAA]">{selectedDay.exercises.length} ejercicios</p>
-              <p className="text-xs text-[#ADAAAA]">
+              <p className="text-xs text-[#9BAEC1]">{selectedDay.exercises.length} ejercicios</p>
+              <p className="text-xs text-[#9BAEC1]">
                 {selectedDay.exercises.reduce((acc, exercise) => acc + exercise.sets.length, 0)} series
               </p>
             </div>
@@ -159,7 +159,7 @@ export default function RoutineDetailPage() {
           {selectedDay.exercises.map((exercise, index) => (
             <div
               key={exercise.id}
-              className="overflow-hidden rounded-2xl border border-[#262626] bg-[#131313]"
+              className="overflow-hidden rounded-2xl border border-[#203347] bg-[#13263A]"
             >
               <button
                 onClick={() => toggleExercise(index)}
@@ -174,30 +174,30 @@ export default function RoutineDetailPage() {
                   </div>
                   <div>
                     <p className="text-sm font-semibold text-white">{exercise.name}</p>
-                    <p className="mt-0.5 text-xs text-[#ADAAAA]" style={{ fontFamily: "'Inter', sans-serif" }}>
+                    <p className="mt-0.5 text-xs text-[#9BAEC1]" style={{ fontFamily: "'Inter', sans-serif" }}>
                       {exercise.sets.length} series - {exercise.muscle}
                     </p>
                   </div>
                 </div>
                 {expandedExercises.has(index) ? (
-                  <ChevronUp size={16} className="text-[#ADAAAA]" />
+                  <ChevronUp size={16} className="text-[#9BAEC1]" />
                 ) : (
-                  <ChevronDown size={16} className="text-[#ADAAAA]" />
+                  <ChevronDown size={16} className="text-[#9BAEC1]" />
                 )}
               </button>
 
               {expandedExercises.has(index) && (
-                <div className="border-t border-[#262626] px-4 py-4">
+                <div className="border-t border-[#203347] px-4 py-4">
                   <div className="mb-3 flex flex-wrap gap-2">
                     {exercise.implement && (
-                      <span className="rounded-full border border-[rgba(18,239,211,0.25)] bg-[rgba(18,239,211,0.08)] px-3 py-1 text-[10px] font-semibold uppercase tracking-widest text-[#12EFD3]">
+                      <span className="rounded-full border border-[rgba(0,201,167,0.25)] bg-[rgba(0,201,167,0.08)] px-3 py-1 text-[10px] font-semibold uppercase tracking-widest text-[#00C9A7]">
                         {exercise.implement}
                       </span>
                     )}
                     {exercise.secondaryMuscles?.map((muscle) => (
                       <span
                         key={muscle}
-                        className="rounded-full bg-[#262626] px-3 py-1 text-[10px] font-semibold uppercase tracking-widest text-[#A1A1A1]"
+                        className="rounded-full bg-[#203347] px-3 py-1 text-[10px] font-semibold uppercase tracking-widest text-[#90A4B8]"
                       >
                         {muscle}
                       </span>
@@ -208,7 +208,7 @@ export default function RoutineDetailPage() {
                     {['Serie', 'Kg', 'Reps', 'RPE'].map((column) => (
                       <span
                         key={column}
-                        className="text-center text-[10px] font-semibold uppercase tracking-wider text-[#ADAAAA]"
+                        className="text-center text-[10px] font-semibold uppercase tracking-wider text-[#9BAEC1]"
                         style={{ fontFamily: "'Inter', sans-serif" }}
                       >
                         {column}
@@ -220,12 +220,12 @@ export default function RoutineDetailPage() {
                       key={set.id}
                       className="grid grid-cols-4 gap-2 border-t border-[rgba(255,255,255,0.03)] px-4 py-3"
                     >
-                      <span className="text-center text-sm text-[#ADAAAA]">{setIndex + 1}</span>
+                      <span className="text-center text-sm text-[#9BAEC1]">{setIndex + 1}</span>
                       <span className="text-center text-sm font-medium text-white">
                         {set.kg > 0 ? set.kg : '-'}
                       </span>
                       <span className="text-center text-sm font-medium text-white">{set.reps}</span>
-                      <span className="text-center text-sm text-[#ADAAAA]">{set.rpe}</span>
+                      <span className="text-center text-sm text-[#9BAEC1]">{set.rpe}</span>
                     </div>
                   ))}
 
@@ -247,16 +247,16 @@ export default function RoutineDetailPage() {
                 state: { routineId: routine.id, dayName: selectedDay.name },
               })
             }
-            className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-[#12EFD3] py-4 shadow-[0_0_15px_rgba(18,239,211,0.2)] transition-colors active:bg-[#0DBDA7]"
+            className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-[#00C9A7] py-4 shadow-[0_0_15px_rgba(0,201,167,0.2)] transition-colors active:bg-[#009F86]"
           >
             <Play size={18} fill="black" className="ml-0.5 text-black" />
             <span className="font-bold text-black">Iniciar {selectedDay.name}</span>
           </button>
           <button
             onClick={tryEditRoutine}
-            className="flex w-14 items-center justify-center rounded-2xl border border-[#262626] bg-[#1C2030]"
+            className="flex w-14 items-center justify-center rounded-2xl border border-[#203347] bg-[#1A2D42]"
           >
-            <Pencil size={18} className="text-[#ADAAAA]" />
+            <Pencil size={18} className="text-[#9BAEC1]" />
           </button>
         </div>
       </div>

@@ -37,7 +37,7 @@ export function AuthScreen() {
       }
 
       if (mode === 'signup' && !response.data.session) {
-        setMessage('Revisa tu correo para confirmar la cuenta antes de entrar.');
+        setMessage('Revisá tu correo para confirmar la cuenta antes de entrar.');
       }
     } catch (caughtError) {
       setError(caughtError instanceof Error ? caughtError.message : 'No se pudo iniciar sesión.');
@@ -47,21 +47,22 @@ export function AuthScreen() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#050710] px-5">
-      <div className="w-full max-w-[390px] rounded-[32px] border border-[rgba(18,239,211,0.12)] bg-[#0A0D12] p-6 shadow-[0_32px_80px_rgba(0,0,0,0.45)]">
+    <div className="min-h-screen flex items-center justify-center bg-[#08111C] px-5">
+      <div className="w-full max-w-[390px] rounded-[32px] border border-[rgba(0,201,167,0.12)] bg-[#102235] p-6 shadow-[0_32px_80px_rgba(0,0,0,0.45)]">
         <div className="mb-8 flex flex-col items-center gap-4 text-center">
-          <div className="flex h-20 w-20 items-center justify-center rounded-full border border-[rgba(18,239,211,0.2)] bg-[#0E0E0E]">
-            <img src={brandLogoWhite} alt="GYMUP" className="h-14 w-14 object-contain" />
+          <div className="flex h-20 w-20 items-center justify-center rounded-full border border-[rgba(0,201,167,0.2)] bg-[#0B1F33]">
+            <img src={brandLogoWhite} alt="WOHL" className="h-14 w-14 object-contain" />
           </div>
           <div>
-            <h1 className="text-3xl font-extrabold tracking-tight text-white">GYMUP</h1>
-            <p className="mt-2 text-sm text-[#ADAAAA]">
-              Entrá con tu cuenta para guardar rutinas y sesiones reales.
+            <p className="text-[11px] font-bold uppercase tracking-[0.28em] text-[#00C9A7]">Sistema de rendimiento</p>
+            <h1 className="mt-2 text-3xl font-black tracking-[0.18em] text-white">WOHL</h1>
+            <p className="mt-2 text-sm text-[#9BAEC1]">
+              Entrá con tu cuenta para guardar progreso, sesiones reales y tu sistema personal.
             </p>
           </div>
         </div>
 
-        <div className="mb-5 grid grid-cols-2 gap-2 rounded-2xl bg-[#131313] p-1">
+        <div className="mb-5 grid grid-cols-2 gap-2 rounded-2xl bg-[#13263A] p-1">
           {[
             { value: 'signin', label: 'Entrar' },
             { value: 'signup', label: 'Crear cuenta' },
@@ -70,7 +71,7 @@ export function AuthScreen() {
               key={item.value}
               onClick={() => setMode(item.value as 'signin' | 'signup')}
               className={`rounded-2xl px-4 py-3 text-sm font-bold transition-all ${
-                mode === item.value ? 'bg-[#12EFD3] text-black' : 'text-[#ADAAAA]'
+                mode === item.value ? 'bg-[#00C9A7] text-black' : 'text-[#9BAEC1]'
               }`}
             >
               {item.label}
@@ -80,9 +81,9 @@ export function AuthScreen() {
 
         <div className="flex flex-col gap-4">
           <label className="flex flex-col gap-2">
-            <span className="text-[10px] font-bold uppercase tracking-widest text-[#ADAAAA]">Email</span>
-            <div className="flex items-center gap-3 rounded-2xl border border-[#262626] bg-[#131313] px-4 py-3">
-              <Mail size={16} className="text-[#12EFD3]" />
+            <span className="text-[10px] font-bold uppercase tracking-widest text-[#9BAEC1]">Email</span>
+            <div className="flex items-center gap-3 rounded-2xl border border-[#203347] bg-[#13263A] px-4 py-3">
+              <Mail size={16} className="text-[#00C9A7]" />
               <input
                 type="email"
                 value={email}
@@ -94,9 +95,9 @@ export function AuthScreen() {
           </label>
 
           <label className="flex flex-col gap-2">
-            <span className="text-[10px] font-bold uppercase tracking-widest text-[#ADAAAA]">Contraseña</span>
-            <div className="flex items-center gap-3 rounded-2xl border border-[#262626] bg-[#131313] px-4 py-3">
-              <LockKeyhole size={16} className="text-[#12EFD3]" />
+            <span className="text-[10px] font-bold uppercase tracking-widest text-[#9BAEC1]">Contraseña</span>
+            <div className="flex items-center gap-3 rounded-2xl border border-[#203347] bg-[#13263A] px-4 py-3">
+              <LockKeyhole size={16} className="text-[#00C9A7]" />
               <input
                 type="password"
                 value={password}
@@ -114,7 +115,7 @@ export function AuthScreen() {
           )}
 
           {message && (
-            <div className="rounded-2xl border border-[rgba(18,239,211,0.2)] bg-[rgba(18,239,211,0.08)] px-4 py-3 text-sm text-[#9EF8EC]">
+            <div className="rounded-2xl border border-[rgba(0,201,167,0.2)] bg-[rgba(0,201,167,0.08)] px-4 py-3 text-sm text-[#9EF8EC]">
               {message}
             </div>
           )}
@@ -122,10 +123,10 @@ export function AuthScreen() {
           <button
             onClick={submit}
             disabled={loading || !email.trim() || !password.trim()}
-            className="mt-2 flex items-center justify-center gap-2 rounded-2xl bg-[#12EFD3] py-4 font-extrabold text-black disabled:cursor-not-allowed disabled:opacity-50"
+            className="mt-2 flex items-center justify-center gap-2 rounded-2xl bg-[#00C9A7] py-4 font-extrabold text-black disabled:cursor-not-allowed disabled:opacity-50"
           >
             {loading ? <LoaderCircle size={18} className="animate-spin" /> : null}
-            {mode === 'signin' ? 'Entrar a GYMUP' : 'Crear cuenta'}
+            {mode === 'signin' ? 'Entrar a WOHL' : 'Crear cuenta'}
           </button>
         </div>
       </div>

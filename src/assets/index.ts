@@ -1,3 +1,4 @@
-import brandLogoWhite from './gymup_logo_white.svg';
+import brandLogoBlack from './wohl_logo_black.svg';
+import brandLogoWhite from './wohl_logo_white.svg';
 
-export { brandLogoWhite };
+export { brandLogoBlack, brandLogoWhite };

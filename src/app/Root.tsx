@@ -26,10 +26,10 @@ export default function Root() {
 
   return (
     <div
-      className={`gymup-stage min-h-screen flex items-center justify-center ${isLightMode ? 'gymup-light-stage' : ''}`}
+      className={`wohl-stage min-h-screen flex items-center justify-center ${isLightMode ? 'wohl-light-stage' : ''}`}
     >
       <div
-        className={`gymup-shell relative flex flex-col ${isLightMode ? 'gymup-light-mode' : ''}`}
+        className={`wohl-shell relative flex flex-col ${isLightMode ? 'wohl-light-mode' : ''}`}
         style={{
           width: '100%',
           maxWidth: '430px',
@@ -39,15 +39,15 @@ export default function Root() {
         }}
       >
         {status === 'loading' ? (
-          <div className="flex flex-1 items-center justify-center px-6 text-center text-sm text-[#ADAAAA]">
+          <div className="flex flex-1 items-center justify-center px-6 text-center text-sm text-[#9BAEC1]">
             Cargando tus datos reales...
           </div>
         ) : status === 'error' ? (
           <div className="flex flex-1 flex-col items-center justify-center gap-4 px-6 text-center">
-            <p className="text-sm text-[#ADAAAA]">{error ?? 'No se pudo cargar la app.'}</p>
+            <p className="text-sm text-[#9BAEC1]">{error ?? 'No se pudo cargar la app.'}</p>
             <button
               onClick={() => void refreshAppData()}
-              className="rounded-2xl bg-[#12EFD3] px-5 py-3 text-sm font-bold text-black"
+              className="rounded-2xl bg-[#00C9A7] px-5 py-3 text-sm font-bold text-black"
             >
               Reintentar
             </button>
@@ -59,26 +59,26 @@ export default function Root() {
         ) : showEmptyAccountState ? (
           <div className="flex flex-col gap-6 px-5 py-6 pb-4">
             <div>
-              <span className="text-[10px] font-bold uppercase tracking-[0.24em] text-[#12EFD3]">
+              <span className="text-[10px] font-bold uppercase tracking-[0.24em] text-[#00C9A7]">
                 Bienvenido
               </span>
               <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-white">Tu cuenta ya esta creada</h1>
-              <p className="mt-2 text-sm text-[#A1A1A1]">
-                Empieza creando tu primera rutina. Desde ahi ya podras guardar sesiones reales y usar GYMUP como una cuenta propia.
+              <p className="mt-2 text-sm text-[#90A4B8]">
+                Empieza creando tu primera estructura. Desde ahi ya podras registrar sesiones reales y usar WOHL como tu sistema personal de progreso.
               </p>
             </div>
 
             <div className="rounded-3xl border border-[rgba(127,152,255,0.16)] bg-[rgba(127,152,255,0.07)] p-5">
               <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[#7F98FF]">Siguiente paso</p>
-              <h2 className="mt-2 text-xl font-bold tracking-tight text-white">Crea tu primera rutina</h2>
+              <h2 className="mt-2 text-xl font-bold tracking-tight text-white">Crea tu primer sistema</h2>
               <p className="mt-2 text-sm text-[#C7D2FE]">
-                Puedes arrancar con una Upper/Lower, Push Pull Legs o una estructura totalmente personalizada.
+                Puedes arrancar con una estructura Upper/Lower, Push Pull Legs o un sistema totalmente personalizado.
               </p>
               <button
                 onClick={() => navigate('/routine-editor/new')}
                 className="mt-4 flex w-full items-center justify-center rounded-2xl bg-[#7F98FF] py-4 font-extrabold text-[#0B1020] transition-colors active:bg-[#6F89F0]"
               >
-                Crear primera rutina
+                Crear primer sistema
               </button>
             </div>
 

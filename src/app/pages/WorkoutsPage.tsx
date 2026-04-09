@@ -71,7 +71,7 @@ export default function WorkoutsPage() {
           <h1 className="text-3xl font-extrabold tracking-tight text-white">Entrenamientos</h1>
           <button
             onClick={() => navigate('/routine-editor/new')}
-            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#12EFD3] py-4 shadow-[0_0_15px_rgba(18,239,211,0.15)] transition-colors active:bg-[#0DBDA7]"
+            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#00C9A7] py-4 shadow-[0_0_15px_rgba(0,201,167,0.15)] transition-colors active:bg-[#009F86]"
             type="button"
           >
             <Plus size={22} className="text-black" strokeWidth={2.5} />
@@ -82,33 +82,33 @@ export default function WorkoutsPage() {
             className="flex w-full items-center justify-center gap-2 rounded-2xl border border-[rgba(245,185,66,0.24)] bg-[rgba(245,185,66,0.08)] py-4 font-bold text-[#F5B942] transition-colors active:bg-[rgba(245,185,66,0.14)]"
             type="button"
           >
-            Empezar entrenamiento vacío
+            Empezar entrenamiento vacÃ­o
           </button>
         </div>
 
         {hasRoutines ? (
           activeRoutine ? (
-            <div className="rounded-3xl border border-[rgba(18,239,211,0.18)] bg-[linear-gradient(180deg,rgba(18,239,211,0.10),rgba(19,19,19,1))] p-5">
+            <div className="rounded-3xl border border-[rgba(0,201,167,0.18)] bg-[linear-gradient(180deg,rgba(0,201,167,0.10),rgba(19,19,19,1))] p-5">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[#12EFD3]">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[#00C9A7]">
                     Rutina actual seleccionada
                   </p>
                   <h2 className="mt-2 text-2xl font-bold tracking-tight text-white">{activeRoutine.name}</h2>
                   <p className="mt-2 text-sm text-[#C8C8C8]" style={{ fontFamily: "'Inter', sans-serif" }}>
                     {activeRoutine.description ??
-                      `${activeRoutine.daysPerWeek} días por semana con ${activeRoutine.days.length} entrenamientos disponibles.`}
+                      `${activeRoutine.daysPerWeek} dÃ­as por semana con ${activeRoutine.days.length} entrenamientos disponibles.`}
                   </p>
                 </div>
-                <div className="rounded-2xl border border-[rgba(18,239,211,0.2)] bg-[rgba(18,239,211,0.08)] p-3">
-                  <CheckCircle2 size={22} className="text-[#12EFD3]" />
+                <div className="rounded-2xl border border-[rgba(0,201,167,0.2)] bg-[rgba(0,201,167,0.08)] p-3">
+                  <CheckCircle2 size={22} className="text-[#00C9A7]" />
                 </div>
               </div>
 
               <div className="mt-5 grid grid-cols-2 gap-3">
-                <div className="rounded-2xl bg-[#131313] p-4">
+                <div className="rounded-2xl bg-[#13263A] p-4">
                   <div className="mb-2 flex items-center gap-2">
-                    <Clock size={14} className="text-[#12EFD3]" />
+                    <Clock size={14} className="text-[#00C9A7]" />
                     <span
                       className="text-[10px] font-semibold uppercase tracking-wider text-[#777575]"
                       style={{ fontFamily: "'Inter', sans-serif" }}
@@ -118,17 +118,17 @@ export default function WorkoutsPage() {
                   </div>
                   <div className="flex items-baseline gap-1">
                     <span className="text-2xl font-bold text-white">{weeklyHours.toFixed(1)}</span>
-                    <span className="text-sm font-bold italic text-[#ADAAAA]">h</span>
+                    <span className="text-sm font-bold italic text-[#9BAEC1]">h</span>
                   </div>
                 </div>
-                <div className="rounded-2xl bg-[#131313] p-4">
+                <div className="rounded-2xl bg-[#13263A] p-4">
                   <div className="mb-2 flex items-center gap-2">
-                    <TrendingUp size={14} className="text-[#12EFD3]" />
+                    <TrendingUp size={14} className="text-[#00C9A7]" />
                     <span
                       className="text-[10px] font-semibold uppercase tracking-wider text-[#777575]"
                       style={{ fontFamily: "'Inter', sans-serif" }}
                     >
-                      Volumen histórico
+                      Volumen histÃ³rico
                     </span>
                   </div>
                   <div className="flex items-baseline gap-1">
@@ -150,10 +150,10 @@ export default function WorkoutsPage() {
                     Sin rutina seleccionada
                   </p>
                   <h2 className="mt-2 text-xl font-bold tracking-tight text-white">
-                    Elegí una rutina para empezar
+                    ElegÃ­ una rutina para empezar
                   </h2>
                   <p className="mt-2 text-sm text-[#D6B9B9]" style={{ fontFamily: "'Inter', sans-serif" }}>
-                    Seleccioná una de tus rutinas disponibles abajo para actualizar los entrenamientos,
+                    SeleccionÃ¡ una de tus rutinas disponibles abajo para actualizar los entrenamientos,
                     el resumen de la rutina y las opciones de inicio.
                   </p>
                 </div>
@@ -161,15 +161,15 @@ export default function WorkoutsPage() {
             </div>
           )
         ) : (
-          <div className="rounded-3xl border border-[#262626] bg-[#131313] p-6 text-sm text-[#ADAAAA]">
-            Todavía no tenés rutinas creadas. Creá una nueva para empezar a entrenar.
+          <div className="rounded-3xl border border-[#203347] bg-[#13263A] p-6 text-sm text-[#9BAEC1]">
+            TodavÃ­a no tenÃ©s rutinas creadas. CreÃ¡ una nueva para empezar a entrenar.
           </div>
         )}
 
         <div className="flex items-center justify-between">
           <span className="text-xl font-bold tracking-tight text-white">Cambiar rutina</span>
           <span
-            className="rounded-full border border-[rgba(18,239,211,0.18)] bg-[rgba(18,239,211,0.08)] px-3 py-1 text-xs font-semibold uppercase tracking-widest text-[#12EFD3]"
+            className="rounded-full border border-[rgba(0,201,167,0.18)] bg-[rgba(0,201,167,0.08)] px-3 py-1 text-xs font-semibold uppercase tracking-widest text-[#00C9A7]"
             style={{ fontFamily: "'Inter', sans-serif" }}
           >
             {routines.length} disponibles
@@ -186,8 +186,8 @@ export default function WorkoutsPage() {
                 onClick={() => navigate(`/routine/${routine.id}`)}
                 className={`relative w-full overflow-hidden rounded-2xl text-left transition-colors active:bg-[#1a1a1a] ${
                   isActive
-                    ? 'border border-[rgba(18,239,211,0.18)] bg-[rgba(18,239,211,0.06)]'
-                    : 'border border-[#262626] bg-[#131313]'
+                    ? 'border border-[rgba(0,201,167,0.18)] bg-[rgba(0,201,167,0.06)]'
+                    : 'border border-[#203347] bg-[#13263A]'
                 }`}
                 style={{ boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }}
               >
@@ -202,7 +202,7 @@ export default function WorkoutsPage() {
                       <div className="flex flex-wrap items-center gap-2">
                         <h3 className="text-lg font-bold leading-tight text-white">{routine.name}</h3>
                         {isActive && (
-                          <span className="rounded-full bg-[rgba(18,239,211,0.12)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-widest text-[#12EFD3]">
+                          <span className="rounded-full bg-[rgba(0,201,167,0.12)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-widest text-[#00C9A7]">
                             Activa
                           </span>
                         )}
@@ -211,7 +211,7 @@ export default function WorkoutsPage() {
                         className="mt-1 text-[10px] font-semibold uppercase tracking-wider text-white/60"
                         style={{ fontFamily: "'Inter', sans-serif" }}
                       >
-                        {routine.daysPerWeek} días / semana
+                        {routine.daysPerWeek} dÃ­as / semana
                       </p>
                     </div>
                     <div className="-mr-1 flex items-center gap-1">
@@ -252,7 +252,7 @@ export default function WorkoutsPage() {
                           >
                             {name}
                           </span>
-                          <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-[#262626]">
+                          <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-[#203347]">
                             <div
                               className="h-full rounded-full"
                               style={{
@@ -277,7 +277,7 @@ export default function WorkoutsPage() {
                         {routine.tags?.map((tag) => (
                           <span
                             key={tag}
-                            className="rounded-lg bg-[#262626] px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider text-[#777575]"
+                            className="rounded-lg bg-[#203347] px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider text-[#777575]"
                           >
                             {tag}
                           </span>
@@ -293,7 +293,7 @@ export default function WorkoutsPage() {
                   )}
 
                   <div className="flex items-center justify-between gap-3">
-                    <p className="text-xs text-[#A1A1A1]" style={{ fontFamily: "'Inter', sans-serif" }}>
+                    <p className="text-xs text-[#90A4B8]" style={{ fontFamily: "'Inter', sans-serif" }}>
                       {routine.days.length} entrenamientos disponibles
                     </p>
                     <button
@@ -301,8 +301,8 @@ export default function WorkoutsPage() {
                       disabled={isActive || switchingRoutineId === routine.id}
                       className={`rounded-full px-4 py-2 text-[10px] font-semibold uppercase tracking-widest transition-colors disabled:opacity-60 ${
                         isActive
-                          ? 'border border-[rgba(18,239,211,0.18)] bg-[rgba(18,239,211,0.1)] text-[#12EFD3]'
-                          : 'bg-[#12EFD3] text-black active:bg-[#0DBDA7]'
+                          ? 'border border-[rgba(0,201,167,0.18)] bg-[rgba(0,201,167,0.1)] text-[#00C9A7]'
+                          : 'bg-[#00C9A7] text-black active:bg-[#009F86]'
                       }`}
                       type="button"
                     >
@@ -323,10 +323,10 @@ export default function WorkoutsPage() {
       {deleteId !== null && (
         <div className="absolute inset-0 z-50 flex items-center justify-center px-6">
           <div className="absolute inset-0 bg-black/70" onClick={() => setDeleteId(null)} />
-          <div className="relative w-full rounded-3xl p-6" style={{ background: '#1C2030' }}>
+          <div className="relative w-full rounded-3xl p-6" style={{ background: '#1A2D42' }}>
             <h3 className="mb-2 text-center text-xl font-bold text-white">Eliminar rutina</h3>
-            <p className="mb-6 text-center text-sm text-[#ADAAAA]" style={{ fontFamily: "'Inter', sans-serif" }}>
-              Esta acción no se puede deshacer. ¿Estás seguro?
+            <p className="mb-6 text-center text-sm text-[#9BAEC1]" style={{ fontFamily: "'Inter', sans-serif" }}>
+              Esta acciÃ³n no se puede deshacer. Â¿EstÃ¡s seguro?
             </p>
             <div className="flex flex-col gap-3">
               <button
@@ -339,7 +339,7 @@ export default function WorkoutsPage() {
               </button>
               <button
                 onClick={() => setDeleteId(null)}
-                className="w-full rounded-2xl bg-[#262626] py-4 font-semibold text-white"
+                className="w-full rounded-2xl bg-[#203347] py-4 font-semibold text-white"
                 type="button"
               >
                 Cancelar

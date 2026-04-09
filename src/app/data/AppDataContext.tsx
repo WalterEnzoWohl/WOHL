@@ -60,18 +60,18 @@ const DEFAULT_APP_CONTEXT: AppContext = {
   activeRoutineId: DEFAULT_ROUTINES[0]?.id ?? null,
   currentDayName: DEFAULT_ROUTINES[0]?.days[0]?.name ?? '',
   nextDayName: DEFAULT_ROUTINES[0]?.days[1]?.name ?? '',
-  nextDayLabel: 'Próximo',
+  nextDayLabel: 'PrÃ³ximo',
   streakDays: 0,
 };
 
 const AppDataContext = createContext<AppDataContextValue | null>(null);
 
 function getActiveWorkoutStorageKey(userId: string) {
-  return `gymup.activeWorkout.${userId}`;
+  return `wohl.activeWorkout.${userId}`;
 }
 
 function getAppSettingsStorageKey(userId: string) {
-  return `gymup.appSettings.${userId}`;
+  return `wohl.appSettings.${userId}`;
 }
 
 function readActiveWorkout(userId: string): ActiveWorkoutDraft | null {

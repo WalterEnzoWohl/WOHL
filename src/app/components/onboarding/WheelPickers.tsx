@@ -108,7 +108,7 @@ function WheelColumn({ active, value, options, onChange, align = 'center' }: Whe
               >
                 <span
                   className={`block truncate tracking-tight transition-all duration-150 ${
-                    selected ? 'text-[2rem] font-black text-[#12EFD3]' : 'text-[1.2rem] font-semibold opacity-70'
+                    selected ? 'text-[2rem] font-black text-[#00C9A7]' : 'text-[1.2rem] font-semibold opacity-70'
                   }`}
                 >
                   {option.label}
@@ -169,7 +169,7 @@ export function BaseWheelPicker({
             </div>
 
             <div className="relative overflow-hidden rounded-[28px] border border-[rgba(255,255,255,0.07)] bg-[linear-gradient(180deg,rgba(255,255,255,0.02)_0%,rgba(255,255,255,0.01)_100%)] px-3 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
-              <div className="pointer-events-none absolute inset-x-3 top-1/2 z-10 h-[58px] -translate-y-1/2 rounded-[18px] border-y border-[rgba(18,239,211,0.92)] bg-[linear-gradient(180deg,rgba(18,239,211,0.08)_0%,rgba(18,239,211,0.04)_100%)] shadow-[0_0_0_1px_rgba(18,239,211,0.08),0_0_24px_rgba(18,239,211,0.08)]" />
+              <div className="pointer-events-none absolute inset-x-3 top-1/2 z-10 h-[58px] -translate-y-1/2 rounded-[18px] border-y border-[rgba(0,201,167,0.92)] bg-[linear-gradient(180deg,rgba(0,201,167,0.08)_0%,rgba(0,201,167,0.04)_100%)] shadow-[0_0_0_1px_rgba(0,201,167,0.08),0_0_24px_rgba(0,201,167,0.08)]" />
               <div className="pointer-events-none absolute inset-x-0 top-0 z-10 h-16 bg-[linear-gradient(180deg,#0B101B_0%,rgba(11,16,27,0)_100%)]" />
               <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-16 bg-[linear-gradient(0deg,#0B101B_0%,rgba(11,16,27,0)_100%)]" />
               {children}
@@ -186,7 +186,7 @@ export function BaseWheelPicker({
               <button
                 type="button"
                 onClick={onConfirm}
-                className="flex-1 rounded-[22px] border border-[rgba(18,239,211,0.3)] bg-[linear-gradient(180deg,#10E6C9_0%,#0DC5AA_100%)] py-4 text-base font-extrabold text-[#041016] shadow-[0_16px_30px_rgba(18,239,211,0.2)] transition-transform active:scale-[0.99]"
+                className="flex-1 rounded-[22px] border border-[rgba(0,201,167,0.3)] bg-[linear-gradient(180deg,#10E6C9_0%,#0DC5AA_100%)] py-4 text-base font-extrabold text-[#041016] shadow-[0_16px_30px_rgba(0,201,167,0.2)] transition-transform active:scale-[0.99]"
               >
                 {confirmLabel}
               </button>
@@ -356,7 +356,7 @@ export function NumberWheelPicker({
         ) : null}
 
         {unitLabel ? (
-          <div className="flex h-full items-center justify-center pt-[3px] text-xl font-bold uppercase tracking-[0.16em] text-[#12EFD3]">
+          <div className="flex h-full items-center justify-center pt-[3px] text-xl font-bold uppercase tracking-[0.16em] text-[#00C9A7]">
             {unitLabel}
           </div>
         ) : null}

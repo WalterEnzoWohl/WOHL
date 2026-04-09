@@ -102,32 +102,32 @@ export default function HistoryPage() {
 
       <div className="flex flex-col gap-5 px-5 py-5 pb-6">
         <div className="grid grid-cols-3 gap-3">
-          <div className="rounded-xl border border-[#262626] bg-[#131313] p-4">
+          <div className="rounded-xl border border-[#203347] bg-[#13263A] p-4">
             <div className="mb-2 flex items-center gap-2">
-              <TrendingUp size={12} className="text-[#12EFD3]" />
-              <p className="text-[10px] uppercase tracking-widest text-[#ADAAAA]">Volumen</p>
+              <TrendingUp size={12} className="text-[#00C9A7]" />
+              <p className="text-[10px] uppercase tracking-widest text-[#9BAEC1]">Volumen</p>
             </div>
             <div className="flex items-baseline gap-1">
               <span className="text-xl font-bold text-white">{formatCompactWeight(totalVolume, appSettings.weightUnit)}</span>
             </div>
           </div>
-          <div className="rounded-xl border border-[#262626] bg-[#131313] p-4">
+          <div className="rounded-xl border border-[#203347] bg-[#13263A] p-4">
             <div className="mb-2 flex items-center gap-2">
-              <Clock size={12} className="text-[#12EFD3]" />
-              <p className="text-[10px] uppercase tracking-widest text-[#ADAAAA]">Tiempo</p>
+              <Clock size={12} className="text-[#00C9A7]" />
+              <p className="text-[10px] uppercase tracking-widest text-[#9BAEC1]">Tiempo</p>
             </div>
             <div className="flex items-baseline gap-1">
               <span className="text-xl font-bold text-white">{(totalTime / 60).toFixed(1)}h</span>
             </div>
           </div>
-          <div className="rounded-xl border border-[#262626] bg-[#131313] p-4">
+          <div className="rounded-xl border border-[#203347] bg-[#13263A] p-4">
             <div className="mb-2 flex items-center gap-2">
-              <Filter size={12} className="text-[#12EFD3]" />
-              <p className="text-[10px] uppercase tracking-widest text-[#ADAAAA]">RPE prom.</p>
+              <Filter size={12} className="text-[#00C9A7]" />
+              <p className="text-[10px] uppercase tracking-widest text-[#9BAEC1]">RPE prom.</p>
             </div>
             <div className="flex items-baseline gap-1">
               <span className="text-xl font-bold text-white">{avgRpe}</span>
-              <span className="text-xs italic text-[#ADAAAA]">/ 10</span>
+              <span className="text-xs italic text-[#9BAEC1]">/ 10</span>
             </div>
           </div>
         </div>
@@ -139,8 +139,8 @@ export default function HistoryPage() {
               onClick={() => setSelectedMonth(monthKey)}
               className={`flex-shrink-0 whitespace-nowrap rounded-full px-4 py-2 text-xs font-bold transition-all ${
                 selectedMonth === monthKey
-                  ? 'bg-[#12EFD3] text-black'
-                  : 'border border-[#262626] bg-[#1C2030] text-[#ADAAAA]'
+                  ? 'bg-[#00C9A7] text-black'
+                  : 'border border-[#203347] bg-[#1A2D42] text-[#9BAEC1]'
               }`}
             >
               {monthLabels[monthKey] ?? monthKey}
@@ -150,9 +150,9 @@ export default function HistoryPage() {
 
         <div>
           <div className="mb-2 flex items-center gap-2">
-            <Filter size={12} className="text-[#ADAAAA]" />
-            <span className="text-xs font-semibold uppercase tracking-widest text-[#ADAAAA]">
-              Filtrar por músculo
+            <Filter size={12} className="text-[#9BAEC1]" />
+            <span className="text-xs font-semibold uppercase tracking-widest text-[#9BAEC1]">
+              Filtrar por mÃºsculo
             </span>
           </div>
           <div className="flex gap-2 overflow-x-auto pb-1">
@@ -161,7 +161,7 @@ export default function HistoryPage() {
                 key={muscle}
                 onClick={() => setSelectedMuscle(muscle)}
                 className={`flex-shrink-0 whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-semibold transition-all ${
-                  selectedMuscle === muscle ? 'bg-[#12EFD3] text-black' : 'bg-[#262626] text-[#ADAAAA]'
+                  selectedMuscle === muscle ? 'bg-[#00C9A7] text-black' : 'bg-[#203347] text-[#9BAEC1]'
                 }`}
               >
                 {muscle}
@@ -172,8 +172,8 @@ export default function HistoryPage() {
 
         <div className="flex flex-col gap-3">
           {filtered.length === 0 ? (
-            <div className="rounded-2xl border border-[#262626] bg-[#131313] p-6 text-center">
-              <p className="text-sm text-[#ADAAAA]">No hay sesiones que coincidan con el filtro.</p>
+            <div className="rounded-2xl border border-[#203347] bg-[#13263A] p-6 text-center">
+              <p className="text-sm text-[#9BAEC1]">No hay sesiones que coincidan con el filtro.</p>
             </div>
           ) : (
             filtered.map((session) => {
@@ -185,25 +185,25 @@ export default function HistoryPage() {
               return (
                 <div
                   key={session.id}
-                  className="flex items-center gap-3 rounded-2xl border border-[#262626] bg-[#131313] px-4 py-4 transition-colors active:bg-[#1a1a1a]"
+                  className="flex items-center gap-3 rounded-2xl border border-[#203347] bg-[#13263A] px-4 py-4 transition-colors active:bg-[#1a1a1a]"
                 >
                   <button
                     onClick={() => navigate(`/session-history/${session.id}`)}
                     className="flex min-w-0 flex-1 items-center gap-4 text-left"
                     type="button"
                   >
-                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl border border-[rgba(18,239,211,0.2)] bg-[rgba(18,239,211,0.1)]">
-                      <TrendingUp size={16} className="text-[#12EFD3]" />
+                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl border border-[rgba(0,201,167,0.2)] bg-[rgba(0,201,167,0.1)]">
+                      <TrendingUp size={16} className="text-[#00C9A7]" />
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-semibold text-white">{session.name}</p>
-                      <p className="mt-0.5 text-xs text-[#ADAAAA]" style={{ fontFamily: "'Inter', sans-serif" }}>
+                      <p className="mt-0.5 text-xs text-[#9BAEC1]" style={{ fontFamily: "'Inter', sans-serif" }}>
                         {session.date} - {session.duration} min - {session.muscle}
                       </p>
                     </div>
                     <div className="text-right">
-                      <span className="block text-sm font-bold text-[#12EFD3]">{session.kcal} kcal</span>
-                      <span className="text-xs text-[#ADAAAA]">
+                      <span className="block text-sm font-bold text-[#00C9A7]">{session.kcal} kcal</span>
+                      <span className="text-xs text-[#9BAEC1]">
                         {formatCompactWeight(session.volume, appSettings.weightUnit)}
                         {deltaText ? ` - ${deltaText}` : ''}
                       </span>
@@ -228,9 +228,9 @@ export default function HistoryPage() {
       {blockedSessionId !== null && activeWorkout && (
         <ActiveWorkoutEditLockModal
           activeWorkoutName={activeWorkout.sessionName}
-          eyebrow="Edición bloqueada"
-          title="No podés editar este entrenamiento ahora"
-          description="Ya tenés un entrenamiento en curso. Para evitar inconsistencias entre esa sesión activa y tu historial, primero volvé a entrenar o cerrá esa sesión."
+          eyebrow="EdiciÃ³n bloqueada"
+          title="No podÃ©s editar este entrenamiento ahora"
+          description="Ya tenÃ©s un entrenamiento en curso. Para evitar inconsistencias entre esa sesiÃ³n activa y tu historial, primero volvÃ© a entrenar o cerrÃ¡ esa sesiÃ³n."
           subjectLabel="Entrenamiento activo"
           onResume={() => navigate('/session')}
           onFinish={() => navigate('/session', { state: { action: 'finish' } })}

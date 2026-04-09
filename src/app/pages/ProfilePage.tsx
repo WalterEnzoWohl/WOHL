@@ -169,7 +169,7 @@ export default function ProfilePage() {
       setShowAvatarEditor(true);
     };
     image.onerror = () => {
-      setAvatarError('No pudimos abrir esa imagen. Probá con otra foto.');
+      setAvatarError('No pudimos abrir esa imagen. ProbÃ¡ con otra foto.');
     };
     image.src = src;
   };
@@ -183,7 +183,7 @@ export default function ProfilePage() {
     }
 
     if (!file.type.startsWith('image/')) {
-      setAvatarError('Elegí un archivo de imagen válido.');
+      setAvatarError('ElegÃ­ un archivo de imagen vÃ¡lido.');
       return;
     }
 
@@ -194,7 +194,7 @@ export default function ProfilePage() {
       }
     };
     reader.onerror = () => {
-      setAvatarError('No pudimos leer esa imagen. Probá de nuevo.');
+      setAvatarError('No pudimos leer esa imagen. ProbÃ¡ de nuevo.');
     };
     reader.readAsDataURL(file);
   };
@@ -406,7 +406,7 @@ export default function ProfilePage() {
 
       await new Promise<void>((resolve, reject) => {
         image.onload = () => resolve();
-        image.onerror = () => reject(new Error('No pudimos guardar la imagen. Probá otra vez.'));
+        image.onerror = () => reject(new Error('No pudimos guardar la imagen. ProbÃ¡ otra vez.'));
         image.src = pendingAvatar.src;
       });
 
@@ -449,7 +449,7 @@ export default function ProfilePage() {
       await updateProfileAvatar(avatarBlob);
       closeAvatarEditor();
     } catch {
-      setAvatarError('No pudimos guardar la imagen. Probá otra vez.');
+      setAvatarError('No pudimos guardar la imagen. ProbÃ¡ otra vez.');
       setIsSavingAvatar(false);
     }
   };
@@ -461,17 +461,17 @@ export default function ProfilePage() {
           <div className="flex items-center gap-2">
             <button
               onClick={() => navigate('/config')}
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-[rgba(18,239,211,0.22)] bg-[#131313] transition-colors hover:bg-white/5"
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-[rgba(0,201,167,0.22)] bg-[#13263A] transition-colors hover:bg-white/5"
               aria-label="Ir a ajustes"
             >
-              <Settings size={16} className="text-[#12EFD3]" />
+              <Settings size={16} className="text-[#00C9A7]" />
             </button>
             <button
               onClick={() => navigate('/profile/edit')}
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-[rgba(18,239,211,0.22)] bg-[#131313] transition-colors hover:bg-white/5"
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-[rgba(0,201,167,0.22)] bg-[#13263A] transition-colors hover:bg-white/5"
               aria-label="Editar perfil"
             >
-              <Pencil size={16} className="text-[#12EFD3]" />
+              <Pencil size={16} className="text-[#00C9A7]" />
             </button>
           </div>
         }
@@ -481,11 +481,11 @@ export default function ProfilePage() {
         <div className="relative overflow-hidden rounded-2xl">
           <div className="flex items-start justify-between gap-4 pt-4 pb-5">
             <div className="flex min-w-0 flex-1 flex-col gap-1 pr-2">
-              <span className="text-[10px] font-bold uppercase tracking-widest text-[#12EFD3]">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-[#00C9A7]">
                 {userProfile.trainingLevel}
               </span>
               <h1 className="text-4xl font-extrabold tracking-tight text-white">{userProfile.fullName}</h1>
-              <p className="text-sm text-[#ADAAAA]" style={{ fontFamily: "'Inter', sans-serif" }}>
+              <p className="text-sm text-[#9BAEC1]" style={{ fontFamily: "'Inter', sans-serif" }}>
                 Miembro desde {userProfile.memberSince}
               </p>
             </div>
@@ -493,16 +493,16 @@ export default function ProfilePage() {
               <div className="relative h-[104px] w-[104px]">
                 <UserAvatar
                   alt={userProfile.fullName}
-                  className="h-full w-full overflow-hidden rounded-full border-2 border-[rgba(18,239,211,0.35)] bg-[#1C2030] shadow-[0_0_28px_rgba(18,239,211,0.18)]"
+                  className="h-full w-full overflow-hidden rounded-full border-2 border-[rgba(0,201,167,0.35)] bg-[#1A2D42] shadow-[0_0_28px_rgba(0,201,167,0.18)]"
                   imageClassName="theme-preserve h-full w-full object-cover"
                 />
                 <button
                   onClick={() => fileInputRef.current?.click()}
-                  className="absolute bottom-1 right-1 flex h-8 w-8 items-center justify-center rounded-full border border-[rgba(18,239,211,0.32)] bg-[#0E0E0E] shadow-[0_0_12px_rgba(18,239,211,0.18)] transition-colors active:bg-[#1C2030]"
+                  className="absolute bottom-1 right-1 flex h-8 w-8 items-center justify-center rounded-full border border-[rgba(0,201,167,0.32)] bg-[#0B1F33] shadow-[0_0_12px_rgba(0,201,167,0.18)] transition-colors active:bg-[#1A2D42]"
                   type="button"
                   aria-label="Cambiar foto de perfil"
                 >
-                  <Camera size={14} className="text-[#12EFD3]" />
+                  <Camera size={14} className="text-[#00C9A7]" />
                 </button>
                 <input
                   ref={fileInputRef}
@@ -524,58 +524,58 @@ export default function ProfilePage() {
               unit: weightUnitLabel,
             },
             { label: 'ALTURA', value: userProfile.heightCm.toString(), unit: 'cm' },
-            { label: 'EDAD', value: userProfile.age.toString(), unit: 'años' },
+            { label: 'EDAD', value: userProfile.age.toString(), unit: 'aÃ±os' },
           ].map(({ label, value, unit }) => (
-            <div key={label} className="rounded-xl border border-[rgba(255,255,255,0.05)] bg-[#131313] p-4">
+            <div key={label} className="rounded-xl border border-[rgba(255,255,255,0.05)] bg-[#13263A] p-4">
               <p
-                className="mb-2 text-[10px] font-bold uppercase tracking-widest text-[#ADAAAA]"
+                className="mb-2 text-[10px] font-bold uppercase tracking-widest text-[#9BAEC1]"
                 style={{ fontFamily: "'Inter', sans-serif" }}
               >
                 {label}
               </p>
               <div className="flex items-baseline gap-1">
                 <span className="text-2xl font-extrabold text-white">{value}</span>
-                <span className="text-sm font-bold text-[#12EFD3]">{unit}</span>
+                <span className="text-sm font-bold text-[#00C9A7]">{unit}</span>
               </div>
             </div>
           ))}
         </div>
 
         <div className="grid grid-cols-2 gap-3">
-          <div className="rounded-xl bg-[#262626] p-4">
-            <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-[#ADAAAA]">
+          <div className="rounded-xl bg-[#203347] p-4">
+            <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-[#9BAEC1]">
               Actividad
             </p>
             <div className="flex items-center gap-2">
-              <Flame size={16} className="text-[#12EFD3]" />
+              <Flame size={16} className="text-[#00C9A7]" />
               <div>
                 <span className="block text-lg font-bold text-white">{userProfile.activityLevel}</span>
-                <span className="text-xs text-[#12EFD3]">Factor {userProfile.activityFactor}</span>
+                <span className="text-xs text-[#00C9A7]">Factor {userProfile.activityFactor}</span>
               </div>
             </div>
           </div>
           <button
             onClick={() => setShowObjectiveModal(true)}
-            className="rounded-xl border border-[rgba(18,239,211,0.2)] bg-[#005147] p-4 text-left transition-colors active:bg-[#006257]"
+            className="rounded-xl border border-[rgba(0,201,167,0.2)] bg-[#005147] p-4 text-left transition-colors active:bg-[#006257]"
           >
-            <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-[#12EFD3]">Objetivo</p>
+            <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-[#00C9A7]">Objetivo</p>
             <span className="text-lg font-extrabold text-white">{userProfile.goal}</span>
           </button>
         </div>
 
-        <div className="rounded-2xl border border-[rgba(255,255,255,0.05)] bg-[#131313] p-4">
+        <div className="rounded-2xl border border-[rgba(255,255,255,0.05)] bg-[#13263A] p-4">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-[#12EFD3]">
+              <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-[#00C9A7]">
                 Calorias recomendadas para {nutritionTargets.goalTitle}
               </p>
               <p className="text-sm leading-6 text-white" style={{ fontFamily: "'Inter', sans-serif" }}>
                 Estimado con Harris-Benedict y tu factor de actividad {userProfile.activityFactor}. Tu mantenimiento ronda las {nutritionTargets.maintenanceCalories} kcal.
               </p>
             </div>
-            <div className="rounded-2xl border border-[rgba(18,239,211,0.18)] bg-[rgba(18,239,211,0.1)] px-4 py-3 text-right">
+            <div className="rounded-2xl border border-[rgba(0,201,167,0.18)] bg-[rgba(0,201,167,0.1)] px-4 py-3 text-right">
               <span className="block text-2xl font-extrabold text-white">{nutritionTargets.targetCalories}</span>
-              <span className="text-xs font-bold uppercase tracking-widest text-[#12EFD3]">kcal</span>
+              <span className="text-xs font-bold uppercase tracking-widest text-[#00C9A7]">kcal</span>
             </div>
           </div>
 
@@ -585,11 +585,11 @@ export default function ProfilePage() {
               { label: 'Carbos', value: nutritionTargets.carbGrams, unit: 'g' },
               { label: 'Grasas', value: nutritionTargets.fatGrams, unit: 'g' },
             ].map(({ label, value, unit }) => (
-              <div key={label} className="rounded-xl bg-[#1C2030] px-3 py-3">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-[#ADAAAA]">{label}</p>
+              <div key={label} className="rounded-xl bg-[#1A2D42] px-3 py-3">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-[#9BAEC1]">{label}</p>
                 <div className="mt-2 flex items-baseline gap-1">
                   <span className="text-xl font-extrabold text-white">{value}</span>
-                  <span className="text-xs font-bold text-[#12EFD3]">{unit}</span>
+                  <span className="text-xs font-bold text-[#00C9A7]">{unit}</span>
                 </div>
               </div>
             ))}
@@ -598,7 +598,7 @@ export default function ProfilePage() {
 
         <div className="flex flex-col gap-4">
           <h2 className="text-2xl font-bold tracking-tight text-white">Progreso mensual</h2>
-          <div className="rounded-2xl border border-[rgba(255,255,255,0.05)] bg-[#131313] p-6">
+          <div className="rounded-2xl border border-[rgba(255,255,255,0.05)] bg-[#13263A] p-6">
             <div className="flex flex-col gap-5">
               {monthlyMuscleProgress.map((muscleGroup) => (
                 <button
@@ -608,23 +608,23 @@ export default function ProfilePage() {
                 >
                   <div className="flex items-center justify-between">
                     <span
-                      className="text-xs font-semibold uppercase tracking-widest text-[#ADAAAA]"
+                      className="text-xs font-semibold uppercase tracking-widest text-[#9BAEC1]"
                       style={{ fontFamily: "'Inter', sans-serif" }}
                     >
                       {muscleGroup.name}
                     </span>
-                    <span className="text-base font-bold text-[#12EFD3]">Niv. {muscleGroup.level}</span>
+                    <span className="text-base font-bold text-[#00C9A7]">Niv. {muscleGroup.level}</span>
                   </div>
-                  <div className="h-2 overflow-hidden rounded-full bg-[#262626]">
+                  <div className="h-2 overflow-hidden rounded-full bg-[#203347]">
                     <div
                       className="h-full rounded-full"
                       style={{
                         width: `${muscleGroup.progressPercent}%`,
-                        background: 'linear-gradient(135deg, #12EFD3 0%, #00A894 100%)',
+                        background: 'linear-gradient(135deg, #00C9A7 0%, #00A894 100%)',
                       }}
                     />
                   </div>
-                  <span className="text-[10px] font-medium text-[#ADAAAA]" style={{ fontFamily: "'Inter', sans-serif" }}>
+                  <span className="text-[10px] font-medium text-[#9BAEC1]" style={{ fontFamily: "'Inter', sans-serif" }}>
                     {muscleGroup.monthlyDirectCount} ejercicios directos este mes
                   </span>
                 </button>
@@ -638,7 +638,7 @@ export default function ProfilePage() {
             <h2 className="text-2xl font-bold tracking-tight text-white">Historial de sesiones</h2>
             <button
               onClick={() => navigate('/history')}
-              className="text-[10px] font-bold uppercase tracking-widest text-[#12EFD3]"
+              className="text-[10px] font-bold uppercase tracking-widest text-[#00C9A7]"
             >
               Ver todo
             </button>
@@ -655,15 +655,15 @@ export default function ProfilePage() {
                   onClick={() => setSelectedDate(isoDate)}
                   className={`flex min-w-[3.5rem] flex-1 flex-col items-center gap-1 rounded-xl py-2 transition-all ${
                     isSelected
-                      ? 'bg-[#12EFD3]'
+                      ? 'bg-[#00C9A7]'
                       : hasSession
-                      ? 'border border-[rgba(18,239,211,0.3)] bg-[#262626]'
-                      : 'border border-[rgba(255,255,255,0.05)] bg-[#131313]'
+                      ? 'border border-[rgba(0,201,167,0.3)] bg-[#203347]'
+                      : 'border border-[rgba(255,255,255,0.05)] bg-[#13263A]'
                   }`}
                 >
                   <span
                     className={`text-[9px] font-bold uppercase tracking-wider ${
-                      isSelected ? 'text-black' : 'text-[#ADAAAA]'
+                      isSelected ? 'text-black' : 'text-[#9BAEC1]'
                     }`}
                   >
                     {day}
@@ -671,7 +671,7 @@ export default function ProfilePage() {
                   <span className={`text-base font-extrabold ${isSelected ? 'text-black' : 'text-white'}`}>
                     {num}
                   </span>
-                  {hasSession && !isSelected && <div className="h-1 w-1 rounded-full bg-[#12EFD3]" />}
+                  {hasSession && !isSelected && <div className="h-1 w-1 rounded-full bg-[#00C9A7]" />}
                 </button>
               );
             })}
@@ -683,26 +683,26 @@ export default function ProfilePage() {
                 <button
                   key={session.id}
                   onClick={() => navigate(`/session-history/${session.id}`)}
-                  className="flex w-full items-center gap-4 rounded-2xl border border-[rgba(255,255,255,0.05)] bg-[#131313] px-5 py-4 text-left transition-colors active:bg-[#1a1a1a]"
+                  className="flex w-full items-center gap-4 rounded-2xl border border-[rgba(255,255,255,0.05)] bg-[#13263A] px-5 py-4 text-left transition-colors active:bg-[#1a1a1a]"
                 >
-                  <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl border border-[rgba(18,239,211,0.2)] bg-[rgba(18,239,211,0.1)]">
-                    <svg width="18" height="18" viewBox="0 0 18 18" fill="#12EFD3">
-                      <path d="M3 9h12M9 3v12" stroke="#12EFD3" strokeWidth="2" strokeLinecap="round" fill="none" />
+                  <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl border border-[rgba(0,201,167,0.2)] bg-[rgba(0,201,167,0.1)]">
+                    <svg width="18" height="18" viewBox="0 0 18 18" fill="#00C9A7">
+                      <path d="M3 9h12M9 3v12" stroke="#00C9A7" strokeWidth="2" strokeLinecap="round" fill="none" />
                     </svg>
                   </div>
                   <div className="flex-1">
                     <p className="text-sm font-semibold text-white">{session.name}</p>
-                    <p className="mt-0.5 text-xs text-[#ADAAAA]" style={{ fontFamily: "'Inter', sans-serif" }}>
+                    <p className="mt-0.5 text-xs text-[#9BAEC1]" style={{ fontFamily: "'Inter', sans-serif" }}>
                       {session.date} - {session.duration} min - {session.muscle}
                     </p>
                   </div>
-                  <span className="text-sm font-bold text-[#12EFD3]">{session.kcal} kcal</span>
+                  <span className="text-sm font-bold text-[#00C9A7]">{session.kcal} kcal</span>
                 </button>
               ))
             ) : (
-              <div className="rounded-2xl border border-[rgba(255,255,255,0.05)] bg-[#131313] p-5">
-                <p className="text-center text-sm text-[#ADAAAA]" style={{ fontFamily: "'Inter', sans-serif" }}>
-                  No hay sesiones registradas para ese día.
+              <div className="rounded-2xl border border-[rgba(255,255,255,0.05)] bg-[#13263A] p-5">
+                <p className="text-center text-sm text-[#9BAEC1]" style={{ fontFamily: "'Inter', sans-serif" }}>
+                  No hay sesiones registradas para ese dÃ­a.
                 </p>
               </div>
             )}
@@ -711,10 +711,10 @@ export default function ProfilePage() {
 
         <div className="flex flex-col gap-4 pb-2">
           <h2 className="text-2xl font-bold tracking-tight text-white">Configuracion</h2>
-          <div className="overflow-hidden rounded-2xl border border-[rgba(255,255,255,0.05)] bg-[#131313]">
+          <div className="overflow-hidden rounded-2xl border border-[rgba(255,255,255,0.05)] bg-[#13263A]">
             {[
-              { label: 'Ajustes de cuenta', icon: <Settings size={18} className="text-[#12EFD3]" />, path: '/config' },
-              { label: 'Notificaciones', icon: <Bell size={18} className="text-[#12EFD3]" />, path: '/config' },
+              { label: 'Ajustes de cuenta', icon: <Settings size={18} className="text-[#00C9A7]" />, path: '/config' },
+              { label: 'Notificaciones', icon: <Bell size={18} className="text-[#00C9A7]" />, path: '/config' },
             ].map(({ label, icon, path }) => (
               <button
                 key={label}
@@ -722,12 +722,12 @@ export default function ProfilePage() {
                 className="flex w-full items-center justify-between border-b border-[rgba(255,255,255,0.05)] px-4 py-4 transition-colors last:border-b-0 hover:bg-white/5"
               >
                 <div className="flex items-center gap-4">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#262626]">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#203347]">
                     {icon}
                   </div>
                   <span className="text-base font-medium text-white">{label}</span>
                 </div>
-                <ChevronRight size={16} className="text-[#ADAAAA]" />
+                <ChevronRight size={16} className="text-[#9BAEC1]" />
               </button>
             ))}
             <button
@@ -738,7 +738,7 @@ export default function ProfilePage() {
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[rgba(229,57,53,0.1)]">
                   <LogOut size={18} className="text-[#E53935]" />
                 </div>
-                <span className="text-base font-medium text-[#E53935]">Cerrar sesión</span>
+                <span className="text-base font-medium text-[#E53935]">Cerrar sesiÃ³n</span>
               </div>
             </button>
           </div>
@@ -748,11 +748,11 @@ export default function ProfilePage() {
       {showObjectiveModal && (
         <div className="absolute inset-0 z-50 flex items-center justify-center px-3 py-6 sm:px-6">
           <div className="absolute inset-0 bg-black/70" onClick={() => setShowObjectiveModal(false)} />
-          <div className="relative w-full rounded-3xl p-6" style={{ background: '#1C2030' }}>
+          <div className="relative w-full rounded-3xl p-6" style={{ background: '#1A2D42' }}>
             <div className="mb-5 flex items-center justify-between">
               <h3 className="text-xl font-bold text-white">Cambiar objetivo</h3>
               <button onClick={() => setShowObjectiveModal(false)}>
-                <X size={20} className="text-[#ADAAAA]" />
+                <X size={20} className="text-[#9BAEC1]" />
               </button>
             </div>
             <div className="grid grid-cols-2 gap-2">
@@ -765,8 +765,8 @@ export default function ProfilePage() {
                   }}
                   className={`flex items-center justify-between rounded-2xl px-4 py-4 text-left transition-all ${
                     userProfile.goal === objective
-                      ? 'bg-[#12EFD3] text-black'
-                      : 'bg-[#262626] text-white hover:bg-[#333]'
+                      ? 'bg-[#00C9A7] text-black'
+                      : 'bg-[#203347] text-white hover:bg-[#333]'
                   }`}
                 >
                   <span className="text-sm font-bold uppercase tracking-widest">{objective}</span>
@@ -780,10 +780,10 @@ export default function ProfilePage() {
       {showLogoutModal && (
         <div className="absolute inset-0 z-50 flex items-center justify-center px-3 py-6 sm:px-6">
           <div className="absolute inset-0 bg-black/70" onClick={() => setShowLogoutModal(false)} />
-          <div className="relative w-full rounded-3xl p-6" style={{ background: '#1C2030' }}>
-            <h3 className="mb-2 text-center text-xl font-bold text-white">Cerrar sesión</h3>
-            <p className="mb-6 text-center text-sm text-[#ADAAAA]" style={{ fontFamily: "'Inter', sans-serif" }}>
-              Vas a salir de tu cuenta de GYMUP en este dispositivo.
+          <div className="relative w-full rounded-3xl p-6" style={{ background: '#1A2D42' }}>
+            <h3 className="mb-2 text-center text-xl font-bold text-white">Cerrar sesiÃ³n</h3>
+            <p className="mb-6 text-center text-sm text-[#9BAEC1]" style={{ fontFamily: "'Inter', sans-serif" }}>
+              Vas a salir de tu cuenta de WOHL en este dispositivo.
             </p>
             <div className="flex flex-col gap-3">
               <button
@@ -791,11 +791,11 @@ export default function ProfilePage() {
                 className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#E53935] py-4 font-bold text-white"
               >
                 <LogOut size={16} />
-                Cerrar sesión
+                Cerrar sesiÃ³n
               </button>
               <button
                 onClick={() => setShowLogoutModal(false)}
-                className="w-full rounded-2xl bg-[#262626] py-4 font-semibold text-white"
+                className="w-full rounded-2xl bg-[#203347] py-4 font-semibold text-white"
               >
                 Cancelar
               </button>
@@ -807,27 +807,27 @@ export default function ProfilePage() {
       {showAvatarEditor && pendingAvatar && (
         <div className="absolute inset-0 z-50 flex items-center justify-center px-3 py-6 sm:px-6">
           <div className="absolute inset-0 bg-[rgba(4,7,18,0.78)] backdrop-blur-[4px]" onClick={closeAvatarEditor} />
-          <div className="relative w-full max-w-[640px] rounded-[28px] border border-[rgba(18,239,211,0.18)] bg-[linear-gradient(180deg,rgba(28,32,48,0.98)_0%,rgba(12,15,28,0.98)_100%)] p-4 shadow-[0_30px_80px_rgba(0,0,0,0.42)] sm:p-6">
+          <div className="relative w-full max-w-[640px] rounded-[28px] border border-[rgba(0,201,167,0.18)] bg-[linear-gradient(180deg,rgba(28,32,48,0.98)_0%,rgba(12,15,28,0.98)_100%)] p-4 shadow-[0_30px_80px_rgba(0,0,0,0.42)] sm:p-6">
             <button
               onClick={closeAvatarEditor}
               type="button"
               aria-label="Cerrar editor de foto"
-              className="absolute right-4 top-4 rounded-full border border-[rgba(18,239,211,0.16)] bg-[rgba(255,255,255,0.04)] p-2 text-[#C7D2E3] shadow-sm transition hover:bg-[rgba(255,255,255,0.08)]"
+              className="absolute right-4 top-4 rounded-full border border-[rgba(0,201,167,0.16)] bg-[rgba(255,255,255,0.04)] p-2 text-[#C7D2E3] shadow-sm transition hover:bg-[rgba(255,255,255,0.08)]"
             >
               <X size={20} />
             </button>
             <div className="mb-5 text-center text-white">
               <div>
-                <h3 className="text-xl font-bold text-white sm:text-2xl">Ajustá tu foto de perfil</h3>
+                <h3 className="text-xl font-bold text-white sm:text-2xl">AjustÃ¡ tu foto de perfil</h3>
                 <p className="mt-2 text-sm text-[#98A2B3] sm:text-[15px]" style={{ fontFamily: "'Inter', sans-serif" }}>
-                  Elegí el encuadre antes de guardarla.
+                  ElegÃ­ el encuadre antes de guardarla.
                 </p>
               </div>
             </div>
 
             <div className="flex flex-col items-center">
               <div className="mt-5 flex w-full justify-center">
-                <div className="relative w-full max-w-[560px] overflow-hidden rounded-[24px] border border-[rgba(18,239,211,0.12)] bg-[#0F1324] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] sm:p-5">
+                <div className="relative w-full max-w-[560px] overflow-hidden rounded-[24px] border border-[rgba(0,201,167,0.12)] bg-[#0F1324] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] sm:p-5">
                   <div
                     className="relative mx-auto cursor-move overflow-hidden rounded-[18px] bg-[#1A2034]"
                     style={{
@@ -857,7 +857,7 @@ export default function ProfilePage() {
                     <div className="pointer-events-none absolute inset-0">
                       <div className="absolute inset-y-0 left-0 w-[44px] bg-[rgba(7,10,18,0.74)]" />
                       <div className="absolute inset-y-0 right-0 w-[44px] bg-[rgba(7,10,18,0.74)]" />
-                      <div className="absolute left-1/2 top-1/2 h-[248px] w-[248px] -translate-x-1/2 -translate-y-1/2 rounded-full border-[3px] border-[rgba(18,239,211,0.95)] shadow-[0_0_0_1px_rgba(255,255,255,0.12),0_0_22px_rgba(18,239,211,0.18)]" />
+                      <div className="absolute left-1/2 top-1/2 h-[248px] w-[248px] -translate-x-1/2 -translate-y-1/2 rounded-full border-[3px] border-[rgba(0,201,167,0.95)] shadow-[0_0_0_1px_rgba(255,255,255,0.12),0_0_22px_rgba(0,201,167,0.18)]" />
                     </div>
                   </div>
                 </div>
@@ -866,7 +866,7 @@ export default function ProfilePage() {
 
             <div className="mt-5 w-full max-w-[560px]">
               <label className="flex flex-col gap-2">
-                <div className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-[0.24em] text-[#12EFD3]">
+                <div className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-[0.24em] text-[#00C9A7]">
                   <span>Zoom</span>
                   <span className="text-[#E5E7EB]">{avatarZoom.toFixed(2)}x</span>
                 </div>
@@ -877,7 +877,7 @@ export default function ProfilePage() {
                   step="0.01"
                   value={avatarZoom}
                   onChange={(event) => applyAvatarZoom(Number(event.target.value), 0, 0)}
-                  className="h-2 w-full cursor-pointer appearance-none rounded-full bg-[#1F2937] accent-[#12EFD3]"
+                  className="h-2 w-full cursor-pointer appearance-none rounded-full bg-[#1F2937] accent-[#00C9A7]"
                 />
               </label>
             </div>
@@ -899,7 +899,7 @@ export default function ProfilePage() {
               <button
                 onClick={() => void saveAvatar()}
                 disabled={isSavingAvatar}
-                className="w-full rounded-2xl bg-[#12EFD3] px-6 py-3.5 text-base font-semibold text-[#041016] shadow-[0_0_24px_rgba(18,239,211,0.18)] transition hover:bg-[#2BF5DB] disabled:cursor-not-allowed disabled:opacity-60 sm:max-w-[200px]"
+                className="w-full rounded-2xl bg-[#00C9A7] px-6 py-3.5 text-base font-semibold text-[#041016] shadow-[0_0_24px_rgba(0,201,167,0.18)] transition hover:bg-[#2BF5DB] disabled:cursor-not-allowed disabled:opacity-60 sm:max-w-[200px]"
                 type="button"
               >
                 {isSavingAvatar ? 'Guardando...' : 'Guardar'}

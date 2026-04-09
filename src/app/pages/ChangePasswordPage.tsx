@@ -14,13 +14,13 @@ export default function ChangePasswordPage() {
   const handleSubmit = async () => {
     if (password.length < 8) {
       setStatus('error');
-      setMessage('La nueva contraseña tiene que tener al menos 8 caracteres.');
+      setMessage('La nueva contraseÃ±a tiene que tener al menos 8 caracteres.');
       return;
     }
 
     if (password !== confirmPassword) {
       setStatus('error');
-      setMessage('Las contraseñas no coinciden. Revisalas y volvé a intentar.');
+      setMessage('Las contraseÃ±as no coinciden. Revisalas y volvÃ© a intentar.');
       return;
     }
 
@@ -34,62 +34,62 @@ export default function ChangePasswordPage() {
       }
 
       setStatus('success');
-      setMessage('Tu contraseña se actualizó correctamente.');
+      setMessage('Tu contraseÃ±a se actualizÃ³ correctamente.');
       setPassword('');
       setConfirmPassword('');
     } catch (caughtError) {
       setStatus('error');
-      setMessage(caughtError instanceof Error ? caughtError.message : 'No se pudo cambiar la contraseña.');
+      setMessage(caughtError instanceof Error ? caughtError.message : 'No se pudo cambiar la contraseÃ±a.');
     }
   };
 
   return (
     <div className="flex flex-col" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-      <Header showBack title="Cambiar contraseña" onBack={() => navigate('/config')} />
+      <Header showBack title="Cambiar contraseÃ±a" onBack={() => navigate('/config')} />
 
       <div className="flex flex-col gap-6 px-4 py-5 pb-7 sm:px-5 sm:py-6">
-        <div className="rounded-3xl border border-[rgba(18,239,211,0.14)] bg-[rgba(18,239,211,0.06)] p-5">
+        <div className="rounded-3xl border border-[rgba(0,201,167,0.14)] bg-[rgba(0,201,167,0.06)] p-5">
           <div className="flex items-start gap-4">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[rgba(18,239,211,0.12)]">
-              <Lock size={20} className="text-[#12EFD3]" />
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[rgba(0,201,167,0.12)]">
+              <Lock size={20} className="text-[#00C9A7]" />
             </div>
             <div className="min-w-0">
-              <h1 className="text-2xl font-bold tracking-tight text-white">Protegé tu acceso</h1>
+              <h1 className="text-2xl font-bold tracking-tight text-white">ProtegÃ© tu acceso</h1>
               <p className="mt-2 text-sm leading-6 text-[#C8C8C8]" style={{ fontFamily: "'Inter', sans-serif" }}>
-                Cambiá tu contraseña cuando quieras. La nueva clave se aplica a tu cuenta de Supabase y reemplaza la actual.
+                CambiÃ¡ tu contraseÃ±a cuando quieras. La nueva clave se aplica a tu cuenta de Supabase y reemplaza la actual.
               </p>
             </div>
           </div>
         </div>
 
-        <div className="rounded-3xl bg-[#131313] p-5">
+        <div className="rounded-3xl bg-[#13263A] p-5">
           <div className="flex flex-col gap-4">
             <div>
-              <label className="mb-2 block text-[10px] font-semibold uppercase tracking-[0.22em] text-[#12EFD3]" htmlFor="new-password">
-                Nueva contraseña
+              <label className="mb-2 block text-[10px] font-semibold uppercase tracking-[0.22em] text-[#00C9A7]" htmlFor="new-password">
+                Nueva contraseÃ±a
               </label>
               <input
                 id="new-password"
                 type="password"
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
-                placeholder="Mínimo 8 caracteres"
-                className="w-full rounded-2xl border border-[rgba(18,239,211,0.16)] bg-[#0F131B] px-4 py-3 text-white outline-none transition-colors focus:border-[rgba(18,239,211,0.4)]"
+                placeholder="MÃ­nimo 8 caracteres"
+                className="w-full rounded-2xl border border-[rgba(0,201,167,0.16)] bg-[#0F131B] px-4 py-3 text-white outline-none transition-colors focus:border-[rgba(0,201,167,0.4)]"
                 style={{ fontFamily: "'Inter', sans-serif" }}
               />
             </div>
 
             <div>
-              <label className="mb-2 block text-[10px] font-semibold uppercase tracking-[0.22em] text-[#12EFD3]" htmlFor="confirm-password">
-                Confirmar contraseña
+              <label className="mb-2 block text-[10px] font-semibold uppercase tracking-[0.22em] text-[#00C9A7]" htmlFor="confirm-password">
+                Confirmar contraseÃ±a
               </label>
               <input
                 id="confirm-password"
                 type="password"
                 value={confirmPassword}
                 onChange={(event) => setConfirmPassword(event.target.value)}
-                placeholder="Repetí la nueva contraseña"
-                className="w-full rounded-2xl border border-[rgba(18,239,211,0.16)] bg-[#0F131B] px-4 py-3 text-white outline-none transition-colors focus:border-[rgba(18,239,211,0.4)]"
+                placeholder="RepetÃ­ la nueva contraseÃ±a"
+                className="w-full rounded-2xl border border-[rgba(0,201,167,0.16)] bg-[#0F131B] px-4 py-3 text-white outline-none transition-colors focus:border-[rgba(0,201,167,0.4)]"
                 style={{ fontFamily: "'Inter', sans-serif" }}
               />
             </div>
@@ -100,13 +100,13 @@ export default function ChangePasswordPage() {
           <div
             className={`rounded-2xl px-4 py-3 text-sm ${
               status === 'success'
-                ? 'border border-[rgba(18,239,211,0.14)] bg-[rgba(18,239,211,0.08)] text-white'
+                ? 'border border-[rgba(0,201,167,0.14)] bg-[rgba(0,201,167,0.08)] text-white'
                 : 'border border-[rgba(229,57,53,0.16)] bg-[rgba(229,57,53,0.08)] text-[#FFD4D4]'
             }`}
           >
             <div className="flex items-start gap-3">
               {status === 'success' ? (
-                <CheckCircle2 size={18} className="mt-0.5 shrink-0 text-[#12EFD3]" />
+                <CheckCircle2 size={18} className="mt-0.5 shrink-0 text-[#00C9A7]" />
               ) : (
                 <ShieldAlert size={18} className="mt-0.5 shrink-0 text-[#FF8A80]" />
               )}
@@ -119,17 +119,17 @@ export default function ChangePasswordPage() {
           <button
             onClick={() => void handleSubmit()}
             disabled={status === 'saving'}
-            className="w-full rounded-2xl bg-[#12EFD3] py-4 font-bold text-black disabled:opacity-60"
+            className="w-full rounded-2xl bg-[#00C9A7] py-4 font-bold text-black disabled:opacity-60"
             type="button"
           >
-            {status === 'saving' ? 'Guardando...' : 'Actualizar contraseña'}
+            {status === 'saving' ? 'Guardando...' : 'Actualizar contraseÃ±a'}
           </button>
           <button
             onClick={() => navigate('/config')}
-            className="w-full rounded-2xl bg-[#131313] py-4 font-semibold text-white"
+            className="w-full rounded-2xl bg-[#13263A] py-4 font-semibold text-white"
             type="button"
           >
-            Volver a configuración
+            Volver a configuraciÃ³n
           </button>
         </div>
       </div>

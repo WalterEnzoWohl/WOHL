@@ -65,7 +65,7 @@ type ExerciseHistoryEntry = {
 
 const DEFAULT_REST = 90;
 const FREE_SESSION_NAME = 'Entrenamiento libre';
-const FREE_SESSION_FOCUS = 'Sesión vacía y personalizada';
+const FREE_SESSION_FOCUS = 'SesiÃ³n vacÃ­a y personalizada';
 
 function formatTime(seconds: number) {
   const minutes = Math.floor(seconds / 60)
@@ -237,12 +237,12 @@ export default function TrainingSessionPage() {
 
   if (requestedHistorySessionId !== null && activeWorkout) {
     return (
-      <div className="min-h-screen bg-[#0A0D12]">
+      <div className="min-h-screen bg-[#102235]">
         <ActiveWorkoutEditLockModal
           activeWorkoutName={activeWorkout.sessionName}
-          eyebrow="Edición bloqueada"
-          title="No podés editar este entrenamiento ahora"
-          description="Ya tenés un entrenamiento en curso. Para evitar mezclar datos del historial con la sesión activa, primero volvé a ese entrenamiento o finalizalo."
+          eyebrow="EdiciÃ³n bloqueada"
+          title="No podÃ©s editar este entrenamiento ahora"
+          description="Ya tenÃ©s un entrenamiento en curso. Para evitar mezclar datos del historial con la sesiÃ³n activa, primero volvÃ© a ese entrenamiento o finalizalo."
           subjectLabel="Entrenamiento activo"
           onResume={() => navigate('/session')}
           onFinish={() => navigate('/session', { state: { action: 'finish' } })}
@@ -256,14 +256,14 @@ export default function TrainingSessionPage() {
     return (
       <div
         className="flex min-h-screen flex-col"
-        style={{ background: '#0A0D12', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+        style={{ background: '#102235', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
       >
-        <div className="flex h-16 items-center border-b border-[#262626] px-5" style={{ background: '#0E0E0E' }}>
+        <div className="flex h-16 items-center border-b border-[#203347] px-5" style={{ background: '#0B1F33' }}>
           <button className="-ml-2 p-2" onClick={() => navigate(-1)} type="button">
-            <Menu size={18} className="text-[#12EFD3]" />
+            <Menu size={18} className="text-[#00C9A7]" />
           </button>
         </div>
-        <div className="px-5 py-6 text-sm text-[#ADAAAA]">No se encontró la sesión que querías editar.</div>
+        <div className="px-5 py-6 text-sm text-[#9BAEC1]">No se encontrÃ³ la sesiÃ³n que querÃ­as editar.</div>
       </div>
     );
   }
@@ -312,12 +312,12 @@ export default function TrainingSessionPage() {
   const sessionName =
     resumedWorkout?.sessionName ??
     historicalSession?.name ??
-    (isFreeSession ? FREE_SESSION_NAME : currentDay?.name ?? 'Sesión');
+    (isFreeSession ? FREE_SESSION_NAME : currentDay?.name ?? 'SesiÃ³n');
   const sessionFocus =
     resumedWorkout?.sessionFocus ??
     historicalSession?.sessionFocus ??
     (isFreeSession ? FREE_SESSION_FOCUS : currentDay?.focus ?? 'Entrenamiento guiado');
-  const sessionAccent = isFreeSession ? '#F5B942' : isHistoryEditSession ? '#7F98FF' : '#12EFD3';
+  const sessionAccent = isFreeSession ? '#F5B942' : isHistoryEditSession ? '#7F98FF' : '#00C9A7';
   const previousSession = isHistoryEditSession
     ? historicalPreviousSession
     : isFreeSession
@@ -876,10 +876,10 @@ export default function TrainingSessionPage() {
   ];
 
   const sessionHeaderLabel = isHistoryEditSession
-    ? 'Edición del historial'
+    ? 'EdiciÃ³n del historial'
     : isFreeSession
-    ? 'Sesión libre'
-    : 'Sesión activa';
+    ? 'SesiÃ³n libre'
+    : 'SesiÃ³n activa';
   const sessionDateLabel =
     isHistoryEditSession && historicalSession
       ? `${historicalSession.dayLabel} - ${historicalSession.date}`
@@ -889,11 +889,11 @@ export default function TrainingSessionPage() {
   return (
     <div
       className="relative flex min-h-screen flex-col"
-      style={{ background: '#0A0D12', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+      style={{ background: '#102235', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
     >
       <div
-        className="h-16 shrink-0 border-b border-[#262626] px-5"
-        style={{ background: '#0E0E0E' }}
+        className="h-16 shrink-0 border-b border-[#203347] px-5"
+        style={{ background: '#0B1F33' }}
       >
         <div className="flex h-full items-center justify-between">
           <button
@@ -903,20 +903,20 @@ export default function TrainingSessionPage() {
             }
             type="button"
           >
-            <Menu size={18} className="text-[#12EFD3]" />
+            <Menu size={18} className="text-[#00C9A7]" />
           </button>
           <div className="flex items-center gap-2">
-            <img src={brandLogoWhite} alt="GymUp" className="h-7 w-7 object-contain" />
-            <span className="text-lg font-extrabold italic uppercase tracking-tight text-white">GYMUP</span>
+            <img src={brandLogoWhite} alt="WOHL" className="h-7 w-7 object-contain" />
+            <span className="text-lg font-extrabold italic uppercase tracking-tight text-white">WOHL</span>
           </div>
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1.5 rounded-full border border-[rgba(18,239,211,0.2)] bg-[#1C2030] px-3 py-1.5">
-              <div className={`h-1.5 w-1.5 rounded-full bg-[#12EFD3] ${isHistoryEditSession ? '' : 'animate-pulse'}`} />
-              <span className="text-sm font-bold text-[#12EFD3]" style={{ fontFamily: "'Inter', sans-serif" }}>
+            <div className="flex items-center gap-1.5 rounded-full border border-[rgba(0,201,167,0.2)] bg-[#1A2D42] px-3 py-1.5">
+              <div className={`h-1.5 w-1.5 rounded-full bg-[#00C9A7] ${isHistoryEditSession ? '' : 'animate-pulse'}`} />
+              <span className="text-sm font-bold text-[#00C9A7]" style={{ fontFamily: "'Inter', sans-serif" }}>
                 {formatTime(elapsed)}
               </span>
             </div>
-            <UserAvatar className="h-9 w-9 overflow-hidden rounded-full border border-[rgba(18,239,211,0.2)]" imageClassName="theme-preserve h-full w-full object-cover" />
+            <UserAvatar className="h-9 w-9 overflow-hidden rounded-full border border-[rgba(0,201,167,0.2)]" imageClassName="theme-preserve h-full w-full object-cover" />
           </div>
         </div>
       </div>
@@ -926,7 +926,7 @@ export default function TrainingSessionPage() {
           <div className="flex items-end justify-between">
             <div>
               <p
-                className="mb-1 text-xs uppercase tracking-widest text-[#ADAAAA]"
+                className="mb-1 text-xs uppercase tracking-widest text-[#9BAEC1]"
                 style={{ fontFamily: "'Inter', sans-serif" }}
               >
                 {sessionHeaderLabel} - {sessionDateLabel}
@@ -937,14 +937,14 @@ export default function TrainingSessionPage() {
                 </h1>
                 {sessionBadgeLabel && (
                   <span
-                    className="rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-widest text-[#0E0E0E]"
+                    className="rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-widest text-[#0B1F33]"
                     style={{ background: sessionAccent }}
                   >
                     {sessionBadgeLabel}
                   </span>
                 )}
               </div>
-              <p className="mt-1 text-sm text-[#ADAAAA]" style={{ fontFamily: "'Inter', sans-serif" }}>
+              <p className="mt-1 text-sm text-[#9BAEC1]" style={{ fontFamily: "'Inter', sans-serif" }}>
                 {sessionFocus}
               </p>
             </div>
@@ -952,11 +952,11 @@ export default function TrainingSessionPage() {
 
           <div className="grid grid-cols-2 gap-4">
             <div
-              className="relative overflow-hidden rounded-xl bg-[#131313] p-5"
-              style={{ borderLeft: '4px solid rgba(18,239,211,0.4)' }}
+              className="relative overflow-hidden rounded-xl bg-[#13263A] p-5"
+              style={{ borderLeft: '4px solid rgba(0,201,167,0.4)' }}
             >
               <p
-                className="mb-3 text-[10px] uppercase tracking-widest text-[#ADAAAA]"
+                className="mb-3 text-[10px] uppercase tracking-widest text-[#9BAEC1]"
                 style={{ fontFamily: "'Inter', sans-serif" }}
               >
                 Volumen total
@@ -965,40 +965,40 @@ export default function TrainingSessionPage() {
                 <span className="text-4xl font-normal text-white">
                   {formatWeightNumber(totalVolume, appSettings.weightUnit, 0)}
                 </span>
-                <span className="text-sm font-bold italic text-[#ADAAAA]">{weightUnitLabel}</span>
+                <span className="text-sm font-bold italic text-[#9BAEC1]">{weightUnitLabel}</span>
               </div>
             </div>
             <div
-              className="relative overflow-hidden rounded-xl bg-[#131313] p-5"
+              className="relative overflow-hidden rounded-xl bg-[#13263A] p-5"
               style={{ borderLeft: '4px solid rgba(127,152,255,0.4)' }}
             >
               <p
-                className="mb-3 text-[10px] uppercase tracking-widest text-[#ADAAAA]"
+                className="mb-3 text-[10px] uppercase tracking-widest text-[#9BAEC1]"
                 style={{ fontFamily: "'Inter', sans-serif" }}
               >
                 Series completas
               </p>
               <div className="flex items-baseline gap-1">
                 <span className="text-4xl font-normal text-white">{totalSetsCompleted}</span>
-                <span className="text-sm font-bold italic text-[#ADAAAA]">/ {totalSets}</span>
+                <span className="text-sm font-bold italic text-[#9BAEC1]">/ {totalSets}</span>
               </div>
             </div>
           </div>
 
-          <div className="rounded-2xl border border-[#262626] bg-[#131313] p-4">
+          <div className="rounded-2xl border border-[#203347] bg-[#13263A] p-4">
             <label
               htmlFor="session-notes"
-              className="mb-2 block text-[10px] font-semibold uppercase tracking-widest text-[#12EFD3]"
+              className="mb-2 block text-[10px] font-semibold uppercase tracking-widest text-[#00C9A7]"
               style={{ fontFamily: "'Inter', sans-serif" }}
             >
-              Notas de la sesión
+              Notas de la sesiÃ³n
             </label>
             <textarea
               id="session-notes"
               value={notes}
               onChange={(event) => setNotes(event.target.value)}
-              placeholder="Añadí notas sobre tu sesión, sensaciones o ajustes para la próxima..."
-              className="h-24 w-full resize-none rounded-xl border border-[rgba(18,239,211,0.15)] bg-[#1C2030] p-4 text-sm text-white outline-none transition-colors focus:border-[rgba(18,239,211,0.45)]"
+              placeholder="AÃ±adÃ­ notas sobre tu sesiÃ³n, sensaciones o ajustes para la prÃ³xima..."
+              className="h-24 w-full resize-none rounded-xl border border-[rgba(0,201,167,0.15)] bg-[#1A2D42] p-4 text-sm text-white outline-none transition-colors focus:border-[rgba(0,201,167,0.45)]"
               style={{ fontFamily: "'Inter', sans-serif" }}
             />
           </div>
@@ -1015,7 +1015,7 @@ export default function TrainingSessionPage() {
               </button>
               <button
                 onClick={() => setShowDatabaseExercisePicker(true)}
-                className="flex items-center justify-center gap-2 rounded-2xl border border-[rgba(18,239,211,0.22)] bg-[rgba(18,239,211,0.08)] px-3 py-4 text-[#12EFD3] transition-colors active:bg-[rgba(18,239,211,0.14)]"
+                className="flex items-center justify-center gap-2 rounded-2xl border border-[rgba(0,201,167,0.22)] bg-[rgba(0,201,167,0.08)] px-3 py-4 text-[#00C9A7] transition-colors active:bg-[rgba(0,201,167,0.14)]"
                 type="button"
               >
                 <Search size={18} />
@@ -1033,12 +1033,12 @@ export default function TrainingSessionPage() {
                 return (
                   <div
                     key={`${exercise.id}-${exerciseIdx}`}
-                    className="overflow-hidden rounded-2xl border border-[#262626] bg-[#141720]"
+                    className="overflow-hidden rounded-2xl border border-[#203347] bg-[#141720]"
                   >
                     <div className="flex items-center justify-between px-4 py-4">
                       <div className="flex items-center gap-3">
                         <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[rgba(0,81,71,0.2)]">
-                          <svg width="20" height="20" viewBox="0 0 20 20" fill="#12EFD3">
+                          <svg width="20" height="20" viewBox="0 0 20 20" fill="#00C9A7">
                             <path d="M7 4.5a2.5 2.5 0 0 1 5 0v1h1.5A1.5 1.5 0 0 1 15 7v1.5a1.5 1.5 0 0 1-1.5 1.5H6.5A1.5 1.5 0 0 1 5 8.5V7a1.5 1.5 0 0 1 1.5-1.5H8v-1zM9 4.5a1 1 0 0 0-2 0v1h2v-1zM11 5.5V4.5a1 1 0 0 1 2 0v1h-2zM5 12a1 1 0 0 0 0 2h10a1 1 0 0 0 0-2H5zM4 15a1 1 0 0 1 1-1h10a1 1 0 0 1 0 2H5a1 1 0 0 1-1-1z" />
                           </svg>
                         </div>
@@ -1046,7 +1046,7 @@ export default function TrainingSessionPage() {
                           <h2 className="text-xl font-bold italic uppercase leading-tight tracking-tight text-white">
                             {exercise.name}
                           </h2>
-                          <p className="mt-0.5 text-xs text-[#ADAAAA]" style={{ fontFamily: "'Inter', sans-serif" }}>
+                          <p className="mt-0.5 text-xs text-[#9BAEC1]" style={{ fontFamily: "'Inter', sans-serif" }}>
                             Ejercicio {exerciseIdx + 1} de {exerciseList.length} - {exercise.muscle}
                             {exercise.implement ? ` - ${exercise.implement}` : ''}
                           </p>
@@ -1057,7 +1057,7 @@ export default function TrainingSessionPage() {
                           setCurrentExIdx(exerciseIdx);
                           setShowMenu(true);
                         }}
-                        className="rounded-lg bg-[#262626] p-2"
+                        className="rounded-lg bg-[#203347] p-2"
                         type="button"
                       >
                         <MoreVertical size={16} className="text-white" />
@@ -1071,8 +1071,8 @@ export default function TrainingSessionPage() {
                             key={`${exercise.id}-${column}`}
                             className={`text-[10px] font-semibold tracking-widest ${
                               column === weightUnitLabel.toUpperCase() || column === 'REPS'
-                                ? 'text-[#12EFD3]'
-                                : 'text-[#ADAAAA]'
+                                ? 'text-[#00C9A7]'
+                                : 'text-[#9BAEC1]'
                             }`}
                             style={{ fontFamily: "'Inter', sans-serif" }}
                           >
@@ -1092,7 +1092,7 @@ export default function TrainingSessionPage() {
                           <div
                             key={set.id}
                             className={`border-b border-[rgba(73,72,71,0.1)] px-4 py-4 last:border-b-0 ${
-                              isActive ? 'border-l-4 border-l-[rgba(18,239,211,0.3)] bg-[rgba(18,239,211,0.05)]' : ''
+                              isActive ? 'border-l-4 border-l-[rgba(0,201,167,0.3)] bg-[rgba(0,201,167,0.05)]' : ''
                             }`}
                           >
                             <div className="grid grid-cols-5 items-center gap-2">
@@ -1104,7 +1104,7 @@ export default function TrainingSessionPage() {
                                   }}
                                   className={`flex w-full flex-col items-center rounded-lg px-1 py-1 transition-colors ${
                                     currentExIdx === exerciseIdx && selectedSetIdx === setIdx
-                                      ? 'bg-[rgba(18,239,211,0.08)]'
+                                      ? 'bg-[rgba(0,201,167,0.08)]'
                                       : 'hover:bg-white/5'
                                   }`}
                                   type="button"
@@ -1112,10 +1112,10 @@ export default function TrainingSessionPage() {
                                   <span
                                     className={`font-bold italic ${
                                       isActive
-                                        ? 'text-xl text-[#12EFD3]'
+                                        ? 'text-xl text-[#00C9A7]'
                                         : set.kind === 'warmup'
                                         ? 'text-base text-[#F5B942]'
-                                        : 'text-base text-[#ADAAAA]'
+                                        : 'text-base text-[#9BAEC1]'
                                     }`}
                                   >
                                     {setIdx === 0 && set.kind === 'warmup' ? 'W' : setIdx + 1}
@@ -1144,7 +1144,7 @@ export default function TrainingSessionPage() {
                                     </span>
                                   </div>
                                 ) : isActive ? (
-                                  <div className="rounded-lg border border-[rgba(18,239,211,0.3)] bg-[#262626] px-1 py-2 shadow-[0_0_10px_rgba(18,239,211,0.1)]">
+                                  <div className="rounded-lg border border-[rgba(0,201,167,0.3)] bg-[#203347] px-1 py-2 shadow-[0_0_10px_rgba(0,201,167,0.1)]">
                                     <input
                                       type="number"
                                       step={appSettings.weightUnit === 'kg' ? '0.5' : '0.1'}
@@ -1152,7 +1152,7 @@ export default function TrainingSessionPage() {
                                       onChange={(event) =>
                                         updateSetValue(exerciseIdx, setIdx, 'kg', event.target.value)
                                       }
-                                      className={`w-full bg-transparent text-center font-normal text-[#12EFD3] outline-none ${
+                                      className={`w-full bg-transparent text-center font-normal text-[#00C9A7] outline-none ${
                                         appSettings.weightUnit === 'lb' ? 'text-sm' : 'text-base'
                                       }`}
                                       style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
@@ -1175,14 +1175,14 @@ export default function TrainingSessionPage() {
 
                               <div>
                                 {isActive ? (
-                                  <div className="rounded-lg border border-[rgba(18,239,211,0.3)] bg-[#262626] py-2 shadow-[0_0_10px_rgba(18,239,211,0.1)]">
+                                  <div className="rounded-lg border border-[rgba(0,201,167,0.3)] bg-[#203347] py-2 shadow-[0_0_10px_rgba(0,201,167,0.1)]">
                                     <input
                                       type="number"
                                       value={set.reps || ''}
                                       onChange={(event) =>
                                         updateSetValue(exerciseIdx, setIdx, 'reps', event.target.value)
                                       }
-                                      className="w-full bg-transparent text-center text-base font-normal text-[#12EFD3] outline-none"
+                                      className="w-full bg-transparent text-center text-base font-normal text-[#00C9A7] outline-none"
                                       style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
                                     />
                                   </div>
@@ -1196,8 +1196,8 @@ export default function TrainingSessionPage() {
                               </div>
 
                               <div className="text-center">
-                                <div className="rounded-lg bg-[#262626] py-1 text-center">
-                                  <span className="text-xs text-[#ADAAAA]" style={{ fontFamily: "'Inter', sans-serif" }}>
+                                <div className="rounded-lg bg-[#203347] py-1 text-center">
+                                  <span className="text-xs text-[#9BAEC1]" style={{ fontFamily: "'Inter', sans-serif" }}>
                                     {set.rpe || '-'}
                                   </span>
                                 </div>
@@ -1209,16 +1209,16 @@ export default function TrainingSessionPage() {
                                   disabled={isPending}
                                   className={`flex h-9 w-9 items-center justify-center rounded-xl transition-all ${
                                     isCompleted
-                                      ? 'bg-[#12EFD3]'
+                                      ? 'bg-[#00C9A7]'
                                       : isActive
-                                      ? 'border border-[rgba(18,239,211,0.4)] bg-[rgba(18,239,211,0.2)]'
-                                      : 'bg-[#262626] opacity-40'
+                                      ? 'border border-[rgba(0,201,167,0.4)] bg-[rgba(0,201,167,0.2)]'
+                                      : 'bg-[#203347] opacity-40'
                                   }`}
                                   type="button"
                                 >
                                   <Check
                                     size={14}
-                                    className={isCompleted ? 'text-[#003830]' : 'text-[#12EFD3]'}
+                                    className={isCompleted ? 'text-[#003830]' : 'text-[#00C9A7]'}
                                     strokeWidth={3}
                                   />
                                 </button>
@@ -1232,13 +1232,13 @@ export default function TrainingSessionPage() {
                     <div className="grid grid-cols-2 gap-3 border-t border-[rgba(73,72,71,0.1)] px-4 py-4">
                       <button
                         onClick={() => addSet(exerciseIdx)}
-                        className="flex items-center justify-center gap-2 rounded-2xl border border-[#262626] bg-[#1C2030] py-3 transition-colors active:bg-[#262626]"
+                        className="flex items-center justify-center gap-2 rounded-2xl border border-[#203347] bg-[#1A2D42] py-3 transition-colors active:bg-[#203347]"
                         type="button"
                       >
-                        <div className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-[#12EFD3]">
-                          <Plus size={12} className="text-[#12EFD3]" />
+                        <div className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-[#00C9A7]">
+                          <Plus size={12} className="text-[#00C9A7]" />
                         </div>
-                        <span className="text-sm font-semibold text-white">Añadir serie</span>
+                        <span className="text-sm font-semibold text-white">AÃ±adir serie</span>
                       </button>
                       <button
                         onClick={() => removeSet(exerciseIdx, exercise.sets.length - 1)}
@@ -1262,15 +1262,15 @@ export default function TrainingSessionPage() {
                 </div>
                 <div>
                   <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[#F5B942]">
-                    {isHistoryEditSession ? 'Sesión sin ejercicios' : 'Entrenamiento vacío'}
+                    {isHistoryEditSession ? 'SesiÃ³n sin ejercicios' : 'Entrenamiento vacÃ­o'}
                   </p>
                   <h2 className="mt-2 text-xl font-bold tracking-tight text-white">
-                    {isHistoryEditSession ? 'Sumá ejercicios para completar esta sesión' : 'Empezá agregando tu primer ejercicio'}
+                    {isHistoryEditSession ? 'SumÃ¡ ejercicios para completar esta sesiÃ³n' : 'EmpezÃ¡ agregando tu primer ejercicio'}
                   </h2>
                   <p className="mt-2 text-sm text-[#D8C9A1]" style={{ fontFamily: "'Inter', sans-serif" }}>
                     {isHistoryEditSession
-                      ? 'Podés reconstruir esta sesión del historial agregando ejercicios manualmente o desde tu base actual.'
-                      : 'Esta sesión no depende de ninguna rutina. Podés cargar ejercicios manualmente o elegirlos desde tu base actual y guardar el entrenamiento en tu historial.'}
+                      ? 'PodÃ©s reconstruir esta sesiÃ³n del historial agregando ejercicios manualmente o desde tu base actual.'
+                      : 'Esta sesiÃ³n no depende de ninguna rutina. PodÃ©s cargar ejercicios manualmente o elegirlos desde tu base actual y guardar el entrenamiento en tu historial.'}
                   </p>
                 </div>
               </div>
@@ -1281,18 +1281,18 @@ export default function TrainingSessionPage() {
             <div className="grid grid-cols-2 gap-3">
               <button
                 onClick={() => undefined}
-                className="flex items-center justify-center gap-2 rounded-2xl border border-[#262626] bg-[#1C2030] py-4 transition-colors active:bg-[#262626]"
+                className="flex items-center justify-center gap-2 rounded-2xl border border-[#203347] bg-[#1A2D42] py-4 transition-colors active:bg-[#203347]"
                 type="button"
               >
-                <div className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-[#12EFD3]">
-                  <Plus size={12} className="text-[#12EFD3]" />
+                <div className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-[#00C9A7]">
+                  <Plus size={12} className="text-[#00C9A7]" />
                 </div>
-                <span className="text-sm font-semibold text-white">Añadir serie</span>
+                <span className="text-sm font-semibold text-white">AÃ±adir serie</span>
               </button>
               <button
                 onClick={nextExercise}
                 disabled={currentExIdx >= exerciseList.length - 1}
-                className="flex items-center justify-center gap-2 rounded-2xl bg-[#12EFD3] py-4 transition-colors active:bg-[#0DBDA7] disabled:opacity-40"
+                className="flex items-center justify-center gap-2 rounded-2xl bg-[#00C9A7] py-4 transition-colors active:bg-[#009F86] disabled:opacity-40"
                 type="button"
               >
                 <span className="text-sm font-bold text-black">Siguiente ejercicio</span>
@@ -1302,20 +1302,20 @@ export default function TrainingSessionPage() {
           )}
 
           {restActive && currentExercise && (
-            <div className="flex items-center gap-3 rounded-2xl border border-[rgba(18,239,211,0.15)] bg-[#1C2030] px-4 py-3">
+            <div className="flex items-center gap-3 rounded-2xl border border-[rgba(0,201,167,0.15)] bg-[#1A2D42] px-4 py-3">
               <button
                 onClick={() => setShowRestConfig(true)}
                 className="relative h-14 w-14 flex-shrink-0"
                 type="button"
               >
                 <svg className="h-full w-full -rotate-90" viewBox="0 0 56 56">
-                  <circle cx="28" cy="28" r="24" fill="none" stroke="#262626" strokeWidth="4" />
+                  <circle cx="28" cy="28" r="24" fill="none" stroke="#203347" strokeWidth="4" />
                   <circle
                     cx="28"
                     cy="28"
                     r="24"
                     fill="none"
-                    stroke="#12EFD3"
+                    stroke="#00C9A7"
                     strokeWidth="4"
                     strokeDasharray={`${2 * Math.PI * 24}`}
                     strokeDashoffset={`${2 * Math.PI * 24 * (1 - restTime / restConfig)}`}
@@ -1324,19 +1324,19 @@ export default function TrainingSessionPage() {
                   />
                 </svg>
                 <span
-                  className="absolute inset-0 flex items-center justify-center text-xs font-bold text-[#12EFD3]"
+                  className="absolute inset-0 flex items-center justify-center text-xs font-bold text-[#00C9A7]"
                   style={{ fontFamily: "'Inter', sans-serif" }}
                 >
                   {restTime}s
                 </span>
               </button>
               <div className="flex-1">
-                <p className="text-[10px] font-semibold uppercase tracking-widest text-[#ADAAAA]">Descanso activo</p>
-                <p className="mt-0.5 text-sm font-semibold text-white">Próxima serie: {currentExercise.name}</p>
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-[#9BAEC1]">Descanso activo</p>
+                <p className="mt-0.5 text-sm font-semibold text-white">PrÃ³xima serie: {currentExercise.name}</p>
               </div>
               <button
                 onClick={() => setRestActive(false)}
-                className="text-sm font-bold uppercase tracking-wider text-[#12EFD3]"
+                className="text-sm font-bold uppercase tracking-wider text-[#00C9A7]"
                 type="button"
               >
                 Omitir
@@ -1364,13 +1364,13 @@ export default function TrainingSessionPage() {
                   : setShowReplaceExercise(true)
               }
               disabled={!isFreeSession && !isHistoryEditSession && !currentExercise}
-              className="flex h-14 w-14 items-center justify-center rounded-2xl border border-[#262626] bg-[#1C2030] disabled:opacity-40"
+              className="flex h-14 w-14 items-center justify-center rounded-2xl border border-[#203347] bg-[#1A2D42] disabled:opacity-40"
               type="button"
             >
               {isFreeSession || isHistoryEditSession ? (
                 <Search size={20} className="text-[#F5B942]" />
               ) : (
-                <BarChart2 size={20} className="text-[#ADAAAA]" />
+                <BarChart2 size={20} className="text-[#9BAEC1]" />
               )}
             </button>
           </div>
@@ -1391,15 +1391,15 @@ export default function TrainingSessionPage() {
       {showMenu && currentExercise && (
         <div className="absolute inset-0 z-40 flex items-end">
           <button
-            aria-label="Cerrar menú"
+            aria-label="Cerrar menÃº"
             className="absolute inset-0 bg-black/70"
             onClick={() => setShowMenu(false)}
             type="button"
           />
-          <div className="relative z-10 w-full rounded-t-[2rem] bg-[#1C2030] px-5 pb-6 pt-5">
+          <div className="relative z-10 w-full rounded-t-[2rem] bg-[#1A2D42] px-5 pb-6 pt-5">
             <div className="mx-auto mb-5 h-1.5 w-12 rounded-full bg-[#3A3F50]" />
             <h3 className="text-2xl font-bold tracking-tight text-white">{currentExercise.name}</h3>
-            <p className="mt-1 text-sm text-[#A1A1A1]" style={{ fontFamily: "'Inter', sans-serif" }}>
+            <p className="mt-1 text-sm text-[#90A4B8]" style={{ fontFamily: "'Inter', sans-serif" }}>
               {currentExercise.muscle}
               {currentExercise.implement ? ` - ${currentExercise.implement}` : ''}
             </p>
@@ -1432,9 +1432,9 @@ export default function TrainingSessionPage() {
             onClick={() => setSelectedSetIdx(null)}
             type="button"
           />
-          <div className="relative z-10 w-full rounded-t-[2rem] bg-[#1C2030] px-5 pb-6 pt-5">
+          <div className="relative z-10 w-full rounded-t-[2rem] bg-[#1A2D42] px-5 pb-6 pt-5">
             <div className="mx-auto mb-5 h-1.5 w-12 rounded-full bg-[#3A3F50]" />
-            <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[#12EFD3]">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[#00C9A7]">
               Set {selectedSetIdx + 1}
             </p>
             <h3 className="mt-2 text-2xl font-bold tracking-tight text-white">{currentExercise.name}</h3>
@@ -1448,7 +1448,7 @@ export default function TrainingSessionPage() {
                 <div>
                   <p className="font-semibold text-white">Serie de calentamiento</p>
                   <p className="mt-1 text-xs text-[#D8C9A1]" style={{ fontFamily: "'Inter', sans-serif" }}>
-                    Ideal para aproximaciones y activación.
+                    Ideal para aproximaciones y activaciÃ³n.
                   </p>
                 </div>
                 <Sparkles size={18} className="text-[#F5B942]" />
@@ -1456,16 +1456,16 @@ export default function TrainingSessionPage() {
 
               <button
                 onClick={() => updateSetKind(currentExIdx, selectedSetIdx, 'normal')}
-                className="flex items-center justify-between rounded-2xl border border-[rgba(18,239,211,0.18)] bg-[rgba(18,239,211,0.08)] px-4 py-4 text-left"
+                className="flex items-center justify-between rounded-2xl border border-[rgba(0,201,167,0.18)] bg-[rgba(0,201,167,0.08)] px-4 py-4 text-left"
                 type="button"
               >
                 <div>
                   <p className="font-semibold text-white">Set normal</p>
-                  <p className="mt-1 text-xs text-[#A1A1A1]" style={{ fontFamily: "'Inter', sans-serif" }}>
+                  <p className="mt-1 text-xs text-[#90A4B8]" style={{ fontFamily: "'Inter', sans-serif" }}>
                     Cuenta como serie principal dentro del ejercicio.
                   </p>
                 </div>
-                <Check size={18} className="text-[#12EFD3]" />
+                <Check size={18} className="text-[#00C9A7]" />
               </button>
 
               <button
@@ -1477,7 +1477,7 @@ export default function TrainingSessionPage() {
                 <div>
                   <p className="font-semibold">Eliminar serie</p>
                   <p className="mt-1 text-xs text-[#D6B9B9]" style={{ fontFamily: "'Inter', sans-serif" }}>
-                    Quitá esta serie de la sesión actual.
+                    QuitÃ¡ esta serie de la sesiÃ³n actual.
                   </p>
                 </div>
                 <Trash2 size={18} />
@@ -1495,13 +1495,13 @@ export default function TrainingSessionPage() {
             onClick={() => setShowExerciseHistory(false)}
             type="button"
           />
-          <div className="relative z-10 w-full rounded-t-[2rem] bg-[#1C2030] px-5 pb-6 pt-5">
+          <div className="relative z-10 w-full rounded-t-[2rem] bg-[#1A2D42] px-5 pb-6 pt-5">
             <div className="mx-auto mb-5 h-1.5 w-12 rounded-full bg-[#3A3F50]" />
-            <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[#12EFD3]">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[#00C9A7]">
               Historial del ejercicio
             </p>
             <h3 className="mt-2 text-2xl font-bold tracking-tight text-white">{currentExercise.name}</h3>
-            <p className="mt-2 text-sm text-[#A1A1A1]" style={{ fontFamily: "'Inter', sans-serif" }}>
+            <p className="mt-2 text-sm text-[#90A4B8]" style={{ fontFamily: "'Inter', sans-serif" }}>
               Tus registros recientes para este movimiento.
             </p>
 
@@ -1511,17 +1511,17 @@ export default function TrainingSessionPage() {
                   <button
                     key={`${entry.sessionId}-${entry.sessionDate}`}
                     onClick={() => navigate(`/session-history/${entry.sessionId}`)}
-                    className="rounded-2xl border border-[#2A2F3D] bg-[#131313] p-4 text-left"
+                    className="rounded-2xl border border-[#2A2F3D] bg-[#13263A] p-4 text-left"
                     type="button"
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div>
                         <p className="text-base font-bold text-white">{entry.sessionName}</p>
-                        <p className="mt-1 text-xs text-[#A1A1A1]" style={{ fontFamily: "'Inter', sans-serif" }}>
+                        <p className="mt-1 text-xs text-[#90A4B8]" style={{ fontFamily: "'Inter', sans-serif" }}>
                           {entry.sessionDate}
                         </p>
                       </div>
-                      <span className="rounded-full bg-[rgba(18,239,211,0.1)] px-3 py-1 text-[10px] font-semibold uppercase tracking-widest text-[#12EFD3]">
+                      <span className="rounded-full bg-[rgba(0,201,167,0.1)] px-3 py-1 text-[10px] font-semibold uppercase tracking-widest text-[#00C9A7]">
                         PR {entry.maxKg > 0 ? formatWeightWithUnit(entry.maxKg, appSettings.weightUnit) : 'Peso corporal'}
                       </span>
                     </div>
@@ -1530,7 +1530,7 @@ export default function TrainingSessionPage() {
                       {entry.sets.map((set, index) => (
                         <span
                           key={`${entry.sessionId}-${index}`}
-                          className="rounded-full bg-[#1C2030] px-3 py-1 text-[10px] font-semibold uppercase tracking-widest text-[#D8E4FF]"
+                          className="rounded-full bg-[#1A2D42] px-3 py-1 text-[10px] font-semibold uppercase tracking-widest text-[#D8E4FF]"
                         >
                           {set.kg > 0 ? `${formatWeightNumber(set.kg, appSettings.weightUnit)}${weightUnitLabel}` : 'PC'} x {set.reps}
                         </span>
@@ -1539,8 +1539,8 @@ export default function TrainingSessionPage() {
                   </button>
                 ))
               ) : (
-                <div className="rounded-2xl border border-[#2A2F3D] bg-[#131313] p-5 text-sm text-[#A1A1A1]">
-                  Todavía no hay registros guardados para este ejercicio.
+                <div className="rounded-2xl border border-[#2A2F3D] bg-[#13263A] p-5 text-sm text-[#90A4B8]">
+                  TodavÃ­a no hay registros guardados para este ejercicio.
                 </div>
               )}
             </div>
@@ -1559,20 +1559,20 @@ export default function TrainingSessionPage() {
             }}
             type="button"
           />
-          <div className="relative z-10 w-full rounded-t-[2rem] bg-[#1C2030] px-5 pb-6 pt-5">
+          <div className="relative z-10 w-full rounded-t-[2rem] bg-[#1A2D42] px-5 pb-6 pt-5">
             <div className="mx-auto mb-5 h-1.5 w-12 rounded-full bg-[#3A3F50]" />
             <h3 className="text-2xl font-bold tracking-tight text-white">Reemplazar ejercicio</h3>
-            <p className="mt-2 text-sm text-[#A1A1A1]" style={{ fontFamily: "'Inter', sans-serif" }}>
-              Elegí otra variante disponible en tus rutinas.
+            <p className="mt-2 text-sm text-[#90A4B8]" style={{ fontFamily: "'Inter', sans-serif" }}>
+              ElegÃ­ otra variante disponible en tus rutinas.
             </p>
 
-            <div className="mt-5 rounded-2xl border border-[#2A2F3D] bg-[#131313] px-4 py-3">
+            <div className="mt-5 rounded-2xl border border-[#2A2F3D] bg-[#13263A] px-4 py-3">
               <div className="flex items-center gap-3">
                 <Search size={16} className="text-[#7E8799]" />
                 <input
                   value={replaceQuery}
                   onChange={(event) => setReplaceQuery(event.target.value)}
-                  placeholder="Buscar por ejercicio, músculo o implemento"
+                  placeholder="Buscar por ejercicio, mÃºsculo o implemento"
                   className="w-full bg-transparent text-sm text-white outline-none placeholder:text-[#7E8799]"
                   style={{ fontFamily: "'Inter', sans-serif" }}
                 />
@@ -1585,11 +1585,11 @@ export default function TrainingSessionPage() {
                   <button
                     key={exercise.name}
                     onClick={() => replaceCurrentExercise(exercise)}
-                    className="rounded-2xl border border-[#2A2F3D] bg-[#131313] p-4 text-left"
+                    className="rounded-2xl border border-[#2A2F3D] bg-[#13263A] p-4 text-left"
                     type="button"
                   >
                     <p className="text-lg font-bold text-white">{exercise.name}</p>
-                    <p className="mt-1 text-sm text-[#A1A1A1]" style={{ fontFamily: "'Inter', sans-serif" }}>
+                    <p className="mt-1 text-sm text-[#90A4B8]" style={{ fontFamily: "'Inter', sans-serif" }}>
                       {exercise.muscle}
                       {exercise.implement ? ` - ${exercise.implement}` : ''}
                     </p>
@@ -1597,7 +1597,7 @@ export default function TrainingSessionPage() {
                       {exercise.sets.slice(0, 3).map((set, index) => (
                         <span
                           key={`${exercise.name}-${index}`}
-                          className="rounded-full bg-[rgba(18,239,211,0.1)] px-3 py-1 text-[10px] font-semibold uppercase tracking-widest text-[#12EFD3]"
+                          className="rounded-full bg-[rgba(0,201,167,0.1)] px-3 py-1 text-[10px] font-semibold uppercase tracking-widest text-[#00C9A7]"
                         >
                           {set.kg > 0 ? `${formatWeightNumber(set.kg, appSettings.weightUnit)}${weightUnitLabel}` : 'PC'} x {set.reps}
                         </span>
@@ -1606,8 +1606,8 @@ export default function TrainingSessionPage() {
                   </button>
                 ))
               ) : (
-                <div className="rounded-2xl border border-[#2A2F3D] bg-[#131313] p-5 text-sm text-[#A1A1A1]">
-                  No encontramos ejercicios que coincidan con tu búsqueda.
+                <div className="rounded-2xl border border-[#2A2F3D] bg-[#13263A] p-5 text-sm text-[#90A4B8]">
+                  No encontramos ejercicios que coincidan con tu bÃºsqueda.
                 </div>
               )}
             </div>
@@ -1623,25 +1623,25 @@ export default function TrainingSessionPage() {
             onClick={closeDatabaseExercisePicker}
             type="button"
           />
-          <div className="relative z-10 w-full rounded-t-[2rem] bg-[#1C2030] px-5 pb-6 pt-5">
+          <div className="relative z-10 w-full rounded-t-[2rem] bg-[#1A2D42] px-5 pb-6 pt-5">
             <div className="mx-auto mb-5 h-1.5 w-12 rounded-full bg-[#3A3F50]" />
-            <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[#12EFD3]">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[#00C9A7]">
               Base de ejercicios
             </p>
             <h3 className="mt-2 text-2xl font-bold tracking-tight text-white">Agregar Ejercicio</h3>
-            <p className="mt-2 text-sm text-[#A1A1A1]" style={{ fontFamily: "'Inter', sans-serif" }}>
+            <p className="mt-2 text-sm text-[#90A4B8]" style={{ fontFamily: "'Inter', sans-serif" }}>
               {isHistoryEditSession
-                ? 'Elegí ejercicios ya existentes en tus rutinas para sumarlos a esta sesión del historial.'
-                : 'Elegí ejercicios ya existentes en tus rutinas para sumarlos a este entrenamiento libre.'}
+                ? 'ElegÃ­ ejercicios ya existentes en tus rutinas para sumarlos a esta sesiÃ³n del historial.'
+                : 'ElegÃ­ ejercicios ya existentes en tus rutinas para sumarlos a este entrenamiento libre.'}
             </p>
 
-            <div className="mt-5 rounded-2xl border border-[#2A2F3D] bg-[#131313] px-4 py-3">
+            <div className="mt-5 rounded-2xl border border-[#2A2F3D] bg-[#13263A] px-4 py-3">
               <div className="flex items-center gap-3">
                 <Search size={16} className="text-[#7E8799]" />
                 <input
                   value={databaseQuery}
                   onChange={(event) => setDatabaseQuery(event.target.value)}
-                  placeholder="Buscar por ejercicio, músculo o implemento"
+                  placeholder="Buscar por ejercicio, mÃºsculo o implemento"
                   className="w-full bg-transparent text-sm text-white outline-none placeholder:text-[#7E8799]"
                   style={{ fontFamily: "'Inter', sans-serif" }}
                 />
@@ -1654,18 +1654,18 @@ export default function TrainingSessionPage() {
                   <button
                     key={exercise.name}
                     onClick={() => addDatabaseExercise(exercise)}
-                    className="rounded-2xl border border-[#2A2F3D] bg-[#131313] p-4 text-left"
+                    className="rounded-2xl border border-[#2A2F3D] bg-[#13263A] p-4 text-left"
                     type="button"
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div>
                         <p className="text-lg font-bold text-white">{exercise.name}</p>
-                        <p className="mt-1 text-sm text-[#A1A1A1]" style={{ fontFamily: "'Inter', sans-serif" }}>
+                        <p className="mt-1 text-sm text-[#90A4B8]" style={{ fontFamily: "'Inter', sans-serif" }}>
                           {exercise.muscle}
                           {exercise.implement ? ` - ${exercise.implement}` : ''}
                         </p>
                       </div>
-                      <div className="rounded-full bg-[rgba(18,239,211,0.1)] px-3 py-1 text-[10px] font-semibold uppercase tracking-widest text-[#12EFD3]">
+                      <div className="rounded-full bg-[rgba(0,201,167,0.1)] px-3 py-1 text-[10px] font-semibold uppercase tracking-widest text-[#00C9A7]">
                         Agregar
                       </div>
                     </div>
@@ -1674,7 +1674,7 @@ export default function TrainingSessionPage() {
                       {exercise.sets.slice(0, 3).map((set, index) => (
                         <span
                           key={`${exercise.name}-${index}`}
-                          className="rounded-full bg-[rgba(18,239,211,0.1)] px-3 py-1 text-[10px] font-semibold uppercase tracking-widest text-[#12EFD3]"
+                          className="rounded-full bg-[rgba(0,201,167,0.1)] px-3 py-1 text-[10px] font-semibold uppercase tracking-widest text-[#00C9A7]"
                         >
                           {set.kg > 0 ? `${formatWeightNumber(set.kg, appSettings.weightUnit)}${weightUnitLabel}` : 'PC'} x {set.reps}
                         </span>
@@ -1683,8 +1683,8 @@ export default function TrainingSessionPage() {
                   </button>
                 ))
               ) : (
-                <div className="rounded-2xl border border-[#2A2F3D] bg-[#131313] p-5 text-sm text-[#A1A1A1]">
-                  No hay ejercicios disponibles para agregar con esa búsqueda.
+                <div className="rounded-2xl border border-[#2A2F3D] bg-[#13263A] p-5 text-sm text-[#90A4B8]">
+                  No hay ejercicios disponibles para agregar con esa bÃºsqueda.
                 </div>
               )}
             </div>
@@ -1700,16 +1700,16 @@ export default function TrainingSessionPage() {
             onClick={closeAddExercise}
             type="button"
           />
-          <div className="relative z-10 w-full rounded-t-[2rem] bg-[#1C2030] px-5 pb-6 pt-5">
+          <div className="relative z-10 w-full rounded-t-[2rem] bg-[#1A2D42] px-5 pb-6 pt-5">
             <div className="mx-auto mb-5 h-1.5 w-12 rounded-full bg-[#3A3F50]" />
             <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[#F5B942]">
-              {isHistoryEditSession ? 'Edición del historial' : 'Sesión libre'}
+              {isHistoryEditSession ? 'EdiciÃ³n del historial' : 'SesiÃ³n libre'}
             </p>
             <h3 className="mt-2 text-2xl font-bold tracking-tight text-white">Agregar Nuevo Ejercicio</h3>
             <p className="mt-2 text-sm text-[#D8C9A1]" style={{ fontFamily: "'Inter', sans-serif" }}>
               {isHistoryEditSession
-                ? 'Cargá el ejercicio para completar o corregir esta sesión guardada.'
-                : 'Cargá el ejercicio para empezar o seguir tu entrenamiento libre.'}
+                ? 'CargÃ¡ el ejercicio para completar o corregir esta sesiÃ³n guardada.'
+                : 'CargÃ¡ el ejercicio para empezar o seguir tu entrenamiento libre.'}
             </p>
 
             <div className="mt-6 flex flex-col gap-4">
@@ -1725,7 +1725,7 @@ export default function TrainingSessionPage() {
                   value={newExerciseName}
                   onChange={(event) => setNewExerciseName(event.target.value)}
                   placeholder="Ej. Press militar con mancuernas"
-                  className="w-full rounded-2xl border border-[rgba(245,185,66,0.16)] bg-[#131313] px-4 py-3 text-white outline-none transition-colors focus:border-[rgba(245,185,66,0.4)]"
+                  className="w-full rounded-2xl border border-[rgba(245,185,66,0.16)] bg-[#13263A] px-4 py-3 text-white outline-none transition-colors focus:border-[rgba(245,185,66,0.4)]"
                   style={{ fontFamily: "'Inter', sans-serif" }}
                 />
               </div>
@@ -1735,14 +1735,14 @@ export default function TrainingSessionPage() {
                   htmlFor="manual-exercise-muscle"
                   className="mb-2 block text-[10px] font-semibold uppercase tracking-widest text-[#F5B942]"
                 >
-                  Músculo principal
+                  MÃºsculo principal
                 </label>
                 <input
                   id="manual-exercise-muscle"
                   value={newExerciseMuscle}
                   onChange={(event) => setNewExerciseMuscle(event.target.value)}
                   placeholder="Ej. Hombros"
-                  className="w-full rounded-2xl border border-[rgba(245,185,66,0.16)] bg-[#131313] px-4 py-3 text-white outline-none transition-colors focus:border-[rgba(245,185,66,0.4)]"
+                  className="w-full rounded-2xl border border-[rgba(245,185,66,0.16)] bg-[#13263A] px-4 py-3 text-white outline-none transition-colors focus:border-[rgba(245,185,66,0.4)]"
                   style={{ fontFamily: "'Inter', sans-serif" }}
                 />
               </div>
@@ -1759,7 +1759,7 @@ export default function TrainingSessionPage() {
                   value={newExerciseImplement}
                   onChange={(event) => setNewExerciseImplement(event.target.value)}
                   placeholder="Opcional"
-                  className="w-full rounded-2xl border border-[rgba(245,185,66,0.16)] bg-[#131313] px-4 py-3 text-white outline-none transition-colors focus:border-[rgba(245,185,66,0.4)]"
+                  className="w-full rounded-2xl border border-[rgba(245,185,66,0.16)] bg-[#13263A] px-4 py-3 text-white outline-none transition-colors focus:border-[rgba(245,185,66,0.4)]"
                   style={{ fontFamily: "'Inter', sans-serif" }}
                 />
               </div>
@@ -1775,7 +1775,7 @@ export default function TrainingSessionPage() {
                 </button>
                 <button
                   onClick={closeAddExercise}
-                  className="w-full rounded-2xl bg-[#131313] py-4 font-semibold text-white"
+                  className="w-full rounded-2xl bg-[#13263A] py-4 font-semibold text-white"
                   type="button"
                 >
                   Cancelar
@@ -1794,27 +1794,27 @@ export default function TrainingSessionPage() {
             onClick={() => setShowRestConfig(false)}
             type="button"
           />
-          <div className="relative z-10 w-full max-w-sm rounded-3xl bg-[#1C2030] p-6">
+          <div className="relative z-10 w-full max-w-sm rounded-3xl bg-[#1A2D42] p-6">
             <h3 className="text-center text-2xl font-bold text-white">Configurar descanso</h3>
-            <p className="mt-2 text-center text-sm text-[#A1A1A1]" style={{ fontFamily: "'Inter', sans-serif" }}>
-              Ajustá cuántos segundos querés entre series.
+            <p className="mt-2 text-center text-sm text-[#90A4B8]" style={{ fontFamily: "'Inter', sans-serif" }}>
+              AjustÃ¡ cuÃ¡ntos segundos querÃ©s entre series.
             </p>
 
             <div className="mt-6 flex items-center justify-center gap-4">
               <button
                 onClick={() => setRestConfig((value) => Math.max(15, value - 15))}
-                className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#131313] text-2xl text-white"
+                className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#13263A] text-2xl text-white"
                 type="button"
               >
                 -
               </button>
-              <div className="min-w-[8rem] rounded-2xl border border-[rgba(18,239,211,0.16)] bg-[#131313] px-4 py-4 text-center">
+              <div className="min-w-[8rem] rounded-2xl border border-[rgba(0,201,167,0.16)] bg-[#13263A] px-4 py-4 text-center">
                 <span className="text-3xl font-bold text-white">{restConfig}</span>
-                <span className="ml-1 text-sm font-semibold uppercase tracking-widest text-[#12EFD3]">seg</span>
+                <span className="ml-1 text-sm font-semibold uppercase tracking-widest text-[#00C9A7]">seg</span>
               </div>
               <button
                 onClick={() => setRestConfig((value) => Math.min(600, value + 15))}
-                className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#131313] text-2xl text-white"
+                className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#13263A] text-2xl text-white"
                 type="button"
               >
                 +
@@ -1827,14 +1827,14 @@ export default function TrainingSessionPage() {
                   setRestTime(restConfig);
                   setShowRestConfig(false);
                 }}
-                className="w-full rounded-2xl bg-[#12EFD3] py-4 font-bold text-black"
+                className="w-full rounded-2xl bg-[#00C9A7] py-4 font-bold text-black"
                 type="button"
               >
                 Guardar descanso
               </button>
               <button
                 onClick={() => setShowRestConfig(false)}
-                className="w-full rounded-2xl bg-[#131313] py-4 font-semibold text-white"
+                className="w-full rounded-2xl bg-[#13263A] py-4 font-semibold text-white"
                 type="button"
               >
                 Cancelar
@@ -1847,25 +1847,25 @@ export default function TrainingSessionPage() {
       {showFinishModal && (
         <div className="absolute inset-0 z-40 flex items-center justify-center px-5">
           <button
-            aria-label="Cerrar finalización"
+            aria-label="Cerrar finalizaciÃ³n"
             className="absolute inset-0 bg-black/70"
             onClick={() => setShowFinishModal(false)}
             type="button"
           />
-          <div className="relative z-10 w-full max-w-sm rounded-3xl bg-[#1C2030] p-6">
+          <div className="relative z-10 w-full max-w-sm rounded-3xl bg-[#1A2D42] p-6">
             <h3 className="text-center text-3xl font-bold tracking-tight text-white">
-              {isHistoryEditSession ? '¿Guardar cambios de la sesión?' : '¿Finalizar entrenamiento?'}
+              {isHistoryEditSession ? 'Â¿Guardar cambios de la sesiÃ³n?' : 'Â¿Finalizar entrenamiento?'}
             </h3>
             <p className="mt-3 text-center text-base text-[#D4D4D4]" style={{ fontFamily: "'Inter', sans-serif" }}>
               {isHistoryEditSession
-                ? `Vas a actualizar esta sesión con ${totalSetsCompleted}/${totalSets} series completas en ${formatTime(elapsed)} totales.`
+                ? `Vas a actualizar esta sesiÃ³n con ${totalSetsCompleted}/${totalSets} series completas en ${formatTime(elapsed)} totales.`
                 : `Llevas ${formatTime(elapsed)} entrenando y completaste ${totalSetsCompleted}/${totalSets} series.`}
             </p>
             {!hasExercises && (
               <p className="mt-3 text-center text-sm text-[#F5B942]" style={{ fontFamily: "'Inter', sans-serif" }}>
                 {isHistoryEditSession
-                  ? 'Agregá al menos un ejercicio para guardar los cambios, o descartalos.'
-                  : 'Agregá al menos un ejercicio para guardar esta sesión, o descartala.'}
+                  ? 'AgregÃ¡ al menos un ejercicio para guardar los cambios, o descartalos.'
+                  : 'AgregÃ¡ al menos un ejercicio para guardar esta sesiÃ³n, o descartala.'}
               </p>
             )}
 
@@ -1900,17 +1900,17 @@ export default function TrainingSessionPage() {
       {showDeleteSessionModal && historicalSession && (
         <div className="absolute inset-0 z-40 flex items-center justify-center px-5">
           <button
-            aria-label="Cerrar confirmación de borrado"
+            aria-label="Cerrar confirmaciÃ³n de borrado"
             className="absolute inset-0 bg-black/70"
             onClick={() => setShowDeleteSessionModal(false)}
             type="button"
           />
-          <div className="relative z-10 w-full max-w-sm rounded-3xl bg-[#1C2030] p-6">
+          <div className="relative z-10 w-full max-w-sm rounded-3xl bg-[#1A2D42] p-6">
             <h3 className="text-center text-3xl font-bold tracking-tight text-white">
-              ¿Estás seguro de eliminar este entrenamiento?
+              Â¿EstÃ¡s seguro de eliminar este entrenamiento?
             </h3>
             <p className="mt-3 text-center text-base text-[#D4D4D4]" style={{ fontFamily: "'Inter', sans-serif" }}>
-              Vas a borrar esta sesión del historial y no se va a poder recuperar.
+              Vas a borrar esta sesiÃ³n del historial y no se va a poder recuperar.
             </p>
 
             <div className="mt-6 flex flex-col gap-3">
@@ -1919,7 +1919,7 @@ export default function TrainingSessionPage() {
                 className="w-full rounded-2xl bg-[#F43A33] py-4 font-bold text-white"
                 type="button"
               >
-                Sí, eliminar entrenamiento
+                SÃ­, eliminar entrenamiento
               </button>
               <button
                 onClick={() => setShowDeleteSessionModal(false)}

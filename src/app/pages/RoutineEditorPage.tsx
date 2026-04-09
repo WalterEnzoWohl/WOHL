@@ -5,7 +5,7 @@ import { ActiveWorkoutEditLockModal } from '../components/ActiveWorkoutEditLockM
 import { Header } from '../components/Header';
 import { useAppData } from '../data/AppDataContext';
 
-const muscleOptions = ['Todos', 'Pecho', 'Espalda', 'Hombros', 'Tríceps', 'Bíceps', 'Piernas', 'Core', 'Full Body'];
+const muscleOptions = ['Todos', 'Pecho', 'Espalda', 'Hombros', 'TrÃ­ceps', 'BÃ­ceps', 'Piernas', 'Core', 'Full Body'];
 
 const exerciseLibrary = [
   { name: 'Bench Press (Barra)', muscle: 'Pecho' },
@@ -15,14 +15,14 @@ const exerciseLibrary = [
   { name: 'Elevaciones Laterales', muscle: 'Hombros' },
   { name: 'Dominadas', muscle: 'Espalda' },
   { name: 'Remo con Barra', muscle: 'Espalda' },
-  { name: 'Jalón al Pecho', muscle: 'Espalda' },
+  { name: 'JalÃ³n al Pecho', muscle: 'Espalda' },
   { name: 'Sentadilla', muscle: 'Piernas' },
   { name: 'Peso Muerto', muscle: 'Piernas' },
   { name: 'Prensa de Piernas', muscle: 'Piernas' },
-  { name: 'Curl con Barra', muscle: 'Bíceps' },
-  { name: 'Curl Martillo', muscle: 'Bíceps' },
-  { name: 'Extensiones Tríceps', muscle: 'Tríceps' },
-  { name: 'Rompe Cráneos', muscle: 'Tríceps' },
+  { name: 'Curl con Barra', muscle: 'BÃ­ceps' },
+  { name: 'Curl Martillo', muscle: 'BÃ­ceps' },
+  { name: 'Extensiones TrÃ­ceps', muscle: 'TrÃ­ceps' },
+  { name: 'Rompe CrÃ¡neos', muscle: 'TrÃ­ceps' },
   { name: 'Plancha', muscle: 'Core' },
 ];
 
@@ -45,7 +45,7 @@ export default function RoutineEditorPage() {
         sets: ex.sets.length,
         reps: ex.sets[0]?.reps || 10,
       })),
-    })) || [{ name: 'Día 1', exercises: [] }]
+    })) || [{ name: 'DÃ­a 1', exercises: [] }]
   );
   const [expandedDay, setExpandedDay] = useState<number>(0);
   const [showExSearch, setShowExSearch] = useState<number | null>(null);
@@ -59,7 +59,7 @@ export default function RoutineEditorPage() {
   });
 
   const addDay = () => {
-    setDays((prev) => [...prev, { name: `Día ${prev.length + 1}`, exercises: [] }]);
+    setDays((prev) => [...prev, { name: `DÃ­a ${prev.length + 1}`, exercises: [] }]);
   };
 
   const addExercise = (dayIdx: number, exName: string, muscle: string) => {
@@ -100,15 +100,15 @@ export default function RoutineEditorPage() {
       id: existing?.id ?? 0,
       name: name.trim() || 'Nueva rutina',
       daysPerWeek,
-      color: existing?.color ?? '#12EFD3',
+      color: existing?.color ?? '#00C9A7',
       categories: existing?.categories ?? [],
-      description: existing?.description ?? 'Rutina personalizada creada en GYMUP.',
+      description: existing?.description ?? 'Rutina personalizada creada en WOHL.',
       tags: existing?.tags ?? ['PERSONALIZADA'],
       avgMinutes: existing?.avgMinutes ?? 75,
       days: days.map((day, dayIndex) => ({
         id: existing?.days[dayIndex]?.id,
         name: day.name,
-        focus: day.exercises.map((exercise) => exercise.muscle).slice(0, 3).join(', ') || 'Sesión personalizada',
+        focus: day.exercises.map((exercise) => exercise.muscle).slice(0, 3).join(', ') || 'SesiÃ³n personalizada',
         description: existing?.days[dayIndex]?.description ?? undefined,
         exercises: day.exercises.map((exercise, exerciseIndex) => ({
           id: existing?.days[dayIndex]?.exercises[exerciseIndex]?.id ?? exerciseIndex + 1,
@@ -140,7 +140,7 @@ export default function RoutineEditorPage() {
         <div className="flex flex-col gap-5 px-5 py-5 pb-6">
         {/* Name input */}
         <div>
-          <label className="text-[#ADAAAA] text-xs uppercase tracking-widest font-semibold mb-2 block" style={{ fontFamily: "'Inter', sans-serif" }}>
+          <label className="text-[#9BAEC1] text-xs uppercase tracking-widest font-semibold mb-2 block" style={{ fontFamily: "'Inter', sans-serif" }}>
             Nombre de la Rutina
           </label>
           <input
@@ -148,15 +148,15 @@ export default function RoutineEditorPage() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="ej. Upper / Lower Volumen..."
-            className="w-full bg-[#131313] border border-[#262626] rounded-xl px-4 py-3 text-white text-base outline-none focus:border-[rgba(18,239,211,0.4)] transition-colors"
+            className="w-full bg-[#13263A] border border-[#203347] rounded-xl px-4 py-3 text-white text-base outline-none focus:border-[rgba(0,201,167,0.4)] transition-colors"
             style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
           />
         </div>
 
         {/* Frequency selector */}
         <div>
-          <label className="text-[#ADAAAA] text-xs uppercase tracking-widest font-semibold mb-3 block" style={{ fontFamily: "'Inter', sans-serif" }}>
-            Días por semana
+          <label className="text-[#9BAEC1] text-xs uppercase tracking-widest font-semibold mb-3 block" style={{ fontFamily: "'Inter', sans-serif" }}>
+            DÃ­as por semana
           </label>
           <div className="flex gap-2">
             {[2, 3, 4, 5, 6, 7].map((d) => (
@@ -165,8 +165,8 @@ export default function RoutineEditorPage() {
                 onClick={() => setDaysPerWeek(d)}
                 className={`w-10 h-10 rounded-xl font-bold text-sm transition-all ${
                   daysPerWeek === d
-                    ? 'bg-[#12EFD3] text-black'
-                    : 'bg-[#1C2030] text-[#ADAAAA] border border-[#262626]'
+                    ? 'bg-[#00C9A7] text-black'
+                    : 'bg-[#1A2D42] text-[#9BAEC1] border border-[#203347]'
                 }`}
               >
                 {d}
@@ -178,21 +178,21 @@ export default function RoutineEditorPage() {
         {/* Days / Exercises */}
         <div>
           <div className="flex items-center justify-between mb-3">
-            <label className="text-[#ADAAAA] text-xs uppercase tracking-widest font-semibold" style={{ fontFamily: "'Inter', sans-serif" }}>
-              Días de entrenamiento
+            <label className="text-[#9BAEC1] text-xs uppercase tracking-widest font-semibold" style={{ fontFamily: "'Inter', sans-serif" }}>
+              DÃ­as de entrenamiento
             </label>
             <button
               onClick={addDay}
-              className="flex items-center gap-1 text-[#12EFD3] text-xs font-semibold"
+              className="flex items-center gap-1 text-[#00C9A7] text-xs font-semibold"
             >
               <Plus size={14} />
-              Añadir día
+              AÃ±adir dÃ­a
             </button>
           </div>
 
           <div className="flex flex-col gap-3">
             {days.map((day, dayIdx) => (
-              <div key={dayIdx} className="bg-[#131313] rounded-2xl border border-[#262626] overflow-hidden">
+              <div key={dayIdx} className="bg-[#13263A] rounded-2xl border border-[#203347] overflow-hidden">
                 <button
                   onClick={() => setExpandedDay(expandedDay === dayIdx ? -1 : dayIdx)}
                   className="w-full flex items-center justify-between px-4 py-4"
@@ -211,30 +211,30 @@ export default function RoutineEditorPage() {
                       onClick={(e) => e.stopPropagation()}
                       className="bg-transparent text-white font-semibold text-base outline-none"
                     />
-                    <p className="text-[#ADAAAA] text-xs mt-0.5" style={{ fontFamily: "'Inter', sans-serif" }}>
+                    <p className="text-[#9BAEC1] text-xs mt-0.5" style={{ fontFamily: "'Inter', sans-serif" }}>
                       {day.exercises.length} ejercicios
                     </p>
                   </div>
                   {expandedDay === dayIdx ? (
-                    <ChevronUp size={16} className="text-[#ADAAAA]" />
+                    <ChevronUp size={16} className="text-[#9BAEC1]" />
                   ) : (
-                    <ChevronDown size={16} className="text-[#ADAAAA]" />
+                    <ChevronDown size={16} className="text-[#9BAEC1]" />
                   )}
                 </button>
 
                 {expandedDay === dayIdx && (
-                  <div className="border-t border-[#262626] px-4 pb-4">
+                  <div className="border-t border-[#203347] px-4 pb-4">
                     {day.exercises.length === 0 ? (
-                      <p className="text-[#ADAAAA] text-sm text-center py-4" style={{ fontFamily: "'Inter', sans-serif" }}>
-                        No hay ejercicios. Añade uno.
+                      <p className="text-[#9BAEC1] text-sm text-center py-4" style={{ fontFamily: "'Inter', sans-serif" }}>
+                        No hay ejercicios. AÃ±ade uno.
                       </p>
                     ) : (
                       <div className="flex flex-col gap-2 mt-3">
                         {day.exercises.map((ex, exIdx) => (
-                          <div key={exIdx} className="flex items-center gap-3 bg-[#1C2030] rounded-xl px-3 py-3">
+                          <div key={exIdx} className="flex items-center gap-3 bg-[#1A2D42] rounded-xl px-3 py-3">
                             <div className="flex-1">
                               <p className="text-white text-sm font-semibold">{ex.name}</p>
-                              <p className="text-[#ADAAAA] text-xs" style={{ fontFamily: "'Inter', sans-serif" }}>{ex.muscle}</p>
+                              <p className="text-[#9BAEC1] text-xs" style={{ fontFamily: "'Inter', sans-serif" }}>{ex.muscle}</p>
                             </div>
                             <div className="flex items-center gap-2">
                               <div className="flex items-center gap-1">
@@ -242,14 +242,14 @@ export default function RoutineEditorPage() {
                                   type="number"
                                   value={ex.sets}
                                   onChange={(e) => updateExercise(dayIdx, exIdx, 'sets', Number(e.target.value))}
-                                  className="w-8 bg-[#262626] text-white text-xs text-center rounded-lg py-1 outline-none"
+                                  className="w-8 bg-[#203347] text-white text-xs text-center rounded-lg py-1 outline-none"
                                 />
-                                <span className="text-[#ADAAAA] text-xs">×</span>
+                                <span className="text-[#9BAEC1] text-xs">Ã—</span>
                                 <input
                                   type="number"
                                   value={ex.reps}
                                   onChange={(e) => updateExercise(dayIdx, exIdx, 'reps', Number(e.target.value))}
-                                  className="w-8 bg-[#262626] text-white text-xs text-center rounded-lg py-1 outline-none"
+                                  className="w-8 bg-[#203347] text-white text-xs text-center rounded-lg py-1 outline-none"
                                 />
                               </div>
                               <button onClick={() => removeExercise(dayIdx, exIdx)}>
@@ -262,10 +262,10 @@ export default function RoutineEditorPage() {
                     )}
                     <button
                       onClick={() => setShowExSearch(dayIdx)}
-                      className="w-full mt-3 flex items-center justify-center gap-2 border border-dashed border-[rgba(18,239,211,0.3)] rounded-xl py-3 text-[#12EFD3] text-sm font-semibold"
+                      className="w-full mt-3 flex items-center justify-center gap-2 border border-dashed border-[rgba(0,201,167,0.3)] rounded-xl py-3 text-[#00C9A7] text-sm font-semibold"
                     >
                       <Plus size={14} />
-                      Añadir Ejercicio
+                      AÃ±adir Ejercicio
                     </button>
                   </div>
                 )}
@@ -277,7 +277,7 @@ export default function RoutineEditorPage() {
         {/* Save button */}
         <button
           onClick={() => void handleSave()}
-          className="w-full bg-[#12EFD3] rounded-2xl py-4 flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(18,239,211,0.2)]"
+          className="w-full bg-[#00C9A7] rounded-2xl py-4 flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(0,201,167,0.2)]"
         >
           <Save size={18} className="text-black" />
           <span className="text-black font-bold text-base">Guardar Rutina</span>
@@ -293,19 +293,19 @@ export default function RoutineEditorPage() {
           <div className="absolute inset-0 bg-black/60" onClick={() => setShowExSearch(null)} />
           <div
             className="absolute bottom-0 left-0 right-0 rounded-t-3xl flex flex-col"
-            style={{ background: '#1C2030', maxHeight: '80%' }}
+            style={{ background: '#1A2D42', maxHeight: '80%' }}
           >
-            <div className="w-10 h-1 bg-[#262626] rounded-full mx-auto mt-4 mb-3 flex-shrink-0" />
+            <div className="w-10 h-1 bg-[#203347] rounded-full mx-auto mt-4 mb-3 flex-shrink-0" />
             <div className="px-5 pb-4 flex-shrink-0">
               <h3 className="text-white font-bold text-lg mb-3">Buscar Ejercicio</h3>
               <div className="relative mb-3">
-                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#ADAAAA]" />
+                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9BAEC1]" />
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Buscar ejercicio..."
-                  className="w-full bg-[#262626] rounded-xl pl-9 pr-4 py-3 text-white text-sm outline-none border border-[#333]"
+                  className="w-full bg-[#203347] rounded-xl pl-9 pr-4 py-3 text-white text-sm outline-none border border-[#333]"
                   autoFocus
                 />
               </div>
@@ -316,8 +316,8 @@ export default function RoutineEditorPage() {
                     onClick={() => setSelectedMuscle(m)}
                     className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap flex-shrink-0 transition-all ${
                       selectedMuscle === m
-                        ? 'bg-[#12EFD3] text-black'
-                        : 'bg-[#262626] text-[#ADAAAA]'
+                        ? 'bg-[#00C9A7] text-black'
+                        : 'bg-[#203347] text-[#9BAEC1]'
                     }`}
                   >
                     {m}
@@ -331,13 +331,13 @@ export default function RoutineEditorPage() {
                   <button
                     key={ex.name}
                     onClick={() => addExercise(showExSearch, ex.name, ex.muscle)}
-                    className="flex items-center justify-between bg-[#262626] rounded-xl px-4 py-3 text-left hover:bg-[#333] transition-colors"
+                    className="flex items-center justify-between bg-[#203347] rounded-xl px-4 py-3 text-left hover:bg-[#333] transition-colors"
                   >
                     <div>
                       <p className="text-white text-sm font-medium">{ex.name}</p>
-                      <p className="text-[#ADAAAA] text-xs" style={{ fontFamily: "'Inter', sans-serif" }}>{ex.muscle}</p>
+                      <p className="text-[#9BAEC1] text-xs" style={{ fontFamily: "'Inter', sans-serif" }}>{ex.muscle}</p>
                     </div>
-                    <Plus size={16} className="text-[#12EFD3] flex-shrink-0" />
+                    <Plus size={16} className="text-[#00C9A7] flex-shrink-0" />
                   </button>
                 ))}
               </div>

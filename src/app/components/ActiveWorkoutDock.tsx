@@ -97,7 +97,7 @@ export function ActiveWorkoutDock() {
                 <span className="text-lg font-semibold text-[#D8D8D8]">{formatElapsed(elapsed)}</span>
               </div>
               <p
-                className="mt-1 truncate text-sm text-[#A1A1A1]"
+                className="mt-1 truncate text-sm text-[#90A4B8]"
                 style={{ fontFamily: "'Inter', sans-serif" }}
               >
                 {currentExerciseName}
@@ -118,7 +118,7 @@ export function ActiveWorkoutDock() {
             <div className="grid grid-cols-2 gap-3 border-t border-[rgba(255,255,255,0.06)] px-3 pb-3 pt-3">
               <button
                 onClick={() => navigate('/session')}
-                className="flex items-center justify-center gap-2 rounded-2xl bg-[#12EFD3] py-3 font-bold text-black"
+                className="flex items-center justify-center gap-2 rounded-2xl bg-[#00C9A7] py-3 font-bold text-black"
                 type="button"
               >
                 <Play size={16} className="text-black" />
@@ -126,10 +126,10 @@ export function ActiveWorkoutDock() {
               </button>
               <button
                 onClick={() => navigate('/session', { state: { action: 'finish' } })}
-                className="flex items-center justify-center gap-2 rounded-2xl bg-[#1C2030] py-3 font-semibold text-white"
+                className="flex items-center justify-center gap-2 rounded-2xl bg-[#1A2D42] py-3 font-semibold text-white"
                 type="button"
               >
-                <Square size={16} className="text-[#12EFD3]" />
+                <Square size={16} className="text-[#00C9A7]" />
                 Finalizar
               </button>
             </div>
@@ -140,20 +140,20 @@ export function ActiveWorkoutDock() {
       {showDiscardConfirm && (
         <div className="absolute inset-0 z-50 flex items-center justify-center px-5">
           <button
-            aria-label="Cerrar confirmación de descarte"
+            aria-label="Cerrar confirmaciÃ³n de descarte"
             className="absolute inset-0 bg-black/70"
             onClick={() => setShowDiscardConfirm(false)}
             type="button"
           />
-          <div className="relative w-full max-w-sm rounded-3xl bg-[#1C2030] p-6 shadow-[0_24px_80px_rgba(0,0,0,0.45)]">
+          <div className="relative w-full max-w-sm rounded-3xl bg-[#1A2D42] p-6 shadow-[0_24px_80px_rgba(0,0,0,0.45)]">
             <h3 className="text-center text-3xl font-bold tracking-tight text-white">
-              ¿Estás seguro de descartar el entrenamiento?
+              Â¿EstÃ¡s seguro de descartar el entrenamiento?
             </h3>
             <p
               className="mt-3 text-center text-base text-[#D4D4D4]"
               style={{ fontFamily: "'Inter', sans-serif" }}
             >
-              Vas a perder la sesión activa y todos los cambios que todavía no guardaste.
+              Vas a perder la sesiÃ³n activa y todos los cambios que todavÃ­a no guardaste.
             </p>
 
             <div className="mt-6 flex flex-col gap-3">
@@ -162,7 +162,7 @@ export function ActiveWorkoutDock() {
                 className="w-full rounded-2xl bg-[#F43A33] py-4 font-bold text-white"
                 type="button"
               >
-                Sí, descartar entrenamiento
+                SÃ­, descartar entrenamiento
               </button>
               <button
                 onClick={() => setShowDiscardConfirm(false)}

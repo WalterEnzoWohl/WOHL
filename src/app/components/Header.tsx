@@ -1,8 +1,9 @@
 import type { ReactNode } from 'react'
 import { ArrowLeft } from 'lucide-react'
 import { useNavigate } from 'react-router'
-import { brandLogoWhite } from '@/assets'
+import { brandLogoBlack, brandLogoWhite } from '@/assets'
 import { UserAvatar } from './UserAvatar'
+import { useAppData } from '../data/AppDataContext'
 
 interface HeaderProps {
   showBack?: boolean
@@ -14,9 +15,11 @@ interface HeaderProps {
 
 export function Header({ showBack, backLabel, title, rightContent, onBack }: HeaderProps) {
   const navigate = useNavigate()
+  const { appSettings } = useAppData()
   const resolvedRightContent = rightContent !== undefined ? rightContent : (
     <UserAvatar />
   )
+  const brandLogo = appSettings.theme === 'light' ? brandLogoBlack : brandLogoWhite
 
   const handleBack = () => {
     if (onBack) onBack()
@@ -25,14 +28,14 @@ export function Header({ showBack, backLabel, title, rightContent, onBack }: Hea
 
   return (
     <div
-      className="shrink-0 h-16 flex items-center px-4 border-b border-[#262626] z-20"
-      style={{ background: '#0E0E0E' }}
+      className="shrink-0 h-16 flex items-center px-4 border-b border-[#203347] z-20"
+      style={{ background: '#0B1F33' }}
     >
       <div className="flex flex-1 items-center">
         {showBack ? (
           <button
             onClick={handleBack}
-            className="flex items-center gap-2 text-[#A1A1A1] hover:text-white transition-colors"
+            className="flex items-center gap-2 text-[#90A4B8] hover:text-white transition-colors"
           >
             <ArrowLeft size={20} />
             {backLabel && (
@@ -46,7 +49,7 @@ export function Header({ showBack, backLabel, title, rightContent, onBack }: Hea
           </button>
         ) : (
           <div className="-ml-1 flex h-16 w-16 items-center justify-center overflow-visible">
-            <img src={brandLogoWhite} alt="GymUp" className="h-20 w-20 object-contain" />
+            <img src={brandLogo} alt="WOHL" className="theme-preserve h-20 w-20 object-contain" />
           </div>
         )}
       </div>
@@ -61,10 +64,10 @@ export function Header({ showBack, backLabel, title, rightContent, onBack }: Hea
           </span>
         ) : (
           <span
-            className="text-white font-extrabold text-2xl italic uppercase tracking-tight leading-none"
+            className="text-white font-black text-[1.9rem] uppercase tracking-[0.18em] leading-none"
             style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
           >
-            GYMUP
+            WOHL
           </span>
         )}
       </div>
