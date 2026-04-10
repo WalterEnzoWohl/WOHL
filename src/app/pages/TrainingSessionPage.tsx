@@ -1018,10 +1018,10 @@ export default function TrainingSessionPage() {
       style={{ background: '#102235', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
     >
       <div
-        className="h-16 shrink-0 border-b border-[#203347] px-5"
-        style={{ background: '#0B1F33' }}
+        className="shrink-0 border-b border-[#203347] px-5"
+        style={{ background: '#0B1F33', paddingTop: 'env(safe-area-inset-top)' }}
       >
-        <div className="flex h-full items-center justify-between">
+        <div className="flex h-16 items-center justify-between">
           <button
             className="-ml-2 p-2"
             onClick={() =>

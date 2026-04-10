@@ -124,6 +124,13 @@
     @apply border-border outline-ring/50;
   }
 
+  html,
+  body,
+  #root {
+    min-height: 100%;
+    background: #0b1f33;
+  }
+
   body {
     @apply bg-background text-foreground;
   }
