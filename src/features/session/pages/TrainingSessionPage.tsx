@@ -29,7 +29,6 @@ import {
   isBodyweightExercise,
   markExerciseSetsCompleted,
 } from '@/features/session/lib/sessionDrafts';
-import { UserAvatar } from '@/features/profile/components/UserAvatar';
 import { useAppData } from '@/core/app-data/AppDataContext';
 import type {
   ActiveWorkoutDraft,
@@ -476,7 +475,7 @@ export default function TrainingSessionPage() {
           return exercise;
         }
 
-        const previousValue = exercise.sets[setIdx]?.[field] ?? 0;
+        const suggestionField = field === 'kg' ? 'suggestedKg' : 'suggestedReps';
         const nextSets = exercise.sets.map((set, index) => {
           if (index === setIdx) {
             return { ...set, [field]: numericValue };
@@ -486,10 +485,13 @@ export default function TrainingSessionPage() {
             return set;
           }
 
-          const shouldPropagate =
-            !set.completed && (set[field] === 0 || set[field] === previousValue);
+          const shouldPropagate = !set.completed && set[field] === 0;
 
-          return shouldPropagate ? { ...set, [field]: numericValue } : set;
+          if (!shouldPropagate) {
+            return set;
+          }
+
+          return { ...set, [suggestionField]: numericValue };
         });
 
         return {
@@ -502,22 +504,24 @@ export default function TrainingSessionPage() {
 
   const buildNewSet = (targetExercise: ExerciseState, kind: SetState['kind'] = 'normal'): SetState => {
     const lastSet = targetExercise.sets[targetExercise.sets.length - 1];
-    const referenceKg = lastSet?.kg ?? 0;
-    const referenceReps = lastSet?.reps ?? 0;
+    const referenceKg = lastSet?.kg || lastSet?.suggestedKg || lastSet?.prevKg || 0;
+    const referenceReps = lastSet?.reps || lastSet?.suggestedReps || lastSet?.prevReps || 0;
 
     return {
       id: targetExercise.sets.length + 1,
-      kg:
-        kind === 'warmup'
-          ? referenceKg
-          : appSettings.autoWeightIncrement && referenceKg > 0
-          ? Number((referenceKg + getAutoWeightIncrementKg(appSettings.weightUnit)).toFixed(2))
-          : referenceKg,
-      reps: referenceReps,
+      kg: 0,
+      reps: 0,
       rpe: 0,
       completed: isHistoryEditSession,
       prevKg: lastSet?.prevKg ?? referenceKg,
       prevReps: lastSet?.prevReps ?? referenceReps,
+      suggestedKg:
+        kind === 'warmup'
+          ? referenceKg || undefined
+          : appSettings.autoWeightIncrement && referenceKg > 0
+          ? Number((referenceKg + getAutoWeightIncrementKg(appSettings.weightUnit)).toFixed(2))
+          : referenceKg || undefined,
+      suggestedReps: referenceReps || undefined,
       kind,
     };
   };
@@ -880,7 +884,7 @@ export default function TrainingSessionPage() {
       style={{ background: '#102235', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
     >
       <div
-        className="shrink-0 border-b border-[#203347] px-5"
+        className="sticky top-0 z-30 shrink-0 border-b border-[#203347] px-5 shadow-[0_10px_24px_rgba(0,0,0,0.18)]"
         style={{ background: '#0B1F33', paddingTop: 'var(--wohl-safe-top)' }}
       >
         <div className="flex h-16 items-center justify-between">
@@ -904,7 +908,14 @@ export default function TrainingSessionPage() {
                 {formatTime(elapsed)}
               </span>
             </div>
-            <UserAvatar className="h-9 w-9 overflow-hidden rounded-full border border-[rgba(0,201,167,0.2)]" imageClassName="theme-preserve h-full w-full object-cover" />
+            <button
+              onClick={() => setShowFinishModal(true)}
+              disabled={isSubmittingSession}
+              className="rounded-full border border-[rgba(0,201,167,0.22)] bg-[rgba(0,201,167,0.12)] px-3 py-2 text-[11px] font-bold uppercase tracking-[0.18em] text-[#00C9A7] transition-colors active:bg-[rgba(0,201,167,0.18)] disabled:opacity-45"
+              type="button"
+            >
+              {isHistoryEditSession ? 'Guardar' : 'Finalizar'}
+            </button>
           </div>
         </div>
       </div>
@@ -1103,6 +1114,21 @@ export default function TrainingSessionPage() {
                 </div>
               </div>
             </div>
+          )}
+          {hasExercises && (
+            <button
+              onClick={() => setShowFinishModal(true)}
+              disabled={isSubmittingSession}
+              className="flex w-full items-center justify-center gap-2 rounded-2xl border border-[rgba(0,201,167,0.18)] bg-[rgba(0,201,167,0.1)] py-4 transition-colors active:bg-[rgba(0,201,167,0.16)] disabled:opacity-45"
+              type="button"
+            >
+              <div className="flex h-4 w-4 items-center justify-center rounded-full border-2 border-[#00C9A7]/40">
+                <div className="h-1.5 w-1.5 rounded-full bg-[#00C9A7]" />
+              </div>
+              <span className="text-sm font-bold uppercase tracking-widest text-[#00C9A7]">
+                {isHistoryEditSession ? 'Guardar cambios' : 'Finalizar entrenamiento'}
+              </span>
+            </button>
           )}
         </div>
       </div>
@@ -1566,7 +1592,7 @@ export default function TrainingSessionPage() {
       )}
 
       {showFinishModal && (
-        <div className="absolute inset-0 z-40 flex items-center justify-center px-5">
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-5">
           <button
             aria-label="Cerrar finalización"
             className="absolute inset-0 bg-black/70"

@@ -52,10 +52,26 @@ export function TrainingExerciseCard({
 }: SessionExerciseCardProps) {
   const bodyweightExercise = isBodyweightExercise(exercise);
   const [weightDrafts, setWeightDrafts] = useState<Record<number, string>>({});
+  const [isHandleActive, setIsHandleActive] = useState(false);
 
   useEffect(() => {
     setWeightDrafts({});
   }, [exercise.id, weightUnit]);
+
+  useEffect(() => {
+    if (!isHandleActive) {
+      return;
+    }
+
+    const releaseHandle = () => setIsHandleActive(false);
+    window.addEventListener('pointerup', releaseHandle);
+    window.addEventListener('pointercancel', releaseHandle);
+
+    return () => {
+      window.removeEventListener('pointerup', releaseHandle);
+      window.removeEventListener('pointercancel', releaseHandle);
+    };
+  }, [isHandleActive]);
 
   const [{ isDragging }, drag] = useDrag(
     () => ({
@@ -109,6 +125,8 @@ export function TrainingExerciseCard({
     drop(element);
   };
 
+  const compactForReorder = isHandleActive || isDragging;
+
   return (
     <div
       id={htmlId}
@@ -117,12 +135,17 @@ export function TrainingExerciseCard({
         isDragging ? 'opacity-55 ring-2 ring-[rgba(0,201,167,0.3)]' : ''
       }`}
     >
-      <div className="flex items-start justify-between gap-3 px-4 py-4">
-        <div className="flex min-w-0 items-start gap-3">
+      <div className={`flex justify-between gap-3 px-4 ${compactForReorder ? 'items-center py-3' : 'items-start py-4'}`}>
+        <div className={`flex min-w-0 gap-3 ${compactForReorder ? 'items-center' : 'items-start'}`}>
           <button
             ref={drag}
-            onPointerDown={() => onExerciseFocus(exerciseIdx)}
-            className="mt-0.5 flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[rgba(0,81,71,0.2)] active:scale-[0.98]"
+            onPointerDown={() => {
+              onExerciseFocus(exerciseIdx);
+              setIsHandleActive(true);
+            }}
+            onPointerUp={() => setIsHandleActive(false)}
+            onPointerCancel={() => setIsHandleActive(false)}
+            className={`flex shrink-0 items-center justify-center rounded-xl bg-[rgba(0,81,71,0.2)] active:scale-[0.98] ${compactForReorder ? 'h-10 w-10' : 'mt-0.5 h-12 w-12'}`}
             type="button"
             aria-label={`Reordenar ${exercise.name}`}
           >
@@ -130,31 +153,37 @@ export function TrainingExerciseCard({
           </button>
 
           <div className="min-w-0">
-            <h2 className="text-xl font-bold italic uppercase leading-tight tracking-tight text-white">
+            <h2 className={`font-bold italic uppercase leading-tight tracking-tight text-white ${compactForReorder ? 'text-base' : 'text-xl'}`}>
               {exercise.name}
             </h2>
-            <p className="mt-0.5 text-xs text-[#9BAEC1]" style={{ fontFamily: "'Inter', sans-serif" }}>
-              Ejercicio {exerciseIdx + 1} de {totalExercises} - {exercise.muscle}
-              {exercise.implement ? ` - ${exercise.implement}` : ''}
-            </p>
+            {!compactForReorder && (
+              <p className="mt-0.5 text-xs text-[#9BAEC1]" style={{ fontFamily: "'Inter', sans-serif" }}>
+                Ejercicio {exerciseIdx + 1} de {totalExercises} - {exercise.muscle}
+                {exercise.implement ? ` - ${exercise.implement}` : ''}
+              </p>
+            )}
           </div>
         </div>
 
-        <button
-          onClick={(event) => {
-            onExerciseFocus(exerciseIdx);
-            onExerciseMenu(exerciseIdx, event.currentTarget.getBoundingClientRect());
-          }}
-          className={`rounded-lg p-2 transition-colors ${
-            currentExerciseIndex === exerciseIdx ? 'bg-[#203347]' : 'bg-[#1A2D42]'
-          }`}
-          type="button"
-          aria-label={`Abrir acciones de ${exercise.name}`}
-        >
-          <MoreVertical size={16} className="text-white" />
-        </button>
+        {!compactForReorder && (
+          <button
+            onClick={(event) => {
+              onExerciseFocus(exerciseIdx);
+              onExerciseMenu(exerciseIdx, event.currentTarget.getBoundingClientRect());
+            }}
+            className={`rounded-lg p-2 transition-colors ${
+              currentExerciseIndex === exerciseIdx ? 'bg-[#203347]' : 'bg-[#1A2D42]'
+            }`}
+            type="button"
+            aria-label={`Abrir acciones de ${exercise.name}`}
+          >
+            <MoreVertical size={16} className="text-white" />
+          </button>
+        )}
       </div>
 
+      {!compactForReorder && (
+        <>
       <div className="px-4 pb-4">
         <label
           htmlFor={`${htmlId}-notes`}
@@ -206,11 +235,11 @@ export function TrainingExerciseCard({
       <div>
         {exercise.sets.map((set, setIdx) => {
           const weightDraft = weightDrafts[set.id];
+          const suggestedWeight = set.suggestedKg ?? (showPreviousWeight ? set.prevKg : 0);
+          const suggestedReps = set.suggestedReps ?? (showPreviousWeight ? set.prevReps : 0);
           const weightPlaceholder =
-            !bodyweightExercise && showPreviousWeight && set.prevKg > 0
-              ? formatWeightInputValue(set.prevKg, weightUnit)
-              : '';
-          const repsPlaceholder = showPreviousWeight && set.prevReps > 0 ? String(set.prevReps) : '';
+            !bodyweightExercise && suggestedWeight > 0 ? formatWeightInputValue(suggestedWeight, weightUnit) : '';
+          const repsPlaceholder = suggestedReps > 0 ? String(suggestedReps) : '';
           const showWarmupLabel = set.kind === 'warmup';
 
           return (
@@ -269,11 +298,16 @@ export function TrainingExerciseCard({
                       <input
                         type="text"
                         inputMode="decimal"
-                        value={weightDraft ?? formatWeightInputValue(set.kg, weightUnit)}
+                        value={weightDraft ?? (set.kg > 0 ? formatWeightInputValue(set.kg, weightUnit) : '')}
                         onFocus={() => onExerciseFocus(exerciseIdx)}
                         onChange={(event) => {
                           const nextValue = event.target.value.replace(',', '.');
-                          if (!/^\d*(?:\.\d{0,2})?$/.test(nextValue)) {
+                          if (!/^\d{0,3}(?:\.\d{0,2})?$/.test(nextValue)) {
+                            return;
+                          }
+
+                          const parsedValue = Number.parseFloat(nextValue);
+                          if (nextValue && Number.isFinite(parsedValue) && parsedValue > 999) {
                             return;
                           }
 
@@ -309,11 +343,16 @@ export function TrainingExerciseCard({
                     <input
                       type="text"
                       inputMode="numeric"
-                      value={set.reps || ''}
+                      value={set.reps > 0 ? String(set.reps) : ''}
                       onFocus={() => onExerciseFocus(exerciseIdx)}
                       onChange={(event) => {
                         const nextValue = event.target.value;
-                        if (!/^\d*$/.test(nextValue)) {
+                        if (!/^\d{0,2}$/.test(nextValue)) {
+                          return;
+                        }
+
+                        const parsedValue = Number.parseInt(nextValue || '0', 10);
+                        if (nextValue && parsedValue > 99) {
                           return;
                         }
 
@@ -372,6 +411,8 @@ export function TrainingExerciseCard({
           <span className="text-xs font-semibold">Eliminar serie</span>
         </button>
       </div>
+        </>
+      )}
     </div>
   );
 }

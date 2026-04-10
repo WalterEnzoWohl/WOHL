@@ -10,6 +10,8 @@ export interface SetData {
 export interface ActiveWorkoutSet extends SetData {
   prevKg: number;
   prevReps: number;
+  suggestedKg?: number;
+  suggestedReps?: number;
   kind: 'normal' | 'warmup';
 }
 

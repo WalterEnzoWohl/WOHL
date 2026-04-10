@@ -33,17 +33,19 @@ export function buildExerciseState(
       name: exercise.name,
       muscle: exercise.muscle,
       implement: exercise.implement,
-      notes: exercise.notes,
+      notes: exercise.notes ?? '',
       sets: exercise.sets.map((set, index) => {
         const previousKg = previousExercise?.sets[index]?.kg ?? 0;
         const previousReps = previousExercise?.sets[index]?.reps ?? 0;
 
         return {
           ...set,
-          kg: seedWithPrevious ? previousKg : 0,
-          reps: seedWithPrevious ? previousReps : 0,
+          kg: 0,
+          reps: 0,
           prevKg: previousKg,
           prevReps: previousReps,
+          suggestedKg: previousKg || undefined,
+          suggestedReps: previousReps || undefined,
           kind: 'normal',
         };
       }),
@@ -65,7 +67,7 @@ export function buildExerciseStateFromHistorySession(
       name: exercise.name,
       muscle: exercise.muscle,
       implement: exercise.implement,
-      notes: exercise.notes,
+      notes: exercise.notes ?? '',
       sets: exercise.sets.map((set, setIndex) => ({
         id: setIndex + 1,
         kg: set.kg,
@@ -74,6 +76,8 @@ export function buildExerciseStateFromHistorySession(
         completed: true,
         prevKg: previousExercise?.sets[setIndex]?.kg ?? set.kg,
         prevReps: previousExercise?.sets[setIndex]?.reps ?? set.reps,
+        suggestedKg: undefined,
+        suggestedReps: undefined,
         kind: set.kind ?? 'normal',
       })),
     };
@@ -94,18 +98,20 @@ export function buildExerciseStateFromTemplate(
     name: exercise.name,
     muscle: exercise.muscle,
     implement: exercise.implement,
-    notes: exercise.notes,
+    notes: '',
     sets: exercise.sets.map((set, index) => {
       const previousKg = previousExercise?.sets[index]?.kg ?? 0;
       const previousReps = previousExercise?.sets[index]?.reps ?? 0;
 
       return {
         ...set,
-        kg: seedWithPrevious ? previousKg : 0,
-        reps: seedWithPrevious ? previousReps : 0,
-        prevKg: previousKg,
-        prevReps: previousReps,
-        kind: 'normal',
+        kg: 0,
+          reps: 0,
+          prevKg: previousKg,
+          prevReps: previousReps,
+          suggestedKg: previousKg || undefined,
+          suggestedReps: previousReps || undefined,
+          kind: 'normal',
       };
     }),
   };
@@ -131,12 +137,14 @@ export function buildManualExerciseState(
     sets: [
       {
         id: 1,
-        kg: seedWithPrevious ? previousExercise?.sets[0]?.kg ?? 0 : 0,
-        reps: seedWithPrevious ? previousExercise?.sets[0]?.reps ?? 0 : 0,
+        kg: 0,
+        reps: 0,
         rpe: previousExercise?.sets[0]?.rpe ?? 8,
         completed: false,
         prevKg: previousExercise?.sets[0]?.kg ?? 0,
         prevReps: previousExercise?.sets[0]?.reps ?? 0,
+        suggestedKg: previousExercise?.sets[0]?.kg || undefined,
+        suggestedReps: previousExercise?.sets[0]?.reps || undefined,
         kind: 'normal',
       },
     ],
