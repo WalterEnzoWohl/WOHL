@@ -4,6 +4,7 @@ import { ActiveWorkoutDock } from './components/ActiveWorkoutDock';
 import { BottomNav } from './components/BottomNav';
 import { useAppData } from './data/AppDataContext';
 import { hasCompletedOnboarding } from './data/userProfileUtils';
+import { getSupabaseClient } from './lib/supabase';
 
 const HIDE_NAV_PATHS = ['/session', '/post-session', '/onboarding'];
 
@@ -50,6 +51,12 @@ export default function Root() {
               className="rounded-2xl bg-[#00C9A7] px-5 py-3 text-sm font-bold text-black"
             >
               Reintentar
+            </button>
+            <button
+              onClick={() => void getSupabaseClient().auth.signOut()}
+              className="rounded-2xl border border-[rgba(153,181,215,0.18)] bg-[rgba(16,35,58,0.8)] px-5 py-3 text-sm font-semibold text-white"
+            >
+              Volver al acceso
             </button>
           </div>
         ) : needsOnboarding && !isOnboardingRoute ? (

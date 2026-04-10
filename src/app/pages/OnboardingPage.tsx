@@ -28,12 +28,11 @@ import { GOAL_OPTIONS } from '../data/profileInsights';
 
 const STEP_FLOW = [
   'identity',
-  'goal',
   'experience',
+  'goal',
   'activity',
   'personal',
   'metrics',
-  'focus',
   'location',
   'days',
   'schedule',
@@ -211,6 +210,76 @@ function formatMetricLabel(value: number, unit: string) {
 
 function formatTimeLabel(value: string) {
   return value ? `${value} hs` : 'Elegir hora';
+}
+
+const ADVANCED_GOAL_CARDS = [
+  {
+    value: GOAL_OPTIONS[0],
+    title: 'Definición',
+    description:
+      'Ajustamos calorías, métricas y estructura para mantener músculo y mejorar tu composición.',
+    icon: <Flame size={22} />,
+  },
+  {
+    value: GOAL_OPTIONS[1],
+    title: 'Volumen',
+    description:
+      'Priorizamos progresión, recuperación y más margen para construir masa muscular real.',
+    icon: <Zap size={22} />,
+  },
+  {
+    value: GOAL_OPTIONS[2],
+    title: 'Mantenimiento',
+    description:
+      'Buscamos constancia, rendimiento y una estructura sólida para sostener resultados.',
+    icon: <Target size={22} />,
+  },
+  {
+    value: GOAL_OPTIONS[3],
+    title: 'Recomposición',
+    description:
+      'Balanceamos progreso muscular y pérdida de grasa sin llevarte a extremos innecesarios.',
+    icon: <Sparkles size={22} />,
+  },
+] as const;
+
+const BEGINNER_GOAL_CARDS = [
+  {
+    value: GOAL_OPTIONS[0],
+    title: 'Bajar de peso',
+    description:
+      'Nos enfocamos en mejorar tu composición y ayudarte a perder grasa sin complicarte con términos técnicos.',
+    icon: <Flame size={22} />,
+  },
+  {
+    value: GOAL_OPTIONS[1],
+    title: 'Aumentar músculos',
+    description:
+      'Priorizamos ganar masa muscular con una estructura simple, progresiva y fácil de sostener.',
+    icon: <Zap size={22} />,
+  },
+  {
+    value: GOAL_OPTIONS[2],
+    title: 'Mantenerme saludable',
+    description:
+      'La idea es entrenar bien, sentirte mejor y sostener hábitos sin una meta extrema.',
+    icon: <Target size={22} />,
+  },
+  {
+    value: GOAL_OPTIONS[3],
+    title: 'Bajar peso y subir músculo',
+    description:
+      'Buscamos mejorar tu composición corporal con un enfoque equilibrado y realista.',
+    icon: <Sparkles size={22} />,
+  },
+] as const;
+
+function getGoalCards(trainingLevel: string) {
+  return trainingLevel === 'Principiante' ? BEGINNER_GOAL_CARDS : ADVANCED_GOAL_CARDS;
+}
+
+function getGoalLabel(trainingLevel: string, goal: string) {
+  return getGoalCards(trainingLevel).find((item) => item.value === goal)?.title ?? goal;
 }
 
 function SelectionCard({
@@ -497,7 +566,7 @@ function PickerSheet({
 }
 
 const STEP_COPY: Record<
-  StepId,
+  string,
   {
     eyebrow: string;
     title: string;
@@ -619,6 +688,7 @@ export default function OnboardingPage() {
   const currentStep = STEP_FLOW[stepIndex];
   const progressPercent = ((stepIndex + 1) / STEP_FLOW.length) * 100;
   const stepCopy = STEP_COPY[currentStep];
+  const goalCards = useMemo(() => getGoalCards(formData.trainingLevel), [formData.trainingLevel]);
   const selectedDaysOrdered = WEEK_DAYS.filter((day) => formData.preferredTrainingDays.includes(day.value));
 
   useEffect(() => {
@@ -684,8 +754,6 @@ export default function OnboardingPage() {
         return Boolean(formData.gender) && Boolean(formData.birthDate);
       case 'metrics':
         return formData.heightCm > 0 && formData.weightKg > 0 && formData.targetWeightKg > 0;
-      case 'focus':
-        return Boolean(formData.focusMuscle);
       case 'location':
         return Boolean(formData.workoutLocation);
       case 'days':
@@ -1018,16 +1086,14 @@ export default function OnboardingPage() {
       case 'goal':
         return (
           <div className="space-y-4">
-            {GOAL_OPTIONS.map((goal, index) => (
+            {goalCards.map((goal) => (
               <SelectionCard
-                key={goal}
-                title={goal}
-                description={GOAL_CONTENT[goal]}
-                selected={formData.goal === goal}
-                onClick={() => setField('goal', goal)}
-                icon={
-                  index === 0 ? <Flame size={22} /> : index === 1 ? <Zap size={22} /> : index === 2 ? <Target size={22} /> : <Sparkles size={22} />
-                }
+                key={goal.value}
+                title={goal.title}
+                description={goal.description}
+                selected={formData.goal === goal.value}
+                onClick={() => setField('goal', goal.value)}
+                icon={goal.icon}
               />
             ))}
           </div>
@@ -1131,22 +1197,6 @@ export default function OnboardingPage() {
               icon={<Target size={20} />}
               onClick={openTargetWeightPicker}
             />
-          </div>
-        );
-
-      case 'focus':
-        return (
-          <div className="grid grid-cols-2 gap-3">
-            {FOCUS_OPTIONS.map((option) => (
-              <CompactSelectionCard
-                key={option.value}
-                title={option.value}
-                subtitle={option.description}
-                badge={'badge' in option ? option.badge : undefined}
-                selected={formData.focusMuscle === option.value}
-                onClick={() => setField('focusMuscle', option.value)}
-              />
-            ))}
           </div>
         );
 
@@ -1312,7 +1362,12 @@ export default function OnboardingPage() {
             </div>
 
             <div className="grid grid-cols-2 gap-3">
-              <CompactSelectionCard title={formData.goal} subtitle="Objetivo actual" selected onClick={() => undefined} />
+              <CompactSelectionCard
+                title={getGoalLabel(formData.trainingLevel, formData.goal)}
+                subtitle="Objetivo actual"
+                selected
+                onClick={() => undefined}
+              />
               <CompactSelectionCard title={formData.trainingLevel} subtitle="Nivel declarado" selected onClick={() => undefined} />
               <CompactSelectionCard title={`${formData.preferredTrainingDays.length} días`} subtitle="Frecuencia semanal" selected onClick={() => undefined} />
               <CompactSelectionCard title={formData.workoutLocation} subtitle="Lugar de entrenamiento" selected onClick={() => undefined} />
@@ -1335,8 +1390,8 @@ export default function OnboardingPage() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="rounded-[24px] border border-[rgba(255,255,255,0.06)] bg-[#111522] p-4">
-                  <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#8D98AA]">Foco muscular</p>
-                  <p className="mt-2 text-base font-bold text-white">{formData.focusMuscle}</p>
+                  <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#8D98AA]">Actividad</p>
+                  <p className="mt-2 text-base font-bold text-white">{formData.activityLevel}</p>
                 </div>
                 <div className="rounded-[24px] border border-[rgba(255,255,255,0.06)] bg-[#111522] p-4">
                   <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#8D98AA]">Horario</p>

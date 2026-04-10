@@ -20,6 +20,7 @@ import {
   createRoutineCopy,
   deleteSession as deleteSessionRecord,
   deleteRoutine as deleteRoutineRecord,
+  isStaleAuthSessionError,
   loadAppData,
   saveRoutine as saveRoutineRecord,
   updateSession as updateSessionRecord,
@@ -27,6 +28,7 @@ import {
   uploadProfileAvatar as uploadProfileAvatarRecord,
 } from './supabaseRepository';
 import { DEFAULT_ROUTINES, DEFAULT_USER_PROFILE } from './seedData';
+import { getSupabaseClient } from '../lib/supabase';
 
 type AppDataContextValue = {
   status: 'loading' | 'ready' | 'error';
@@ -184,6 +186,12 @@ export function AppDataProvider({
       setSessionHistory(nextData.sessionHistory);
       setStatus('ready');
     } catch (caughtError) {
+      if (isStaleAuthSessionError(caughtError)) {
+        writeActiveWorkout(session.user.id, null);
+        await getSupabaseClient().auth.signOut();
+        return;
+      }
+
       setStatus('error');
       setError(caughtError instanceof Error ? caughtError.message : 'No se pudo cargar la app.');
     }

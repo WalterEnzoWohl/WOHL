@@ -43,6 +43,7 @@ type DbProfileRow = {
 
 const PROFILE_AVATAR_BUCKET = 'profile-avatars';
 const SESSION_META_PREFIX = '__WOHL_SESSION_META__::';
+const STALE_AUTH_SESSION_ERROR = 'WOHL_STALE_AUTH_SESSION';
 
 type SessionExerciseMeta = {
   notes?: string;
@@ -286,6 +287,16 @@ function buildProfileInsert(user: User) {
   };
 }
 
+function buildStaleAuthSessionError() {
+  const error = new Error('Tu sesión anterior ya no existe. Vuelve a iniciar sesión.');
+  error.name = STALE_AUTH_SESSION_ERROR;
+  return error;
+}
+
+export function isStaleAuthSessionError(error: unknown) {
+  return error instanceof Error && error.name === STALE_AUTH_SESSION_ERROR;
+}
+
 function buildSetTemplate(sets: SetData[]) {
   return sets.map((set) => ({
     kg: set.kg,
@@ -451,15 +462,22 @@ export async function ensureUserBootstrapped(session: Session) {
   const client = getSupabaseClient();
   const userId = session.user.id;
 
-  const { data: existingProfile } = await client
+  const { data: existingProfile, error: profileLookupError } = await client
     .from('profiles')
     .select('*')
     .eq('id', userId)
     .maybeSingle<DbProfileRow>();
 
+  if (profileLookupError) {
+    throw profileLookupError;
+  }
+
   if (!existingProfile) {
     const { error } = await client.from('profiles').insert(buildProfileInsert(session.user));
     if (error) {
+      if ('code' in error && error.code === '23503') {
+        throw buildStaleAuthSessionError();
+      }
       throw error;
     }
   }

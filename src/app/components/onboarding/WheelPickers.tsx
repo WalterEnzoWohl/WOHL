@@ -121,9 +121,7 @@ function WheelColumn({ active, value, options, onChange, align = 'center' }: Whe
           return (
             <div
               key={option.value}
-              className={`snap-center select-none px-2 transition-all duration-150 ${
-                selected ? 'text-white' : 'text-[#566075]'
-              }`}
+              className={`snap-center select-none px-2 ${selected ? 'text-white' : 'text-[#566075]'}`}
               style={{ height: ITEM_HEIGHT }}
             >
               <div
@@ -132,7 +130,7 @@ function WheelColumn({ active, value, options, onChange, align = 'center' }: Whe
                 }`}
               >
                 <span
-                  className={`block truncate tracking-tight transition-all duration-200 ${
+                  className={`block truncate tracking-tight ${
                     illuminated
                       ? 'text-[2rem] font-black text-[#00C9A7]'
                       : selected
@@ -354,12 +352,12 @@ export function NumberWheelPicker({
   separator = '.',
 }: NumberWheelPickerProps) {
   const hasDecimal = Boolean(decimalOptions?.length);
-  const wholeColumnWidth = hasDecimal ? 'w-[112px] sm:w-[122px]' : 'w-[140px] sm:w-[152px]';
-  const decimalColumnWidth = 'w-[68px] sm:w-[74px]';
+  const wholeColumnWidth = hasDecimal ? 'w-[108px] sm:w-[116px]' : 'w-[118px] sm:w-[126px]';
+  const decimalColumnWidth = 'w-[64px] sm:w-[70px]';
 
   return (
     <BaseWheelPicker open={open} title={title} subtitle={subtitle} onClose={onClose} onConfirm={onConfirm}>
-      <div className="flex items-center justify-center gap-1.5 sm:gap-2">
+      <div className="flex items-center justify-center gap-1 sm:gap-1.5">
         <div className={wholeColumnWidth}>
           <WheelColumn
             active={open}
@@ -371,7 +369,7 @@ export function NumberWheelPicker({
         </div>
 
         {hasDecimal ? (
-          <div className="flex h-full items-center justify-center pt-[2px] text-[2rem] font-semibold text-[#6E7890]">
+          <div className="flex h-full items-center justify-center pt-[2px] text-[1.9rem] font-semibold text-[#6E7890]">
             {separator}
           </div>
         ) : null}
@@ -389,7 +387,7 @@ export function NumberWheelPicker({
         ) : null}
 
         {unitLabel ? (
-          <div className="flex h-full items-center justify-center pt-[3px] text-lg font-bold uppercase tracking-[0.12em] text-[#00C9A7]">
+          <div className="flex h-full items-center justify-center pt-[3px] pl-0.5 text-base font-bold uppercase tracking-[0.08em] text-[#00C9A7] sm:text-lg">
             {unitLabel}
           </div>
         ) : null}
