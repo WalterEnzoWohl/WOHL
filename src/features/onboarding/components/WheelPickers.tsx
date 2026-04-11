@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useRef, type ReactNode } from 'react';
+﻿import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 
 const VISIBLE_ROWS = 5;
 const ITEM_HEIGHT = 58;
@@ -45,6 +45,8 @@ function buildLoopedOptions(options: WheelPickerOption[]) {
 function WheelColumn({ active, value, options, onChange, align = 'center' }: WheelColumnProps) {
   const scrollerRef = useRef<HTMLDivElement | null>(null);
   const snapTimeoutRef = useRef<number | null>(null);
+  const highlightTimeoutRef = useRef<number | null>(null);
+  const [highlightedValue, setHighlightedValue] = useState<string | null>(null);
   const baseSelectedIndex = useMemo(() => {
     const index = options.findIndex((option) => option.value === value);
     return index >= 0 ? index : 0;
@@ -66,12 +68,24 @@ function WheelColumn({ active, value, options, onChange, align = 'center' }: Whe
     }
 
     element.scrollTop = initialVirtualIndex * ITEM_HEIGHT;
-  }, [active, initialVirtualIndex, options.length]);
+    setHighlightedValue(null);
+
+    if (highlightTimeoutRef.current) {
+      window.clearTimeout(highlightTimeoutRef.current);
+    }
+
+    highlightTimeoutRef.current = window.setTimeout(() => {
+      setHighlightedValue(options[baseSelectedIndex]?.value ?? null);
+    }, 1000);
+  }, [active, baseSelectedIndex, initialVirtualIndex, options]);
 
   useEffect(() => {
     return () => {
       if (snapTimeoutRef.current) {
         window.clearTimeout(snapTimeoutRef.current);
+      }
+      if (highlightTimeoutRef.current) {
+        window.clearTimeout(highlightTimeoutRef.current);
       }
     };
   }, []);
@@ -93,6 +107,11 @@ function WheelColumn({ active, value, options, onChange, align = 'center' }: Whe
     if (snapTimeoutRef.current) {
       window.clearTimeout(snapTimeoutRef.current);
     }
+    if (highlightTimeoutRef.current) {
+      window.clearTimeout(highlightTimeoutRef.current);
+    }
+
+    setHighlightedValue(null);
 
     snapTimeoutRef.current = window.setTimeout(() => {
       const maxBufferIndex = options.length * RECENTER_BUFFER;
@@ -105,6 +124,10 @@ function WheelColumn({ active, value, options, onChange, align = 'center' }: Whe
 
       element.scrollTop = targetIndex * ITEM_HEIGHT;
     }, 50);
+
+    highlightTimeoutRef.current = window.setTimeout(() => {
+      setHighlightedValue(nextOption?.value ?? options[normalizedIndex]?.value ?? null);
+    }, 1000);
   };
 
   return (
@@ -121,11 +144,12 @@ function WheelColumn({ active, value, options, onChange, align = 'center' }: Whe
       >
         {loopedOptions.map((option, virtualIndex) => {
           const selected = option.baseIndex === baseSelectedIndex;
+          const highlighted = selected && highlightedValue === option.value;
 
           return (
             <div
               key={option.key}
-              className={`snap-center select-none px-2 ${selected ? 'text-[#CBD2DC]' : 'text-[#626C7E]'}`}
+              className={`snap-center select-none px-2 ${highlighted ? 'text-[#00C9A7]' : selected ? 'text-[#7B8598]' : 'text-[#626C7E]'}`}
               style={{ height: ITEM_HEIGHT }}
             >
               <div
@@ -135,7 +159,7 @@ function WheelColumn({ active, value, options, onChange, align = 'center' }: Whe
               >
                 <span
                   className={`block truncate text-[1.2rem] font-semibold tracking-tight ${
-                    selected ? 'opacity-100' : 'opacity-70'
+                    highlighted ? 'opacity-100 [text-shadow:0_0_14px_rgba(0,201,167,0.28)]' : selected ? 'opacity-90' : 'opacity-70'
                   }`}
                 >
                   {option.label}
