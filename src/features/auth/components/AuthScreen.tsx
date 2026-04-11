@@ -1,5 +1,5 @@
 ﻿import { useState } from 'react';
-import { LoaderCircle, LockKeyhole, Mail } from 'lucide-react';
+import { Eye, EyeOff, LoaderCircle, LockKeyhole, Mail } from 'lucide-react';
 import { brandLogoWhite } from '@/assets';
 import { getAuthRedirectUrl, getSupabaseClient } from '@/shared/lib/supabase';
 
@@ -7,6 +7,7 @@ export function AuthScreen() {
   const [mode, setMode] = useState<'choice' | 'signin' | 'signup'>('choice');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -39,13 +40,17 @@ export function AuthScreen() {
       }
 
       if (!isSignIn && !response.data.session) {
-        setMessage('Revisa tu correo para confirmar la cuenta antes de entrar.');
+        setMessage('Revisá tu correo para confirmar la cuenta antes de entrar.');
       }
     } catch (caughtError) {
-      setError(caughtError instanceof Error ? caughtError.message : 'No se pudo iniciar sesion.');
+      setError(caughtError instanceof Error ? caughtError.message : 'No se pudo iniciar sesión.');
     } finally {
       setLoading(false);
     }
+  };
+
+  const openGmail = () => {
+    window.open('https://mail.google.com/mail/u/0/#inbox', '_blank', 'noopener,noreferrer');
   };
 
   return (
@@ -74,7 +79,7 @@ export function AuthScreen() {
               className="mt-3 text-[0.86rem] font-medium uppercase tracking-[0.34em] text-[#8D9CB0]"
               style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
             >
-              {showForm ? (isSignIn ? 'Optimiza tu rendimiento' : 'Activa tu sistema personal') : 'Elegi como queres continuar'}
+              {showForm ? (isSignIn ? 'Optimiza tu rendimiento' : 'Activa tu sistema personal') : 'Elegí cómo querés continuar'}
             </p>
 
             <p
@@ -83,9 +88,9 @@ export function AuthScreen() {
             >
               {showForm
                 ? isSignIn
-                  ? 'Ingresa a tu cuenta para guardar tu progreso y optimizar tu rendimiento personal.'
-                  : 'Crea tu cuenta para empezar a registrar progreso, sesiones reales y control de rendimiento.'
-                : 'Elegí si queres entrar con una cuenta existente o crear una nueva para empezar en WOHL.'}
+                  ? 'Ingresá a tu cuenta para guardar tu progreso y optimizar tu rendimiento personal.'
+                  : 'Creá tu cuenta para empezar a registrar progreso, sesiones reales y control de rendimiento.'
+                : 'Elegí si querés entrar con una cuenta existente o crear una nueva para empezar en WOHL.'}
             </p>
           </div>
 
@@ -102,7 +107,7 @@ export function AuthScreen() {
                   className="flex min-h-[4.1rem] w-full items-center justify-center rounded-[24px] border border-[rgba(0,201,167,0.22)] bg-[rgba(0,201,167,0.08)] text-[1rem] font-black text-[#EAFBF8] transition-all duration-200 hover:border-[rgba(0,201,167,0.34)] hover:bg-[rgba(0,201,167,0.12)] active:scale-[0.99]"
                   style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
                 >
-                  Iniciar sesion
+                  Iniciar sesión
                 </button>
 
                 <button
@@ -137,17 +142,25 @@ export function AuthScreen() {
                 </label>
 
                 <label className="flex flex-col gap-2">
-                  <span className="text-[10px] font-bold uppercase tracking-[0.28em] text-[#8EA2B8]">Contrasena</span>
+                  <span className="text-[10px] font-bold uppercase tracking-[0.28em] text-[#8EA2B8]">Contraseña</span>
                   <div className="group flex items-center gap-4 rounded-[22px] border border-[rgba(153,181,215,0.14)] bg-[rgba(16,35,58,0.92)] px-5 py-[0.9rem] transition-all duration-200 focus-within:border-[rgba(0,201,167,0.34)] focus-within:shadow-[0_0_0_4px_rgba(0,201,167,0.08)]">
                     <LockKeyhole size={18} className="shrink-0 text-[#00C9A7]" />
                     <input
-                      type="password"
+                      type={showPassword ? 'text' : 'password'}
                       value={password}
                       onChange={(event) => setPassword(event.target.value)}
                       autoComplete={isSignIn ? 'current-password' : 'new-password'}
                       className="wohl-auth-input w-full border-0 bg-transparent text-[1rem] text-white outline-none placeholder:text-[#65758A]"
                       placeholder="********"
                     />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((value) => !value)}
+                      className="shrink-0 rounded-full p-1 text-[#8EA2B8] transition-colors hover:text-white"
+                      aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                    >
+                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
                   </div>
                 </label>
 
@@ -158,8 +171,17 @@ export function AuthScreen() {
                 )}
 
                 {message && (
-                  <div className="rounded-[22px] border border-[rgba(0,201,167,0.22)] bg-[rgba(0,201,167,0.10)] px-4 py-3 text-sm text-[#AAF6EA]">
-                    {message}
+                  <div className="rounded-[22px] border border-[rgba(0,201,167,0.22)] bg-[rgba(0,201,167,0.10)] px-4 py-4 text-sm text-[#AAF6EA]">
+                    <p>{message}</p>
+                    {!isSignIn && (
+                      <button
+                        type="button"
+                        onClick={openGmail}
+                        className="mt-3 inline-flex items-center justify-center rounded-2xl border border-[rgba(0,201,167,0.22)] bg-[rgba(0,201,167,0.08)] px-4 py-2.5 font-semibold text-white transition-colors hover:bg-[rgba(0,201,167,0.14)]"
+                      >
+                        Abrir Gmail
+                      </button>
+                    )}
                   </div>
                 )}
 
@@ -181,6 +203,7 @@ export function AuthScreen() {
                       setMode(isSignIn ? 'signup' : 'signin');
                       setError(null);
                       setMessage(null);
+                      setShowPassword(false);
                     }}
                     className="text-[1rem] font-medium text-[#9BAEC1] transition-colors hover:text-white"
                     style={{ fontFamily: "'Inter', sans-serif" }}
@@ -196,6 +219,7 @@ export function AuthScreen() {
                     setMode('choice');
                     setError(null);
                     setMessage(null);
+                    setShowPassword(false);
                   }}
                   className="text-sm font-medium text-[#7F93A8] transition-colors hover:text-white"
                   style={{ fontFamily: "'Inter', sans-serif" }}

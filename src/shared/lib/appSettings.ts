@@ -8,6 +8,7 @@ export const DEFAULT_APP_SETTINGS: AppSettings = {
   restTimerSeconds: 90,
   autoWeightIncrement: false,
   showPreviousWeight: true,
+  notifyGymDays: false,
 };
 
 export function mergeAppSettings(value: Partial<AppSettings> | null | undefined): AppSettings {

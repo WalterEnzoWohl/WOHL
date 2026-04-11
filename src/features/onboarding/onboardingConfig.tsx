@@ -1,6 +1,5 @@
 import {
   CalendarDays,
-  Clock3,
   Dumbbell,
   Flame,
   Home,
@@ -25,8 +24,6 @@ export const STEP_FLOW = [
   'personal',
   'metrics',
   'location',
-  'days',
-  'schedule',
   'summary',
 ] as const;
 
@@ -237,20 +234,6 @@ export const STEP_COPY: Record<StepId, StepCopy> = {
     title: '¿Dónde solés entrenar?',
     description:
       'El nivel de equipamiento cambia bastante lo que conviene sugerir después para tus rutinas.',
-    cta: 'Continuar',
-  },
-  days: {
-    eyebrow: 'Frecuencia',
-    title: '¿Cuántos días querés entrenar?',
-    description:
-      'Seleccioná entre 2 y 6 días por semana. Lo usamos para ordenar tu estructura inicial.',
-    cta: 'Continuar',
-  },
-  schedule: {
-    eyebrow: 'Horarios',
-    title: 'Definamos cuándo te viene mejor entrenar.',
-    description:
-      'Podés usar un horario fijo o asignar uno distinto por cada día para que la experiencia sea más real.',
     cta: 'Continuar',
   },
   summary: {

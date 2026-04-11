@@ -1,10 +1,9 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import {
   ArrowLeft,
   CalendarDays,
   Check,
   ChevronRight,
-  Clock3,
   Dumbbell,
   Ruler,
   Scale,
@@ -16,7 +15,7 @@ import {
 import { AnimatePresence, motion } from 'motion/react';
 import { useNavigate } from 'react-router';
 import { brandLogoWhite } from '@/assets';
-import { DateWheelPicker, NumberWheelPicker, TimeWheelPicker } from '@/features/onboarding/components/WheelPickers';
+import { DateWheelPicker, NumberWheelPicker } from '@/features/onboarding/components/WheelPickers';
 import { ACTIVITY_LEVEL_OPTIONS, TRAINING_LEVEL_OPTIONS } from '@/shared/constants';
 import { useAppData } from '@/core/app-data/AppDataContext';
 import {
@@ -26,19 +25,16 @@ import {
   LOCATION_OPTIONS,
   STEP_COPY,
   STEP_FLOW,
-  WEEK_DAYS,
   buildNumberOptions,
   calculateAgeFromBirthDate,
   formatBirthDateLabel,
   formatMetricLabel,
-  formatTimeLabel,
   getActivityIcon,
   getDateParts,
   getExperienceDescription,
   getGoalCards,
   getGoalLabel,
   getLocationIcon,
-  getTimeParts,
   getWeightParts,
   type OnboardingFormState,
   type PickerColumn,
@@ -340,7 +336,6 @@ export default function OnboardingPage() {
   const [targetWeightDraft, setTargetWeightDraft] = useState(() =>
     getWeightParts(userProfile.targetWeightKg || userProfile.weightKg || 72)
   );
-  const [timeDraft, setTimeDraft] = useState(() => getTimeParts(userProfile.preferredWorkoutTime || DEFAULT_TIME));
   const [formData, setFormData] = useState<OnboardingFormState>({
     firstName: userProfile.firstName,
     lastName: userProfile.lastName,
@@ -364,55 +359,9 @@ export default function OnboardingPage() {
   const progressPercent = ((stepIndex + 1) / STEP_FLOW.length) * 100;
   const stepCopy = STEP_COPY[currentStep];
   const goalCards = useMemo(() => getGoalCards(formData.trainingLevel), [formData.trainingLevel]);
-  const selectedDaysOrdered = WEEK_DAYS.filter((day) => formData.preferredTrainingDays.includes(day.value));
-
-  useEffect(() => {
-    if (formData.preferredScheduleMode !== 'different') {
-      return;
-    }
-
-    setFormData((previous) => {
-      const nextMap = { ...previous.preferredWorkoutTimeByDay };
-      previous.preferredTrainingDays.forEach((day) => {
-        if (!nextMap[day]) {
-          nextMap[day] = previous.preferredWorkoutTime || DEFAULT_TIME;
-        }
-      });
-
-      Object.keys(nextMap).forEach((day) => {
-        if (!previous.preferredTrainingDays.includes(day)) {
-          delete nextMap[day];
-        }
-      });
-
-      return {
-        ...previous,
-        preferredWorkoutTimeByDay: nextMap,
-      };
-    });
-  }, [formData.preferredScheduleMode, formData.preferredTrainingDays, formData.preferredWorkoutTime]);
 
   const setField = <K extends keyof OnboardingFormState>(field: K, value: OnboardingFormState[K]) => {
     setFormData((previous) => ({ ...previous, [field]: value }));
-  };
-
-  const toggleTrainingDay = (day: string) => {
-    setFormData((previous) => {
-      const exists = previous.preferredTrainingDays.includes(day);
-
-      if (!exists && previous.preferredTrainingDays.length >= 6) {
-        return previous;
-      }
-
-      const nextDays = exists
-        ? previous.preferredTrainingDays.filter((item) => item !== day)
-        : [...previous.preferredTrainingDays, day];
-
-      return {
-        ...previous,
-        preferredTrainingDays: nextDays,
-      };
-    });
   };
 
   const canContinue = useMemo(() => {
@@ -431,14 +380,6 @@ export default function OnboardingPage() {
         return formData.heightCm > 0 && formData.weightKg > 0 && formData.targetWeightKg > 0;
       case 'location':
         return Boolean(formData.workoutLocation);
-      case 'days':
-        return formData.preferredTrainingDays.length >= 2 && formData.preferredTrainingDays.length <= 6;
-      case 'schedule':
-        if (formData.preferredScheduleMode === 'same') {
-          return Boolean(formData.preferredWorkoutTime);
-        }
-
-        return formData.preferredTrainingDays.every((day) => Boolean(formData.preferredWorkoutTimeByDay[day]));
       case 'summary':
         return true;
       default:
@@ -464,13 +405,6 @@ export default function OnboardingPage() {
   const openTargetWeightPicker = () => {
     setTargetWeightDraft(getWeightParts(formData.targetWeightKg || formData.weightKg || 72));
     setPickerState({ type: 'targetWeight' });
-  };
-
-  const openTimePicker = (day?: string) => {
-    const value =
-      (day ? formData.preferredWorkoutTimeByDay[day] : formData.preferredWorkoutTime) || DEFAULT_TIME;
-    setTimeDraft(getTimeParts(value));
-    setPickerState({ type: 'time', day });
   };
 
   const confirmPicker = () => {
@@ -502,17 +436,6 @@ export default function OnboardingPage() {
       setPickerState(null);
       return;
     }
-
-    const nextTime = `${timeDraft.hour}:${timeDraft.minute}`;
-    if (pickerState.day) {
-      setField('preferredWorkoutTimeByDay', {
-        ...formData.preferredWorkoutTimeByDay,
-        [pickerState.day]: nextTime,
-      });
-    } else {
-      setField('preferredWorkoutTime', nextTime);
-    }
-    setPickerState(null);
   };
 
   const goBack = () => {
@@ -532,17 +455,6 @@ export default function OnboardingPage() {
 
     try {
       const completedAt = new Date().toISOString();
-      const preferredWorkoutTimeByDay =
-        formData.preferredScheduleMode === 'different'
-          ? Object.fromEntries(
-              formData.preferredTrainingDays.map((day) => [
-                day,
-                formData.preferredWorkoutTimeByDay[day] || formData.preferredWorkoutTime || DEFAULT_TIME,
-              ])
-            )
-          : Object.fromEntries(
-              formData.preferredTrainingDays.map((day) => [day, formData.preferredWorkoutTime || DEFAULT_TIME])
-            );
 
       await updateUserProfile({
         firstName: formData.firstName.trim(),
@@ -561,7 +473,7 @@ export default function OnboardingPage() {
         preferredTrainingDays: formData.preferredTrainingDays,
         preferredScheduleMode: formData.preferredScheduleMode,
         preferredWorkoutTime: formData.preferredWorkoutTime || DEFAULT_TIME,
-        preferredWorkoutTimeByDay,
+        preferredWorkoutTimeByDay: formData.preferredWorkoutTimeByDay,
         onboardingCompletedAt: completedAt,
       });
 
@@ -673,21 +585,8 @@ export default function OnboardingPage() {
       ];
     }
 
-    return [
-      {
-        id: 'hour',
-        value: timeDraft.hour,
-        options: buildNumberOptions(5, 23, (value) => String(value).padStart(2, '0')),
-        onSelect: (value) => setTimeDraft((previous) => ({ ...previous, hour: value })),
-      },
-      {
-        id: 'minute',
-        value: timeDraft.minute,
-        options: ['00', '15', '30', '45'].map((value) => ({ value, label: value })),
-        onSelect: (value) => setTimeDraft((previous) => ({ ...previous, minute: value })),
-      },
-    ];
-  }, [birthDraft, heightDraft, pickerState, targetWeightDraft, timeDraft, weightDraft]);
+    return [];
+  }, [birthDraft, heightDraft, pickerState, targetWeightDraft, weightDraft]);
 
   const pickerTitle = useMemo(() => {
     if (!pickerState) {
@@ -698,8 +597,7 @@ export default function OnboardingPage() {
     if (pickerState.type === 'height') return 'Altura actual';
     if (pickerState.type === 'weight') return 'Peso actual';
     if (pickerState.type === 'targetWeight') return 'Peso objetivo';
-    if (pickerState.day) return `Horario para ${pickerState.day}`;
-    return 'Horario principal';
+    return '';
   }, [pickerState]);
 
   const pickerSubtitle = useMemo(() => {
@@ -712,18 +610,18 @@ export default function OnboardingPage() {
     }
 
     if (pickerState.type === 'height') {
-      return 'Selecciona tu altura actual para mejorar cálculos y métricas.';
+      return 'Selecciona tu altura actual para mejorar calculos y metricas.';
     }
 
     if (pickerState.type === 'weight') {
-      return 'Usamos este valor para estadísticas, progreso y objetivos.';
+      return 'Usamos este valor para estadisticas, progreso y objetivos.';
     }
 
     if (pickerState.type === 'targetWeight') {
-      return 'Una referencia simple para entender hacia dónde quieres ir.';
+      return 'Una referencia simple para entender hacia donde quieres ir.';
     }
 
-    return 'Elegí una hora cómoda y realista para que WOHL te acompañe mejor.';
+    return '';
   }, [pickerState]);
 
   const renderStepContent = () => {
@@ -891,128 +789,6 @@ export default function OnboardingPage() {
           </div>
         );
 
-      case 'days':
-        return (
-          <div className="space-y-5">
-            <div className="rounded-[30px] border border-[rgba(0,201,167,0.12)] bg-[rgba(0,201,167,0.05)] p-5">
-              <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#00C9A7]">Rango recomendado</p>
-              <p className="mt-2 text-lg font-bold tracking-tight text-white">
-                {formData.preferredTrainingDays.length}/6 días seleccionados
-              </p>
-              <p className="mt-1 text-sm leading-6 text-[#98A2B3]">
-                Necesitamos al menos 2 para construir una estructura consistente y hasta 6 para no sobredimensionar tu semana.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              {WEEK_DAYS.map((day) => {
-                const selected = formData.preferredTrainingDays.includes(day.value);
-                const selectedOrder = formData.preferredTrainingDays.indexOf(day.value) + 1;
-                const disabled = !selected && formData.preferredTrainingDays.length >= 6;
-
-                return (
-                  <button
-                    key={day.value}
-                    type="button"
-                    disabled={disabled}
-                    onClick={() => toggleTrainingDay(day.value)}
-                    className={`relative flex min-h-[124px] flex-col justify-between rounded-[24px] border px-4 py-4 text-left transition-all duration-200 active:scale-[0.985] ${
-                      selected
-                        ? 'border-[rgba(0,201,167,0.38)] bg-[rgba(0,201,167,0.12)] shadow-[0_18px_34px_rgba(0,201,167,0.07)]'
-                        : disabled
-                          ? 'border-[rgba(255,255,255,0.04)] bg-[#0E1220] opacity-45'
-                          : 'border-[rgba(255,255,255,0.06)] bg-[#111522]'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between gap-3">
-                      <span className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#8D98AA]">{day.short}</span>
-                      <div
-                        className={`flex h-7 min-w-7 items-center justify-center rounded-full px-2 text-xs font-bold ${
-                          selected ? 'bg-[#00C9A7] text-black' : 'bg-[#1A2130] text-[#6F7B91]'
-                        }`}
-                      >
-                        {selected ? selectedOrder : '—'}
-                      </div>
-                    </div>
-                    <div>
-                      <p className="text-lg font-bold tracking-tight text-white">{day.value}</p>
-                      <p className="mt-1 text-sm text-[#98A2B3]">{selected ? 'Incluido en tu semana' : 'Tap para seleccionar'}</p>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        );
-
-      case 'schedule':
-        return (
-          <div className="space-y-5">
-            <div className="rounded-[28px] border border-[rgba(255,255,255,0.06)] bg-[#101521] p-2">
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={() => setField('preferredScheduleMode', 'same')}
-                  className={`rounded-[20px] px-4 py-3 text-sm font-bold transition-all ${
-                    formData.preferredScheduleMode === 'same'
-                      ? 'bg-[#00C9A7] text-[#041016]'
-                      : 'bg-transparent text-[#98A2B3]'
-                  }`}
-                >
-                  Mismo horario
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setField('preferredScheduleMode', 'different')}
-                  className={`rounded-[20px] px-4 py-3 text-sm font-bold transition-all ${
-                    formData.preferredScheduleMode === 'different'
-                      ? 'bg-[#00C9A7] text-[#041016]'
-                      : 'bg-transparent text-[#98A2B3]'
-                  }`}
-                >
-                  Horarios distintos
-                </button>
-              </div>
-            </div>
-
-            {formData.preferredScheduleMode === 'same' ? (
-              <div className="space-y-4">
-                <PickerTriggerCard
-                  label="Horario principal"
-                  value={formatTimeLabel(formData.preferredWorkoutTime)}
-                  description="Se aplicará como referencia para todos los días seleccionados."
-                  icon={<Clock3 size={20} />}
-                  onClick={() => openTimePicker()}
-                />
-
-                <div className="flex flex-wrap gap-2">
-                  {selectedDaysOrdered.map((day) => (
-                    <span
-                      key={day.value}
-                      className="inline-flex rounded-full border border-[rgba(255,255,255,0.08)] bg-[#111522] px-3 py-1.5 text-xs font-semibold text-[#C2CBD9]"
-                    >
-                      {day.value}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {selectedDaysOrdered.map((day) => (
-                  <PickerTriggerCard
-                    key={day.value}
-                    label={day.value}
-                    value={formatTimeLabel(formData.preferredWorkoutTimeByDay[day.value] || DEFAULT_TIME)}
-                    description="Tap para definir una hora dedicada para ese día."
-                    icon={<Clock3 size={20} />}
-                    onClick={() => openTimePicker(day.value)}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
-        );
-
       case 'summary':
         return (
           <div className="space-y-5">
@@ -1044,7 +820,7 @@ export default function OnboardingPage() {
                 onClick={() => undefined}
               />
               <CompactSelectionCard title={formData.trainingLevel} subtitle="Nivel declarado" selected onClick={() => undefined} />
-              <CompactSelectionCard title={`${formData.preferredTrainingDays.length} días`} subtitle="Frecuencia semanal" selected onClick={() => undefined} />
+              <CompactSelectionCard title={formData.activityLevel} subtitle="Ritmo diario" selected onClick={() => undefined} />
               <CompactSelectionCard title={formData.workoutLocation} subtitle="Lugar de entrenamiento" selected onClick={() => undefined} />
             </div>
 
@@ -1058,7 +834,7 @@ export default function OnboardingPage() {
                     {formData.firstName.trim()} {formData.lastName.trim()}
                   </p>
                   <p className="text-sm text-[#98A2B3]">
-                    {calculateAgeFromBirthDate(formData.birthDate)} años · {formData.heightCm} cm · {formData.weightKg.toFixed(1).replace('.0', '')} kg
+                    {calculateAgeFromBirthDate(formData.birthDate)} a?os ? {formData.heightCm} cm ? {formData.weightKg.toFixed(1).replace('.0', '')} kg
                   </p>
                 </div>
               </div>
@@ -1069,22 +845,9 @@ export default function OnboardingPage() {
                   <p className="mt-2 text-base font-bold text-white">{formData.activityLevel}</p>
                 </div>
                 <div className="rounded-[24px] border border-[rgba(255,255,255,0.06)] bg-[#111522] p-4">
-                  <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#8D98AA]">Horario</p>
-                  <p className="mt-2 text-base font-bold text-white">
-                    {formData.preferredScheduleMode === 'same' ? formatTimeLabel(formData.preferredWorkoutTime) : 'Variable'}
-                  </p>
+                  <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#8D98AA]">Meta de peso</p>
+                  <p className="mt-2 text-base font-bold text-white">{formData.targetWeightKg.toFixed(1).replace('.0', '')} kg</p>
                 </div>
-              </div>
-
-              <div className="flex flex-wrap gap-2">
-                {selectedDaysOrdered.map((day) => (
-                  <span
-                    key={day.value}
-                    className="inline-flex rounded-full border border-[rgba(0,201,167,0.14)] bg-[rgba(0,201,167,0.08)] px-3 py-1.5 text-xs font-semibold text-[#00C9A7]"
-                  >
-                    {day.value}
-                  </span>
-                ))}
               </div>
             </div>
           </div>
@@ -1233,16 +996,6 @@ export default function OnboardingPage() {
         wholeOptions={buildNumberOptions(40, 180)}
         decimalOptions={buildNumberOptions(0, 9)}
         unitLabel="kg"
-        onClose={() => setPickerState(null)}
-        onConfirm={confirmPicker}
-      />
-
-      <TimeWheelPicker
-        open={pickerState?.type === 'time'}
-        title={pickerState?.type === 'time' && pickerState.day ? `Horario para ${pickerState.day}` : 'Horario principal'}
-        subtitle="Dejá una hora cómoda y realista. Luego podés ajustarla cuando quieras."
-        value={timeDraft}
-        onChange={setTimeDraft}
         onClose={() => setPickerState(null)}
         onConfirm={confirmPicker}
       />

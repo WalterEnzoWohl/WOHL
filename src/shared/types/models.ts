@@ -130,6 +130,7 @@ export interface AppSettings {
   restTimerSeconds: number;
   autoWeightIncrement: boolean;
   showPreviousWeight: boolean;
+  notifyGymDays: boolean;
 }
 
 export interface ActivityLevelOption {

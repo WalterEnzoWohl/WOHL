@@ -1,6 +1,8 @@
-import { useMemo, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import {
+  Bell,
   ChevronRight,
+  Clock3,
   Download,
   FileText,
   HelpCircle,
@@ -18,6 +20,8 @@ import { useAppData } from '@/core/app-data/AppDataContext';
 import type { AppSettings, SessionHistory } from '@/shared/types/models';
 import { convertWeightFromKg, getWeightUnitLabel } from '@/shared/lib/unitUtils';
 import { getSupabaseClient } from '@/shared/lib/supabase';
+import { TimeWheelPicker } from '@/features/onboarding/components/WheelPickers';
+import { DEFAULT_TIME, WEEK_DAYS, formatTimeLabel, getTimeParts } from '@/features/onboarding/onboardingConfig';
 
 function escapeCsvValue(value: string | number | null | undefined) {
   if (value === null || value === undefined) {
@@ -265,15 +269,146 @@ function SettingPanel({
 
 export default function ConfigPage() {
   const navigate = useNavigate();
-  const { appSettings, sessionHistory, updateAppSettings } = useAppData();
+  const { appSettings, sessionHistory, updateAppSettings, updateUserProfile, userProfile } = useAppData();
   const [showRestTimerModal, setShowRestTimerModal] = useState(false);
   const [draftRestTimer, setDraftRestTimer] = useState(appSettings.restTimerSeconds);
   const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
+  const [timePickerTarget, setTimePickerTarget] = useState<string | null>(null);
+  const [timeDraft, setTimeDraft] = useState(() => getTimeParts(userProfile.preferredWorkoutTime || DEFAULT_TIME));
 
   const csvPreviewCount = useMemo(() => sessionHistory.length, [sessionHistory.length]);
+  const selectedNotificationDays = useMemo(
+    () => WEEK_DAYS.filter((day) => userProfile.preferredTrainingDays.includes(day.value)),
+    [userProfile.preferredTrainingDays]
+  );
 
   const signOut = async () => {
     await getSupabaseClient().auth.signOut();
+  };
+
+  useEffect(() => {
+    if (!timePickerTarget) {
+      return;
+    }
+
+    const nextValue =
+      timePickerTarget === '__main__'
+        ? userProfile.preferredWorkoutTime || DEFAULT_TIME
+        : userProfile.preferredWorkoutTimeByDay[timePickerTarget] ||
+          userProfile.preferredWorkoutTime ||
+          DEFAULT_TIME;
+
+    setTimeDraft(getTimeParts(nextValue));
+  }, [timePickerTarget, userProfile.preferredWorkoutTime, userProfile.preferredWorkoutTimeByDay]);
+
+  const handleNotificationToggle = async () => {
+    const nextValue = !appSettings.notifyGymDays;
+    updateAppSettings({ notifyGymDays: nextValue });
+
+    if (!nextValue) {
+      setFeedbackMessage('Las notificaciones de entrenamiento quedaron desactivadas.');
+      return;
+    }
+
+    if (userProfile.preferredTrainingDays.length === 0) {
+      const defaultDays = ['Lunes', 'Mi?rcoles', 'Viernes'];
+      const defaultTime = userProfile.preferredWorkoutTime || DEFAULT_TIME;
+      await updateUserProfile({
+        preferredTrainingDays: defaultDays,
+        preferredScheduleMode: 'same',
+        preferredWorkoutTime: defaultTime,
+        preferredWorkoutTimeByDay: Object.fromEntries(defaultDays.map((day) => [day, defaultTime])),
+      });
+    }
+
+    setFeedbackMessage('Ya pod?s elegir qu? d?as quer?s que WOHL te recuerde tu sesi?n.');
+  };
+
+  const toggleNotificationDay = async (day: string) => {
+    const exists = userProfile.preferredTrainingDays.includes(day);
+
+    if (!exists && userProfile.preferredTrainingDays.length >= 6) {
+      setFeedbackMessage('Pod?s elegir hasta 6 d?as para las notificaciones.');
+      return;
+    }
+
+    const nextDays = exists
+      ? userProfile.preferredTrainingDays.filter((item) => item !== day)
+      : [...userProfile.preferredTrainingDays, day];
+
+    const fallbackTime = userProfile.preferredWorkoutTime || DEFAULT_TIME;
+    const nextTimeByDay = { ...userProfile.preferredWorkoutTimeByDay };
+
+    nextDays.forEach((selectedDay) => {
+      if (!nextTimeByDay[selectedDay]) {
+        nextTimeByDay[selectedDay] = fallbackTime;
+      }
+    });
+
+    Object.keys(nextTimeByDay).forEach((mappedDay) => {
+      if (!nextDays.includes(mappedDay)) {
+        delete nextTimeByDay[mappedDay];
+      }
+    });
+
+    await updateUserProfile({
+      preferredTrainingDays: nextDays,
+      preferredWorkoutTimeByDay: nextTimeByDay,
+    });
+  };
+
+  const updateNotificationScheduleMode = async (mode: 'same' | 'different') => {
+    const fallbackTime = userProfile.preferredWorkoutTime || DEFAULT_TIME;
+    const nextTimeByDay =
+      mode === 'same'
+        ? Object.fromEntries(userProfile.preferredTrainingDays.map((day) => [day, fallbackTime]))
+        : Object.fromEntries(
+            userProfile.preferredTrainingDays.map((day) => [
+              day,
+              userProfile.preferredWorkoutTimeByDay[day] || fallbackTime,
+            ])
+          );
+
+    await updateUserProfile({
+      preferredScheduleMode: mode,
+      preferredWorkoutTimeByDay: nextTimeByDay,
+    });
+  };
+
+  const openTimePicker = (day?: string) => {
+    const value = day
+      ? userProfile.preferredWorkoutTimeByDay[day] || userProfile.preferredWorkoutTime || DEFAULT_TIME
+      : userProfile.preferredWorkoutTime || DEFAULT_TIME;
+
+    setTimeDraft(getTimeParts(value));
+    setTimePickerTarget(day ?? '__main__');
+  };
+
+  const confirmTimePicker = async () => {
+    if (!timePickerTarget) {
+      return;
+    }
+
+    const nextTime = `${timeDraft.hour}:${timeDraft.minute}`;
+
+    if (timePickerTarget === '__main__') {
+      await updateUserProfile({
+        preferredWorkoutTime: nextTime,
+        preferredWorkoutTimeByDay:
+          userProfile.preferredScheduleMode === 'same'
+            ? Object.fromEntries(userProfile.preferredTrainingDays.map((day) => [day, nextTime]))
+            : userProfile.preferredWorkoutTimeByDay,
+      });
+    } else {
+      await updateUserProfile({
+        preferredWorkoutTimeByDay: {
+          ...userProfile.preferredWorkoutTimeByDay,
+          [timePickerTarget]: nextTime,
+        },
+      });
+    }
+
+    setTimePickerTarget(null);
   };
 
   const handleExportCsv = () => {
@@ -475,6 +610,116 @@ export default function ConfigPage() {
               </div>
             </div>
 
+            <div className="border-b border-[rgba(255,255,255,0.04)] px-4 py-4">
+              <div className="flex items-start gap-4">
+                <SettingIcon>
+                  <Bell size={18} className="text-[#00C9A7]" />
+                </SettingIcon>
+                <div className="min-w-0 flex-1">
+                  <span className="block text-[1.03rem] font-semibold text-white">Notificar los d?as que toca ir al gym</span>
+                  <p className="mt-1 text-sm leading-5 text-[#9BAEC1]" style={{ fontFamily: "'Inter', sans-serif" }}>
+                    Eleg? qu? d?as quer?s recordar y en qu? horario te conviene recibir ese aviso.
+                  </p>
+                </div>
+                <div className="shrink-0 self-center pt-0.5">
+                  <SettingToggle value={appSettings.notifyGymDays} onChange={() => void handleNotificationToggle()} />
+                </div>
+              </div>
+
+              {appSettings.notifyGymDays ? (
+                <div className="mt-4 space-y-4 rounded-[24px] border border-[rgba(255,255,255,0.06)] bg-[#101521] p-4">
+                  <div className="grid grid-cols-2 gap-2 rounded-[20px] bg-[#0C1523] p-1.5">
+                    <button
+                      type="button"
+                      onClick={() => void updateNotificationScheduleMode('same')}
+                      className={
+                        userProfile.preferredScheduleMode === 'same'
+                          ? 'rounded-2xl bg-[#00C9A7] px-4 py-3 text-sm font-bold text-[#041016]'
+                          : 'rounded-2xl px-4 py-3 text-sm font-bold text-[#98A2B3]'
+                      }
+                    >
+                      Mismo horario
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => void updateNotificationScheduleMode('different')}
+                      className={
+                        userProfile.preferredScheduleMode === 'different'
+                          ? 'rounded-2xl bg-[#00C9A7] px-4 py-3 text-sm font-bold text-[#041016]'
+                          : 'rounded-2xl px-4 py-3 text-sm font-bold text-[#98A2B3]'
+                      }
+                    >
+                      Horarios distintos
+                    </button>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div>
+                      <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#8D98AA]">D?as de notificaci?n</p>
+                      <p className="mt-1 text-sm text-[#9BAEC1]">Pod?s elegir entre 1 y 6 d?as. Si quer?s desactivar todo, apag? el switch.</p>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                      {WEEK_DAYS.map((day) => {
+                        const selected = userProfile.preferredTrainingDays.includes(day.value);
+
+                        return (
+                          <button
+                            key={day.value}
+                            type="button"
+                            onClick={() => void toggleNotificationDay(day.value)}
+                            className={selected
+                              ? 'rounded-2xl border border-[rgba(0,201,167,0.32)] bg-[rgba(0,201,167,0.12)] px-3 py-3 text-left'
+                              : 'rounded-2xl border border-[rgba(255,255,255,0.06)] bg-[#13263A] px-3 py-3 text-left'}
+                          >
+                            <span className="block text-[11px] font-bold uppercase tracking-[0.18em] text-[#8D98AA]">{day.short}</span>
+                            <span className="mt-1 block text-sm font-semibold text-white">{day.value}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {userProfile.preferredTrainingDays.length > 0 ? (
+                    userProfile.preferredScheduleMode === 'same' ? (
+                      <button
+                        type="button"
+                        onClick={() => openTimePicker()}
+                        className="flex w-full items-center justify-between gap-4 rounded-[22px] border border-[rgba(255,255,255,0.06)] bg-[#13263A] px-4 py-4 text-left"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#1A2130] text-[#00C9A7]">
+                            <Clock3 size={18} />
+                          </div>
+                          <div>
+                            <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#8D98AA]">Horario principal</p>
+                            <p className="mt-1 text-base font-bold text-white">{formatTimeLabel(userProfile.preferredWorkoutTime || DEFAULT_TIME)}</p>
+                          </div>
+                        </div>
+                        <ChevronRight size={16} className="text-[#9BAEC1]" />
+                      </button>
+                    ) : (
+                      <div className="space-y-2">
+                        {selectedNotificationDays.map((day) => (
+                          <button
+                            key={day.value}
+                            type="button"
+                            onClick={() => openTimePicker(day.value)}
+                            className="flex w-full items-center justify-between gap-4 rounded-[22px] border border-[rgba(255,255,255,0.06)] bg-[#13263A] px-4 py-4 text-left"
+                          >
+                            <div>
+                              <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#8D98AA]">{day.value}</p>
+                              <p className="mt-1 text-base font-bold text-white">{formatTimeLabel(userProfile.preferredWorkoutTimeByDay[day.value] || userProfile.preferredWorkoutTime || DEFAULT_TIME)}</p>
+                            </div>
+                            <ChevronRight size={16} className="text-[#9BAEC1]" />
+                          </button>
+                        ))}
+                      </div>
+                    )
+                  ) : null}
+                </div>
+              ) : null}
+            </div>
+
             <SettingRow
               icon={<Download size={18} className="text-[#00C9A7]" />}
               label="Exportar a CSV"
@@ -535,6 +780,16 @@ export default function ConfigPage() {
             aria-label="Cerrar configuración de descanso"
           />
           <div className="relative w-full rounded-[2rem] bg-[#1A2D42] p-6">
+      <TimeWheelPicker
+        open={Boolean(timePickerTarget)}
+        title={timePickerTarget && timePickerTarget !== '__main__' ? `Horario para ${timePickerTarget}` : 'Horario principal'}
+        subtitle="Defin? la hora en la que quer?s recibir el recordatorio de esa sesi?n."
+        value={timeDraft}
+        onChange={setTimeDraft}
+        onClose={() => setTimePickerTarget(null)}
+        onConfirm={() => void confirmTimePicker()}
+      />
+
             <h3 className="text-center text-2xl font-bold text-white">Descanso por defecto</h3>
             <p className="mt-2 text-center text-sm text-[#9BAEC1]" style={{ fontFamily: "'Inter', sans-serif" }}>
               Definí cuántos segundos querés usar por defecto entre series.
