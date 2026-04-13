@@ -1,0 +1,111 @@
+Pecho/Tríceps
+Incline Bench Press (Barbell)
+Incline Bench Press (Dumbbell)
+Overhead Triceps Extension (Cable)
+Bench Press (Barbell)
+Bench Press (Dumbbell)
+Bench Press (Cable)
+Bench Press (Smith Machine)
+Chest Dip (Weighted)
+Triceps Dip (Weighted)
+Chest Dip
+Butterfly (Pec Deck)
+Push Up
+Cable Fly Crossovers
+Chest Fly (Dumbbell)
+Decline Bench Press (Barbell)
+Chest Press (Machine)
+Triceps Rope Pushdown
+Triceps Pushdown
+
+Espalda/Bíceps
+Pull Up
+Pull Up (Weighted)
+Preacher Curl (Barbell)
+Behind the Back Curl (Cable)
+Pullover (Machine)
+Pullover (Dumbbell)
+Bent Over Row (Barbell)
+Bent Over Row (Dumbbell)
+Lat Pulldown (Cable)
+Hammer Curl (Dumbbell)
+T Bar Row
+Dumbbell Row
+Inverted Row
+Seated Row (Machine)
+Bicep Curl (Barbell)
+EZ Bar Biceps Curl
+Bicep Curl (Dumbbell)
+Concentration Curl
+
+Hombros
+Lateral Raise (Dumbbell)
+Lateral Raise (Cable)
+Lateral Raise (Machine)
+Overhead Press (Barbell)
+Overhead Press (Dumbbell)
+Shoulder Press (Dumbbell)
+Overhead Press (Smith Machine)
+Seated Shoulder Press (Machine)
+Shrug (Dumbbell)
+Shrug (Barbell)
+Arnold Press (Dumbbell)
+Face Pull
+Front Raise (Dumbbell)
+Rear Delt Reverse Fly (Dumbbell)
+
+Piernas
+Squat (Barbell)
+Romanian Deadlift (Barbell)
+Romanian Deadlift (Dumbbell)
+Leg Extension (Machine)
+Seated Leg Curl (Machine)
+Deadlift (Barbell)
+Deadlift (Trap bar)
+Straight Leg Deadlift
+Sumo Deadlift
+Bulgarian Split Squat
+Goblet Squat
+Leg Press (Machine)
+Reverse Lunge (Dumbbell)
+Walking Lunge
+Lunge (Dumbbell)
+Calf Press (Machine)
+Seated Calf Raise
+Standing Calf Raise
+Front Squat
+Hack Squat
+Hack Squat (Machine)
+Hip Thrust (Barbell)
+Glute Bridge
+Hip Thrust
+Dumbbell Step Up
+
+Core/Antebrazos/Cuello
+Cable Crunch
+Lying Neck Curls
+Lying Neck Extension
+Wrist Roller
+Plank
+Side Plank
+Hanging Leg Raise
+Back Extension (Hyperextension)
+Superman
+Ab Wheel
+Hanging Knee Raise
+Cable Core Palloff Press
+Bicycle Crunch
+Crunch
+Reverse Crunch
+
+Full body/Cardio
+Farmers Walk
+Burpee
+Jump Rope
+Kettlebell Swing
+Rowing Machine
+Running
+Air Bike
+Boxing
+Battle Ropes
+Box Jump

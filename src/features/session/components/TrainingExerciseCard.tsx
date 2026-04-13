@@ -15,6 +15,8 @@ type SessionExerciseCardProps = {
   weightUnit: 'kg' | 'lb';
   weightUnitLabel: string;
   showPreviousWeight: boolean;
+  coverImageUrl?: string;
+  onThumbnailClick?: () => void;
   onMoveExercise: (fromIndex: number, toIndex: number) => void;
   onExerciseFocus: (exerciseIdx: number) => void;
   onExerciseMenu: (exerciseIdx: number, anchorRect: DOMRect) => void;
@@ -40,6 +42,8 @@ export function TrainingExerciseCard({
   weightUnit,
   weightUnitLabel,
   showPreviousWeight,
+  coverImageUrl,
+  onThumbnailClick,
   onMoveExercise,
   onExerciseFocus,
   onExerciseMenu,
@@ -151,6 +155,21 @@ export function TrainingExerciseCard({
           >
             <GripVertical size={18} className="text-[#00C9A7]" />
           </button>
+
+          {!compactForReorder && coverImageUrl ? (
+            <button
+              type="button"
+              onClick={onThumbnailClick}
+              className="mt-0.5 shrink-0 overflow-hidden rounded-xl"
+              aria-label={`Ver detalles de ${exercise.name}`}
+            >
+              <img
+                src={coverImageUrl}
+                alt=""
+                className="h-11 w-11 object-cover"
+              />
+            </button>
+          ) : null}
 
           <div className="min-w-0">
             <h2 className={`font-bold italic uppercase leading-tight tracking-tight text-white ${compactForReorder ? 'text-base' : 'text-xl'}`}>

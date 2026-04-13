@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
-import { ChevronDown, ChevronUp, Plus, Save, Search, Trash2 } from 'lucide-react';
+import { ChevronDown, ChevronUp, Info, Plus, Save, Search, Trash2, X } from 'lucide-react';
 import { useAppData } from '@/core/app-data/AppDataContext';
 import { useExerciseCatalog } from '@/features/exercises/hooks/useExerciseCatalog';
 import { ActiveWorkoutEditLockModal } from '@/shared/components/layout/ActiveWorkoutEditLockModal';
@@ -9,12 +9,137 @@ import type { Routine } from '@/shared/types/models';
 
 const ALL_MUSCLES_OPTION = 'Todos';
 
+// Top 100 exercises in popularity order (English source titles from exercises.json)
+// Headers like "Pecho/Tríceps" are omitted — only exercise names are included.
+const POPULAR_ORDER_EN = [
+  // Pecho/Tríceps
+  'Incline Bench Press (Barbell)',
+  'Incline Bench Press (Dumbbell)',
+  'Overhead Triceps Extension (Cable)',
+  'Bench Press (Barbell)',
+  'Bench Press (Dumbbell)',
+  'Bench Press (Cable)',
+  'Bench Press (Smith Machine)',
+  'Chest Dip (Weighted)',
+  'Triceps Dip (Weighted)',
+  'Chest Dip',
+  'Butterfly (Pec Deck)',
+  'Push Up',
+  'Cable Fly Crossovers',
+  'Chest Fly (Dumbbell)',
+  'Decline Bench Press (Barbell)',
+  'Chest Press (Machine)',
+  'Triceps Rope Pushdown',
+  'Triceps Pushdown',
+  // Espalda/Bíceps
+  'Pull Up',
+  'Pull Up (Weighted)',
+  'Preacher Curl (Barbell)',
+  'Behind the Back Curl (Cable)',
+  'Pullover (Machine)',
+  'Pullover (Dumbbell)',
+  'Bent Over Row (Barbell)',
+  'Bent Over Row (Dumbbell)',
+  'Lat Pulldown (Cable)',
+  'Hammer Curl (Dumbbell)',
+  'T Bar Row',
+  'Dumbbell Row',
+  'Inverted Row',
+  'Seated Row (Machine)',
+  'Bicep Curl (Barbell)',
+  'EZ Bar Biceps Curl',
+  'Bicep Curl (Dumbbell)',
+  'Concentration Curl',
+  // Hombros
+  'Lateral Raise (Dumbbell)',
+  'Lateral Raise (Cable)',
+  'Lateral Raise (Machine)',
+  'Overhead Press (Barbell)',
+  'Overhead Press (Dumbbell)',
+  'Shoulder Press (Dumbbell)',
+  'Overhead Press (Smith Machine)',
+  'Seated Shoulder Press (Machine)',
+  'Shrug (Dumbbell)',
+  'Shrug (Barbell)',
+  'Arnold Press (Dumbbell)',
+  'Face Pull',
+  'Front Raise (Dumbbell)',
+  'Rear Delt Reverse Fly (Dumbbell)',
+  // Piernas
+  'Squat (Barbell)',
+  'Romanian Deadlift (Barbell)',
+  'Romanian Deadlift (Dumbbell)',
+  'Leg Extension (Machine)',
+  'Seated Leg Curl (Machine)',
+  'Deadlift (Barbell)',
+  'Deadlift (Trap bar)',
+  'Straight Leg Deadlift',
+  'Sumo Deadlift',
+  'Bulgarian Split Squat',
+  'Goblet Squat',
+  'Leg Press (Machine)',
+  'Reverse Lunge (Dumbbell)',
+  'Walking Lunge',
+  'Lunge (Dumbbell)',
+  'Calf Press (Machine)',
+  'Seated Calf Raise',
+  'Standing Calf Raise',
+  'Front Squat',
+  'Hack Squat',
+  'Hack Squat (Machine)',
+  'Hip Thrust (Barbell)',
+  'Glute Bridge',
+  'Hip Thrust',
+  'Dumbbell Step Up',
+  // Core/Antebrazos/Cuello
+  'Cable Crunch',
+  'Lying Neck Curls',
+  'Lying Neck Extension',
+  'Wrist Roller',
+  'Plank',
+  'Side Plank',
+  'Hanging Leg Raise',
+  'Back Extension (Hyperextension)',
+  'Superman',
+  'Ab Wheel',
+  'Hanging Knee Raise',
+  'Cable Core Palloff Press',
+  'Bicycle Crunch',
+  'Crunch',
+  'Reverse Crunch',
+  // Full body/Cardio
+  'Farmers Walk',
+  'Burpee',
+  'Jump Rope',
+  'Kettlebell Swing',
+  'Rowing Machine',
+  'Running',
+  'Air Bike',
+  'Boxing',
+  'Battle Ropes',
+  'Box Jump',
+];
+
+function normalizeForRanking(s: string): string {
+  return s.toLowerCase().replace(/[^a-z0-9]/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
+const POPULAR_RANK = new Map<string, number>(
+  POPULAR_ORDER_EN.map((title, index) => [normalizeForRanking(title), index])
+);
+
 type RoutineLibraryItem = {
   exerciseSlug?: string;
   name: string;
+  titleEn?: string;
   muscle: string;
   implement?: string;
   secondaryMuscles?: string[];
+  coverImageUrl?: string;
+  animationMediaUrl?: string;
+  animationMediaType?: string;
+  instructions?: string[];
+  overview?: string;
 };
 
 const fallbackExerciseLibrary: RoutineLibraryItem[] = [
@@ -108,17 +233,37 @@ export default function RoutineEditorPage() {
   const [showExSearch, setShowExSearch] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedMuscle, setSelectedMuscle] = useState(ALL_MUSCLES_OPTION);
+  const [selectedExerciseDetail, setSelectedExerciseDetail] = useState<RoutineLibraryItem | null>(null);
 
   const exerciseLibrary = useMemo<RoutineLibraryItem[]>(
     () =>
       catalog.length > 0
-        ? catalog.map((exercise) => ({
-            exerciseSlug: exercise.slug,
-            name: exercise.title,
-            muscle: exercise.muscle,
-            implement: exercise.implement,
-            secondaryMuscles: exercise.secondaryMuscles,
-          }))
+        ? catalog
+            .filter((exercise) => Boolean(exercise.coverImageUrl))
+            .map((exercise) => ({
+              exerciseSlug: exercise.slug,
+              name: exercise.title,
+              titleEn: exercise.slug
+                .replace(/-/g, ' ')
+                .replace(/\b\w/g, (c) => c.toUpperCase()),
+              muscle: exercise.muscle,
+              implement: exercise.implement,
+              secondaryMuscles: exercise.secondaryMuscles,
+              coverImageUrl: exercise.coverImageUrl,
+              animationMediaUrl: exercise.animationMediaUrl,
+              animationMediaType: exercise.animationMediaType,
+              instructions: exercise.instructions,
+              overview: exercise.overview,
+            }))
+            .sort((a, b) => {
+              const keyA = normalizeForRanking(a.exerciseSlug?.replace(/-/g, ' ') ?? '');
+              const keyB = normalizeForRanking(b.exerciseSlug?.replace(/-/g, ' ') ?? '');
+              const rankA = POPULAR_RANK.get(keyA) ?? Infinity;
+              const rankB = POPULAR_RANK.get(keyB) ?? Infinity;
+              if (rankA !== rankB) return rankA - rankB;
+              if (rankA === Infinity) return a.name.localeCompare(b.name, 'es');
+              return 0;
+            })
         : fallbackExerciseLibrary,
     [catalog]
   );
@@ -631,20 +776,46 @@ export default function RoutineEditorPage() {
 
               <div className="flex flex-col gap-2">
                 {filteredExercises.map((exercise) => (
-                  <button
+                  <div
                     key={exercise.exerciseSlug ?? exercise.name}
-                    onClick={() => addExercise(showExSearch, exercise)}
-                    className="flex items-center justify-between rounded-xl bg-[#203347] px-4 py-3 text-left transition-colors hover:bg-[#2A415A]"
-                    type="button"
+                    className="flex items-center gap-3 rounded-xl bg-[#203347] px-3 py-2.5"
                   >
-                    <div>
-                      <p className="text-sm font-medium text-white">{exercise.name}</p>
-                      <p className="text-xs text-[#9BAEC1]" style={{ fontFamily: "'Inter', sans-serif" }}>
+                    {exercise.coverImageUrl ? (
+                      <img
+                        src={exercise.coverImageUrl}
+                        alt=""
+                        className="h-11 w-11 shrink-0 cursor-pointer rounded-lg object-cover"
+                        loading="lazy"
+                        onClick={() => setSelectedExerciseDetail(exercise)}
+                      />
+                    ) : null}
+
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-semibold text-white">{exercise.name}</p>
+                      <p className="truncate text-xs text-[#9BAEC1]" style={{ fontFamily: "'Inter', sans-serif" }}>
                         {[exercise.muscle, exercise.implement].filter(Boolean).join(' · ')}
                       </p>
                     </div>
-                    <Plus size={16} className="shrink-0 text-[#00C9A7]" />
-                  </button>
+
+                    <div className="flex shrink-0 items-center gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedExerciseDetail(exercise)}
+                        className="flex h-8 w-8 items-center justify-center rounded-lg text-[#9BAEC1] transition-colors active:bg-[#2A415A]"
+                        aria-label="Ver detalles"
+                      >
+                        <Info size={16} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => addExercise(showExSearch, exercise)}
+                        className="flex h-8 w-8 items-center justify-center rounded-lg bg-[rgba(0,201,167,0.15)] text-[#00C9A7] transition-colors active:bg-[rgba(0,201,167,0.25)]"
+                        aria-label="Agregar ejercicio"
+                      >
+                        <Plus size={16} />
+                      </button>
+                    </div>
+                  </div>
                 ))}
 
                 {!isCatalogLoading && filteredExercises.length === 0 ? (
@@ -652,6 +823,117 @@ export default function RoutineEditorPage() {
                     No encontramos ejercicios con ese filtro.
                   </div>
                 ) : null}
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {selectedExerciseDetail ? (
+        <div className="absolute inset-0 z-[60]">
+          <div
+            className="absolute inset-0 bg-black/70"
+            onClick={() => setSelectedExerciseDetail(null)}
+          />
+          <div
+            className="absolute bottom-0 left-0 right-0 flex max-h-[88%] flex-col rounded-t-3xl"
+            style={{ background: '#1A2D42' }}
+          >
+            <div className="mx-auto mb-3 mt-4 h-1 w-10 shrink-0 rounded-full bg-[#203347]" />
+
+            <div className="overflow-y-auto">
+              {selectedExerciseDetail.animationMediaUrl ? (
+                <video
+                  key={selectedExerciseDetail.animationMediaUrl}
+                  src={selectedExerciseDetail.animationMediaUrl}
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  className="w-full"
+                  style={{ maxHeight: '260px', objectFit: 'cover' }}
+                />
+              ) : null}
+
+              <div className="px-5 pb-8 pt-4">
+                <div className="mb-4 flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <h2 className="text-xl font-bold leading-tight text-white">
+                      {selectedExerciseDetail.name}
+                    </h2>
+                    {selectedExerciseDetail.titleEn ? (
+                      <p className="mt-0.5 text-sm text-[#6F859A]" style={{ fontFamily: "'Inter', sans-serif" }}>
+                        {selectedExerciseDetail.titleEn}
+                      </p>
+                    ) : null}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedExerciseDetail(null)}
+                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[#203347] text-[#9BAEC1]"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+
+                <div className="mb-4 flex flex-wrap gap-2">
+                  <span className="rounded-full bg-[rgba(0,201,167,0.12)] px-3 py-1 text-xs font-semibold text-[#00C9A7]">
+                    {selectedExerciseDetail.muscle}
+                  </span>
+                  {selectedExerciseDetail.secondaryMuscles?.map((m) => (
+                    <span
+                      key={m}
+                      className="rounded-full bg-[rgba(155,174,193,0.1)] px-3 py-1 text-xs font-medium text-[#9BAEC1]"
+                    >
+                      {m}
+                    </span>
+                  ))}
+                  {selectedExerciseDetail.implement ? (
+                    <span className="rounded-full bg-[rgba(127,152,255,0.12)] px-3 py-1 text-xs font-semibold text-[#7F98FF]">
+                      {selectedExerciseDetail.implement}
+                    </span>
+                  ) : null}
+                </div>
+
+                {selectedExerciseDetail.overview ? (
+                  <p className="mb-5 text-sm leading-relaxed text-[#9BAEC1]" style={{ fontFamily: "'Inter', sans-serif" }}>
+                    {selectedExerciseDetail.overview}
+                  </p>
+                ) : null}
+
+                {selectedExerciseDetail.instructions && selectedExerciseDetail.instructions.length > 0 ? (
+                  <div className="mb-5">
+                    <p className="mb-2.5 text-xs font-bold uppercase tracking-widest text-[#9BAEC1]" style={{ fontFamily: "'Inter', sans-serif" }}>
+                      Instrucciones
+                    </p>
+                    <ol className="flex flex-col gap-2.5">
+                      {selectedExerciseDetail.instructions.map((step, index) => (
+                        <li key={index} className="flex gap-3">
+                          <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[rgba(0,201,167,0.15)] text-[10px] font-bold text-[#00C9A7]">
+                            {index + 1}
+                          </span>
+                          <p className="text-sm leading-relaxed text-white" style={{ fontFamily: "'Inter', sans-serif" }}>
+                            {step}
+                          </p>
+                        </li>
+                      ))}
+                    </ol>
+                  </div>
+                ) : null}
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (showExSearch !== null) {
+                      addExercise(showExSearch, selectedExerciseDetail);
+                    }
+                    setSelectedExerciseDetail(null);
+                  }}
+                  className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#00C9A7] py-4 font-bold text-black"
+                >
+                  <Plus size={16} />
+                  Agregar a este día
+                </button>
               </div>
             </div>
           </div>

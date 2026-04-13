@@ -4,11 +4,13 @@ import {
   Check,
   History,
   Menu,
+  Plus,
   RefreshCw,
   Search,
   Sparkles,
   TimerReset,
   Trash2,
+  X,
 } from 'lucide-react';
 import { DndProvider } from 'react-dnd';
 import { TouchBackend } from 'react-dnd-touch-backend';
@@ -218,6 +220,16 @@ export default function TrainingSessionPage() {
     setIdx: number;
     rect: DOMRect;
   } | null>(null);
+  const [sessionExerciseDetail, setSessionExerciseDetail] = useState<{
+    name: string;
+    titleEn: string;
+    animationMediaUrl?: string;
+    muscle: string;
+    secondaryMuscles: string[];
+    implement?: string;
+    instructions: string[];
+    overview: string;
+  } | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -335,6 +347,11 @@ export default function TrainingSessionPage() {
   const currentExercise = exerciseList[currentExIdx] ?? null;
   const catalogExerciseTemplates = useMemo(
     () => exerciseCatalog.map((exercise) => buildExerciseTemplateFromCatalog(exercise)),
+    [exerciseCatalog]
+  );
+
+  const catalogBySlug = useMemo(
+    () => new Map(exerciseCatalog.filter((e) => Boolean(e.coverImageUrl)).map((e) => [e.slug, e])),
     [exerciseCatalog]
   );
   const fallbackExerciseTemplates = useMemo(
@@ -1094,7 +1111,11 @@ export default function TrainingSessionPage() {
           {hasExercises ? (
             <DndProvider backend={TouchBackend} options={{ enableMouseEvents: true, delayTouchStart: 140 }}>
               <div className="flex flex-col gap-4">
-                {exerciseList.map((exercise, exerciseIdx) => (
+                {exerciseList.map((exercise, exerciseIdx) => {
+                  const catalogEntry = exercise.exerciseSlug
+                    ? catalogBySlug.get(exercise.exerciseSlug)
+                    : undefined;
+                  return (
                   <TrainingExerciseCard
                     key={`${exercise.id}-${exerciseIdx}`}
                     htmlId={`session-exercise-${exerciseIdx}`}
@@ -1105,6 +1126,19 @@ export default function TrainingSessionPage() {
                     weightUnit={appSettings.weightUnit}
                     weightUnitLabel={weightUnitLabel}
                     showPreviousWeight={appSettings.showPreviousWeight}
+                    coverImageUrl={catalogEntry?.coverImageUrl}
+                    onThumbnailClick={catalogEntry ? () => {
+                      setSessionExerciseDetail({
+                        name: catalogEntry.title,
+                        titleEn: catalogEntry.slug.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
+                        animationMediaUrl: catalogEntry.animationMediaUrl,
+                        muscle: catalogEntry.muscle,
+                        secondaryMuscles: catalogEntry.secondaryMuscles,
+                        implement: catalogEntry.implement,
+                        instructions: catalogEntry.instructions,
+                        overview: catalogEntry.overview,
+                      });
+                    } : undefined}
                     onMoveExercise={moveExercise}
                     onExerciseFocus={setCurrentExIdx}
                     onExerciseMenu={(targetExerciseIdx, rect) => {
@@ -1125,7 +1159,8 @@ export default function TrainingSessionPage() {
                       removeSet(targetExerciseIdx, exerciseList[targetExerciseIdx].sets.length - 1)
                     }
                   />
-                ))}
+                  );
+                })}
               </div>
             </DndProvider>
           ) : (
@@ -1751,6 +1786,101 @@ export default function TrainingSessionPage() {
           </div>
         </div>
       )}
+
+      {sessionExerciseDetail ? (
+        <div className="absolute inset-0 z-50">
+          <div
+            className="absolute inset-0 bg-black/70"
+            onClick={() => setSessionExerciseDetail(null)}
+          />
+          <div
+            className="absolute bottom-0 left-0 right-0 flex max-h-[88%] flex-col rounded-t-3xl"
+            style={{ background: '#1A2D42' }}
+          >
+            <div className="mx-auto mb-3 mt-4 h-1 w-10 shrink-0 rounded-full bg-[#203347]" />
+
+            <div className="overflow-y-auto">
+              {sessionExerciseDetail.animationMediaUrl ? (
+                <video
+                  key={sessionExerciseDetail.animationMediaUrl}
+                  src={sessionExerciseDetail.animationMediaUrl}
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  className="w-full"
+                  style={{ maxHeight: '260px', objectFit: 'cover' }}
+                />
+              ) : null}
+
+              <div className="px-5 pb-8 pt-4">
+                <div className="mb-4 flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <h2 className="text-xl font-bold leading-tight text-white">
+                      {sessionExerciseDetail.name}
+                    </h2>
+                    <p className="mt-0.5 text-sm text-[#6F859A]" style={{ fontFamily: "'Inter', sans-serif" }}>
+                      {sessionExerciseDetail.titleEn}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setSessionExerciseDetail(null)}
+                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[#203347] text-[#9BAEC1]"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+
+                <div className="mb-4 flex flex-wrap gap-2">
+                  <span className="rounded-full bg-[rgba(0,201,167,0.12)] px-3 py-1 text-xs font-semibold text-[#00C9A7]">
+                    {sessionExerciseDetail.muscle}
+                  </span>
+                  {sessionExerciseDetail.secondaryMuscles.map((m) => (
+                    <span
+                      key={m}
+                      className="rounded-full bg-[rgba(155,174,193,0.1)] px-3 py-1 text-xs font-medium text-[#9BAEC1]"
+                    >
+                      {m}
+                    </span>
+                  ))}
+                  {sessionExerciseDetail.implement ? (
+                    <span className="rounded-full bg-[rgba(127,152,255,0.12)] px-3 py-1 text-xs font-semibold text-[#7F98FF]">
+                      {sessionExerciseDetail.implement}
+                    </span>
+                  ) : null}
+                </div>
+
+                {sessionExerciseDetail.overview ? (
+                  <p className="mb-5 text-sm leading-relaxed text-[#9BAEC1]" style={{ fontFamily: "'Inter', sans-serif" }}>
+                    {sessionExerciseDetail.overview}
+                  </p>
+                ) : null}
+
+                {sessionExerciseDetail.instructions.length > 0 ? (
+                  <div className="mb-2">
+                    <p className="mb-2.5 text-xs font-bold uppercase tracking-widest text-[#9BAEC1]" style={{ fontFamily: "'Inter', sans-serif" }}>
+                      Instrucciones
+                    </p>
+                    <ol className="flex flex-col gap-2.5">
+                      {sessionExerciseDetail.instructions.map((step, index) => (
+                        <li key={index} className="flex gap-3">
+                          <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[rgba(0,201,167,0.15)] text-[10px] font-bold text-[#00C9A7]">
+                            {index + 1}
+                          </span>
+                          <p className="text-sm leading-relaxed text-white" style={{ fontFamily: "'Inter', sans-serif" }}>
+                            {step}
+                          </p>
+                        </li>
+                      ))}
+                    </ol>
+                  </div>
+                ) : null}
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

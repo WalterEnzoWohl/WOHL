@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "supabase": {
+      "command": "cmd",
+      "args": [
+        "/c",
+        "npx",
+        "-y",
+        "@supabase/mcp-server-supabase",
+        "--supabase-url",
+        "https://oeaccnjobphmuhuyfvnh.supabase.co",
+        "--supabase-anon-key",
+        "sb_publishable_6-2V5TFEKOT0qzLLW207pw_bybMqKEo"
+      ]
+    }
+  }
+}
