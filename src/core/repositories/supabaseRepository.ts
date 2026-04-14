@@ -708,53 +708,60 @@ export async function saveRoutine(userId: string, routine: Routine) {
 
   const savedRoutine = (savedRoutineRows as DbRoutineRow[])[0];
 
-  if (existingId) {
-    const { error: deleteDaysError } = await client
-      .from('routine_days')
-      .delete()
-      .eq('routine_id', existingId);
+  try {
+    if (existingId) {
+      const { error: deleteDaysError } = await client
+        .from('routine_days')
+        .delete()
+        .eq('routine_id', existingId);
 
-    if (deleteDaysError) {
-      throw deleteDaysError;
-    }
-  }
-
-  for (const [dayIndex, day] of routine.days.entries()) {
-    const { data: dayRows, error: dayError } = await client
-      .from('routine_days')
-      .insert({
-        routine_id: savedRoutine.id,
-        position: dayIndex,
-        name: day.name,
-        focus: day.focus,
-        description: day.description ?? null,
-      })
-      .select('*');
-
-    if (dayError) {
-      throw dayError;
-    }
-
-    const insertedDay = (dayRows as DbRoutineDayRow[])[0];
-
-    if (day.exercises.length > 0) {
-      const exercisePayload = day.exercises.map((exercise, exerciseIndex) => ({
-        routine_day_id: insertedDay.id,
-        position: exerciseIndex,
-        exercise_slug: exercise.exerciseSlug ?? null,
-        name: exercise.name,
-        muscle: exercise.muscle,
-        implement: exercise.implement ?? null,
-        secondary_muscles: exercise.secondaryMuscles ?? null,
-        notes: exercise.notes ?? null,
-        sets_json: buildSetTemplate(exercise.sets),
-      }));
-
-      const { error: exerciseError } = await client.from('routine_day_exercises').insert(exercisePayload);
-      if (exerciseError) {
-        throw exerciseError;
+      if (deleteDaysError) {
+        throw deleteDaysError;
       }
     }
+
+    for (const [dayIndex, day] of routine.days.entries()) {
+      const { data: dayRows, error: dayError } = await client
+        .from('routine_days')
+        .insert({
+          routine_id: savedRoutine.id,
+          position: dayIndex,
+          name: day.name,
+          focus: day.focus,
+          description: day.description ?? null,
+        })
+        .select('*');
+
+      if (dayError) {
+        throw dayError;
+      }
+
+      const insertedDay = (dayRows as DbRoutineDayRow[])[0];
+
+      if (day.exercises.length > 0) {
+        const exercisePayload = day.exercises.map((exercise, exerciseIndex) => ({
+          routine_day_id: insertedDay.id,
+          position: exerciseIndex,
+          exercise_slug: exercise.exerciseSlug ?? null,
+          name: exercise.name,
+          muscle: exercise.muscle,
+          implement: exercise.implement ?? null,
+          secondary_muscles: exercise.secondaryMuscles ?? null,
+          notes: exercise.notes ?? null,
+          sets_json: buildSetTemplate(exercise.sets),
+        }));
+
+        const { error: exerciseError } = await client.from('routine_day_exercises').insert(exercisePayload);
+        if (exerciseError) {
+          throw exerciseError;
+        }
+      }
+    }
+  } catch (cause) {
+    throw new Error(
+      'No se pudieron guardar los días y ejercicios de la rutina. Revisá tu conexión e intentá de nuevo.',
+      { cause }
+    );
   }
 
   const refreshedRoutines = await loadRoutines(userId);

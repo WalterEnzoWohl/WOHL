@@ -224,6 +224,8 @@ export default function RoutineEditorPage() {
   const initialDays = buildInitialDays(existing);
 
   const [name, setName] = useState(existing?.name ?? '');
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [nameError, setNameError] = useState('');
   const [daysPerWeek, setDaysPerWeek] = useState(
     Math.max(existing?.daysPerWeek ?? initialDays.length, 2)
@@ -440,8 +442,16 @@ export default function RoutineEditorPage() {
   };
 
   const handleSave = async () => {
+    if (isSaving) return;
+
     if (!name.trim()) {
       setNameError('Tu rutina necesita un nombre para poder guardarse.');
+      return;
+    }
+
+    const hasAnyExercise = days.some((day) => day.exercises.length > 0);
+    if (!hasAnyExercise) {
+      setSaveError('Agregá al menos un ejercicio a algún día antes de guardar la rutina.');
       return;
     }
 
@@ -490,8 +500,16 @@ export default function RoutineEditorPage() {
       })),
     };
 
-    await saveRoutine(routineToSave);
-    navigate('/workouts');
+    setIsSaving(true);
+    setSaveError(null);
+    try {
+      await saveRoutine(routineToSave);
+      navigate('/workouts');
+    } catch (error) {
+      setSaveError(error instanceof Error ? error.message : 'No se pudo guardar la rutina. Intentá de nuevo.');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -708,13 +726,23 @@ export default function RoutineEditorPage() {
             ) : null}
           </div>
 
+          {saveError ? (
+            <div
+              className="rounded-2xl border border-[rgba(255,125,125,0.22)] bg-[rgba(255,125,125,0.08)] px-4 py-3 text-sm text-[#FFB4B4]"
+              style={{ fontFamily: "'Inter', sans-serif" }}
+            >
+              {saveError}
+            </div>
+          ) : null}
+
           <button
             onClick={() => void handleSave()}
-            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#00C9A7] py-4 shadow-[0_0_15px_rgba(0,201,167,0.2)]"
+            disabled={isSaving}
+            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#00C9A7] py-4 shadow-[0_0_15px_rgba(0,201,167,0.2)] disabled:opacity-50"
             type="button"
           >
             <Save size={18} className="text-black" />
-            <span className="text-base font-bold text-black">Guardar rutina</span>
+            <span className="text-base font-bold text-black">{isSaving ? 'Guardando...' : 'Guardar rutina'}</span>
           </button>
         </div>
       ) : (

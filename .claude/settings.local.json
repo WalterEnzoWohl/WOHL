@@ -6,11 +6,11 @@
         "/c",
         "npx",
         "-y",
-        "@supabase/mcp-server-supabase",
-        "--supabase-url",
-        "https://oeaccnjobphmuhuyfvnh.supabase.co",
-        "--supabase-anon-key",
-        "sb_publishable_6-2V5TFEKOT0qzLLW207pw_bybMqKEo"
+        "@supabase/mcp-server-supabase@latest",
+        "--access-token",
+        "sbp_9215ac6c0f420df7888a4de2cef9a2409c81d051",
+        "--project-ref",
+        "oeaccnjobphmuhuyfvnh"
       ]
     }
   }
