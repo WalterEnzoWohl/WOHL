@@ -1,8 +1,10 @@
 import { useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
-import { BookOpen, ChevronDown, ChevronUp, Dumbbell, Info, MoreVertical, Plus, RefreshCw, Save, Search, Timer, Trash2, TrendingUp, X } from 'lucide-react';
+import { BookOpen, Check, ChevronDown, ChevronUp, Dumbbell, Info, MoreVertical, Plus, RefreshCw, Save, Search, Timer, Trash2, TrendingUp } from 'lucide-react';
 import { useAppData } from '@/core/app-data/AppDataContext';
 import { useExerciseCatalog } from '@/features/exercises/hooks/useExerciseCatalog';
+import { ExerciseDetailSheet } from '@/features/exercises/components/ExerciseDetailSheet';
+import type { CatalogExerciseItem } from '@/features/exercises/components/ExerciseDetailSheet';
 import { ActiveWorkoutEditLockModal } from '@/shared/components/layout/ActiveWorkoutEditLockModal';
 import { Header } from '@/shared/components/layout/Header';
 import { NumberWheelPicker } from '@/features/onboarding/components/WheelPickers';
@@ -142,19 +144,7 @@ const REST_OPTIONS: WheelPickerOption[] = [
 ];
 const REST_VALID_VALUES = new Set(REST_OPTIONS.map((o) => o.value));
 
-type RoutineLibraryItem = {
-  exerciseSlug?: string;
-  name: string;
-  titleEn?: string;
-  muscle: string;
-  implement?: string;
-  secondaryMuscles?: string[];
-  coverImageUrl?: string;
-  animationMediaUrl?: string;
-  animationMediaType?: string;
-  instructions?: string[];
-  overview?: string;
-};
+type RoutineLibraryItem = CatalogExerciseItem;
 
 const fallbackExerciseLibrary: RoutineLibraryItem[] = [
   { name: 'Press de banca (barra)', muscle: 'Pecho', implement: 'Barra' },
@@ -264,6 +254,7 @@ export default function RoutineEditorPage() {
   const [replaceTarget, setReplaceTarget] = useState<{ dayIndex: number; exerciseIndex: number } | null>(null);
   const [restPickerTarget, setRestPickerTarget] = useState<{ dayIndex: number; exerciseIndex: number } | null>(null);
   const [restPickerDraft, setRestPickerDraft] = useState('90');
+  const [selectedSlugs, setSelectedSlugs] = useState<Set<string>>(new Set());
 
   const exerciseLibrary = useMemo<RoutineLibraryItem[]>(
     () =>
@@ -489,6 +480,50 @@ export default function RoutineEditorPage() {
     setSearchQuery('');
     setSelectedMuscle(ALL_MUSCLES_OPTION);
     setSelectedImplement(ALL_IMPLEMENTS_OPTION);
+    setSelectedSlugs(new Set());
+  };
+
+  const addMultipleExercises = (dayIndex: number, exercises: RoutineLibraryItem[]) => {
+    if (exercises.length === 0) return;
+    setDays((previous) =>
+      previous.map((day, index) => {
+        if (index !== dayIndex) return day;
+        return {
+          ...day,
+          exercises: [
+            ...day.exercises,
+            ...exercises.map((exercise) => ({
+              exerciseSlug: exercise.exerciseSlug,
+              name: exercise.name,
+              muscle: exercise.muscle,
+              implement: exercise.implement,
+              secondaryMuscles: exercise.secondaryMuscles,
+              sets: 3,
+              reps: 10,
+              kg: 0,
+            })),
+          ],
+        };
+      })
+    );
+    setSelectedSlugs(new Set());
+    setShowExSearch(null);
+    setSearchQuery('');
+    setSelectedMuscle(ALL_MUSCLES_OPTION);
+    setSelectedImplement(ALL_IMPLEMENTS_OPTION);
+  };
+
+  const toggleExerciseSelection = (exercise: RoutineLibraryItem) => {
+    const key = exercise.exerciseSlug ?? exercise.name;
+    setSelectedSlugs((previous) => {
+      const next = new Set(previous);
+      if (next.has(key)) {
+        next.delete(key);
+      } else {
+        next.add(key);
+      }
+      return next;
+    });
   };
 
   const removeExercise = (dayIndex: number, exerciseIndex: number) => {
@@ -869,6 +904,7 @@ export default function RoutineEditorPage() {
                           setSearchQuery('');
                           setSelectedMuscle(ALL_MUSCLES_OPTION);
                           setSelectedImplement(ALL_IMPLEMENTS_OPTION);
+                          setSelectedSlugs(new Set());
                         }}
                         className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-[rgba(0,201,167,0.3)] py-3 text-sm font-semibold text-[#00C9A7]"
                         type="button"
@@ -919,7 +955,7 @@ export default function RoutineEditorPage() {
 
       {showExSearch !== null && !isEditingBlocked ? (
         <div className="absolute inset-0 z-50">
-          <div className="absolute inset-0 bg-black/60" onClick={() => setShowExSearch(null)} />
+          <div className="absolute inset-0 bg-black/60" onClick={() => { setShowExSearch(null); setSelectedSlugs(new Set()); }} />
           <div
             className="absolute bottom-0 left-0 right-0 flex max-h-[80%] flex-col rounded-t-3xl"
             style={{ background: '#1A2D42' }}
@@ -927,7 +963,9 @@ export default function RoutineEditorPage() {
             <div className="mx-auto mb-3 mt-4 h-1 w-10 shrink-0 rounded-full bg-[#203347]" />
 
             <div className="shrink-0 px-5 pb-4">
-              <h3 className="mb-3 text-lg font-bold text-white">Catálogo de ejercicios</h3>
+              <h3 className="mb-3 text-lg font-bold text-white">
+                {replaceTarget !== null ? 'Reemplazar ejercicio' : 'Catálogo de ejercicios'}
+              </h3>
               <div className="relative mb-3">
                 <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9BAEC1]" />
                 <input
@@ -965,7 +1003,7 @@ export default function RoutineEditorPage() {
               </div>
             </div>
 
-            <div className="overflow-y-auto px-5 pb-6">
+            <div className="min-h-0 flex-1 overflow-y-auto px-5 pb-6">
               {catalogError ? (
                 <div className="mb-3 rounded-2xl border border-[rgba(255,125,125,0.22)] bg-[rgba(255,125,125,0.08)] px-4 py-3 text-sm text-[#FFB4B4]">
                   {catalogError}. Por ahora te mostramos una base local de respaldo.
@@ -984,46 +1022,62 @@ export default function RoutineEditorPage() {
                     Recientes
                   </p>
                   <div className="flex flex-col gap-2">
-                    {recentExercises.map((exercise) => (
-                      <div
-                        key={`recent-${exercise.exerciseSlug ?? exercise.name}`}
-                        className="flex items-center gap-3 rounded-xl bg-[#203347] px-3 py-2.5"
-                      >
-                        {exercise.coverImageUrl ? (
-                          <img
-                            src={exercise.coverImageUrl}
-                            alt=""
-                            className="h-11 w-11 shrink-0 cursor-pointer rounded-lg object-cover"
-                            loading="lazy"
-                            onClick={() => setSelectedExerciseDetail(exercise)}
-                          />
-                        ) : null}
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate text-sm font-semibold text-white">{exercise.name}</p>
-                          <p className="truncate text-xs text-[#9BAEC1]" style={{ fontFamily: "'Inter', sans-serif" }}>
-                            {[exercise.muscle, exercise.implement].filter(Boolean).join(' · ')}
-                          </p>
-                        </div>
-                        <div className="flex shrink-0 items-center gap-1.5">
+                    {recentExercises.map((exercise) => {
+                      const key = exercise.exerciseSlug ?? exercise.name;
+                      const isSelected = replaceTarget === null && selectedSlugs.has(key);
+                      return (
+                        <div
+                          key={`recent-${key}`}
+                          className={`flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors ${
+                            isSelected
+                              ? 'border border-[rgba(0,201,167,0.4)] bg-[rgba(0,201,167,0.08)]'
+                              : 'bg-[#203347]'
+                          }`}
+                        >
+                          {exercise.coverImageUrl ? (
+                            <div
+                              className="relative h-11 w-11 shrink-0 cursor-pointer overflow-hidden rounded-lg"
+                              onClick={() => replaceTarget !== null ? setSelectedExerciseDetail(exercise) : toggleExerciseSelection(exercise)}
+                            >
+                              <img src={exercise.coverImageUrl} alt="" className="h-full w-full object-cover" loading="lazy" />
+                              {isSelected ? (
+                                <div className="absolute inset-0 flex items-center justify-center bg-[rgba(0,201,167,0.72)]">
+                                  <Check size={18} className="text-white" strokeWidth={3} />
+                                </div>
+                              ) : null}
+                            </div>
+                          ) : null}
                           <button
                             type="button"
-                            onClick={() => setSelectedExerciseDetail(exercise)}
-                            className="flex h-8 w-8 items-center justify-center rounded-lg text-[#9BAEC1] transition-colors active:bg-[#2A415A]"
-                            aria-label="Ver detalles"
+                            className="min-w-0 flex-1 text-left"
+                            onClick={() => replaceTarget === null ? toggleExerciseSelection(exercise) : undefined}
                           >
-                            <Info size={16} />
+                            <p className="truncate text-sm font-semibold text-white">{exercise.name}</p>
+                            <p className="truncate text-xs text-[#9BAEC1]" style={{ fontFamily: "'Inter', sans-serif" }}>
+                              {[exercise.muscle, exercise.implement].filter(Boolean).join(' · ')}
+                            </p>
                           </button>
-                          <button
-                            type="button"
-                            onClick={() => addExercise(showExSearch!, exercise)}
-                            className="flex h-8 w-8 items-center justify-center rounded-lg bg-[rgba(0,201,167,0.15)] text-[#00C9A7] transition-colors active:bg-[rgba(0,201,167,0.25)]"
-                            aria-label="Agregar ejercicio"
-                          >
-                            <Plus size={16} />
-                          </button>
+                          <div className="flex shrink-0 items-center gap-1.5">
+                            <button
+                              type="button"
+                              onClick={() => setSelectedExerciseDetail(exercise)}
+                              className="flex h-8 w-8 items-center justify-center rounded-lg text-[#9BAEC1] transition-colors active:bg-[#2A415A]"
+                              aria-label="Ver detalles"
+                            >
+                              <Info size={16} />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => addExercise(showExSearch!, exercise)}
+                              className="flex h-8 w-8 items-center justify-center rounded-lg bg-[rgba(0,201,167,0.15)] text-[#00C9A7] transition-colors active:bg-[rgba(0,201,167,0.25)]"
+                              aria-label="Agregar ejercicio"
+                            >
+                              <Plus size={16} />
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               ) : null}
@@ -1034,93 +1088,125 @@ export default function RoutineEditorPage() {
                     Recomendados
                   </p>
                   <div className="flex flex-col gap-2">
-                    {recommendedExercises.map((exercise) => (
-                      <div
-                        key={`rec-${exercise.exerciseSlug ?? exercise.name}`}
-                        className="flex items-center gap-3 rounded-xl bg-[#203347] px-3 py-2.5"
-                      >
-                        {exercise.coverImageUrl ? (
-                          <img
-                            src={exercise.coverImageUrl}
-                            alt=""
-                            className="h-11 w-11 shrink-0 cursor-pointer rounded-lg object-cover"
-                            loading="lazy"
-                            onClick={() => setSelectedExerciseDetail(exercise)}
-                          />
-                        ) : null}
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate text-sm font-semibold text-white">{exercise.name}</p>
-                          <p className="truncate text-xs text-[#9BAEC1]" style={{ fontFamily: "'Inter', sans-serif" }}>
-                            {[exercise.muscle, exercise.implement].filter(Boolean).join(' · ')}
-                          </p>
-                        </div>
-                        <div className="flex shrink-0 items-center gap-1.5">
+                    {recommendedExercises.map((exercise) => {
+                      const key = exercise.exerciseSlug ?? exercise.name;
+                      const isSelected = replaceTarget === null && selectedSlugs.has(key);
+                      return (
+                        <div
+                          key={`rec-${key}`}
+                          className={`flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors ${
+                            isSelected
+                              ? 'border border-[rgba(0,201,167,0.4)] bg-[rgba(0,201,167,0.08)]'
+                              : 'bg-[#203347]'
+                          }`}
+                        >
+                          {exercise.coverImageUrl ? (
+                            <div
+                              className="relative h-11 w-11 shrink-0 cursor-pointer overflow-hidden rounded-lg"
+                              onClick={() => replaceTarget !== null ? setSelectedExerciseDetail(exercise) : toggleExerciseSelection(exercise)}
+                            >
+                              <img src={exercise.coverImageUrl} alt="" className="h-full w-full object-cover" loading="lazy" />
+                              {isSelected ? (
+                                <div className="absolute inset-0 flex items-center justify-center bg-[rgba(0,201,167,0.72)]">
+                                  <Check size={18} className="text-white" strokeWidth={3} />
+                                </div>
+                              ) : null}
+                            </div>
+                          ) : null}
                           <button
                             type="button"
-                            onClick={() => setSelectedExerciseDetail(exercise)}
-                            className="flex h-8 w-8 items-center justify-center rounded-lg text-[#9BAEC1] transition-colors active:bg-[#2A415A]"
-                            aria-label="Ver detalles"
+                            className="min-w-0 flex-1 text-left"
+                            onClick={() => replaceTarget === null ? toggleExerciseSelection(exercise) : undefined}
                           >
-                            <Info size={16} />
+                            <p className="truncate text-sm font-semibold text-white">{exercise.name}</p>
+                            <p className="truncate text-xs text-[#9BAEC1]" style={{ fontFamily: "'Inter', sans-serif" }}>
+                              {[exercise.muscle, exercise.implement].filter(Boolean).join(' · ')}
+                            </p>
                           </button>
-                          <button
-                            type="button"
-                            onClick={() => addExercise(showExSearch!, exercise)}
-                            className="flex h-8 w-8 items-center justify-center rounded-lg bg-[rgba(0,201,167,0.15)] text-[#00C9A7] transition-colors active:bg-[rgba(0,201,167,0.25)]"
-                            aria-label="Agregar ejercicio"
-                          >
-                            <Plus size={16} />
-                          </button>
+                          <div className="flex shrink-0 items-center gap-1.5">
+                            <button
+                              type="button"
+                              onClick={() => setSelectedExerciseDetail(exercise)}
+                              className="flex h-8 w-8 items-center justify-center rounded-lg text-[#9BAEC1] transition-colors active:bg-[#2A415A]"
+                              aria-label="Ver detalles"
+                            >
+                              <Info size={16} />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => addExercise(showExSearch!, exercise)}
+                              className="flex h-8 w-8 items-center justify-center rounded-lg bg-[rgba(0,201,167,0.15)] text-[#00C9A7] transition-colors active:bg-[rgba(0,201,167,0.25)]"
+                              aria-label="Agregar ejercicio"
+                            >
+                              <Plus size={16} />
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               ) : null}
 
               <div className="flex flex-col gap-2">
-                {filteredExercises.map((exercise) => (
-                  <div
-                    key={exercise.exerciseSlug ?? exercise.name}
-                    className="flex items-center gap-3 rounded-xl bg-[#203347] px-3 py-2.5"
-                  >
-                    {exercise.coverImageUrl ? (
-                      <img
-                        src={exercise.coverImageUrl}
-                        alt=""
-                        className="h-11 w-11 shrink-0 cursor-pointer rounded-lg object-cover"
-                        loading="lazy"
-                        onClick={() => setSelectedExerciseDetail(exercise)}
-                      />
-                    ) : null}
+                {filteredExercises.map((exercise) => {
+                  const key = exercise.exerciseSlug ?? exercise.name;
+                  const isSelected = replaceTarget === null && selectedSlugs.has(key);
+                  return (
+                    <div
+                      key={key}
+                      className={`flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors ${
+                        isSelected
+                          ? 'border border-[rgba(0,201,167,0.4)] bg-[rgba(0,201,167,0.08)]'
+                          : 'bg-[#203347]'
+                      }`}
+                    >
+                      {exercise.coverImageUrl ? (
+                        <div
+                          className="relative h-11 w-11 shrink-0 cursor-pointer overflow-hidden rounded-lg"
+                          onClick={() => replaceTarget !== null ? setSelectedExerciseDetail(exercise) : toggleExerciseSelection(exercise)}
+                        >
+                          <img src={exercise.coverImageUrl} alt="" className="h-full w-full object-cover" loading="lazy" />
+                          {isSelected ? (
+                            <div className="absolute inset-0 flex items-center justify-center bg-[rgba(0,201,167,0.72)]">
+                              <Check size={18} className="text-white" strokeWidth={3} />
+                            </div>
+                          ) : null}
+                        </div>
+                      ) : null}
 
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-semibold text-white">{exercise.name}</p>
-                      <p className="truncate text-xs text-[#9BAEC1]" style={{ fontFamily: "'Inter', sans-serif" }}>
-                        {[exercise.muscle, exercise.implement].filter(Boolean).join(' · ')}
-                      </p>
-                    </div>
-
-                    <div className="flex shrink-0 items-center gap-1.5">
                       <button
                         type="button"
-                        onClick={() => setSelectedExerciseDetail(exercise)}
-                        className="flex h-8 w-8 items-center justify-center rounded-lg text-[#9BAEC1] transition-colors active:bg-[#2A415A]"
-                        aria-label="Ver detalles"
+                        className="min-w-0 flex-1 text-left"
+                        onClick={() => replaceTarget === null ? toggleExerciseSelection(exercise) : undefined}
                       >
-                        <Info size={16} />
+                        <p className="truncate text-sm font-semibold text-white">{exercise.name}</p>
+                        <p className="truncate text-xs text-[#9BAEC1]" style={{ fontFamily: "'Inter', sans-serif" }}>
+                          {[exercise.muscle, exercise.implement].filter(Boolean).join(' · ')}
+                        </p>
                       </button>
-                      <button
-                        type="button"
-                        onClick={() => addExercise(showExSearch, exercise)}
-                        className="flex h-8 w-8 items-center justify-center rounded-lg bg-[rgba(0,201,167,0.15)] text-[#00C9A7] transition-colors active:bg-[rgba(0,201,167,0.25)]"
-                        aria-label="Agregar ejercicio"
-                      >
-                        <Plus size={16} />
-                      </button>
+
+                      <div className="flex shrink-0 items-center gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => setSelectedExerciseDetail(exercise)}
+                          className="flex h-8 w-8 items-center justify-center rounded-lg text-[#9BAEC1] transition-colors active:bg-[#2A415A]"
+                          aria-label="Ver detalles"
+                        >
+                          <Info size={16} />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => addExercise(showExSearch, exercise)}
+                          className="flex h-8 w-8 items-center justify-center rounded-lg bg-[rgba(0,201,167,0.15)] text-[#00C9A7] transition-colors active:bg-[rgba(0,201,167,0.25)]"
+                          aria-label="Agregar ejercicio"
+                        >
+                          <Plus size={16} />
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
 
                 {!isCatalogLoading && filteredExercises.length === 0 ? (
                   <div className="rounded-2xl border border-[#203347] bg-[#13263A] px-4 py-5 text-center text-sm text-[#9BAEC1]">
@@ -1129,6 +1215,23 @@ export default function RoutineEditorPage() {
                 ) : null}
               </div>
             </div>
+
+            {replaceTarget === null && selectedSlugs.size > 0 ? (
+              <div className="shrink-0 border-t border-[#203347] px-5 pb-6 pt-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (showExSearch === null) return;
+                    const toAdd = exerciseLibrary.filter((e) => selectedSlugs.has(e.exerciseSlug ?? e.name));
+                    addMultipleExercises(showExSearch, toAdd);
+                  }}
+                  className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#00C9A7] py-4 font-bold text-black shadow-[0_0_15px_rgba(0,201,167,0.2)]"
+                >
+                  <Plus size={18} />
+                  Agregar {selectedSlugs.size} ejercicio{selectedSlugs.size !== 1 ? 's' : ''}
+                </button>
+              </div>
+            ) : null}
           </div>
         </div>
       ) : null}
@@ -1184,6 +1287,7 @@ export default function RoutineEditorPage() {
                   setSearchQuery('');
                   setSelectedMuscle(ALL_MUSCLES_OPTION);
                   setSelectedImplement(ALL_IMPLEMENTS_OPTION);
+                  setSelectedSlugs(new Set());
                   setExerciseMenu(null);
                 }}
                 className="flex w-full items-center gap-3 rounded-xl px-2 py-3 text-sm font-semibold text-[#9BAEC1] transition-colors active:bg-[#203347]"
@@ -1314,116 +1418,14 @@ export default function RoutineEditorPage() {
         </div>
       ) : null}
 
-      {selectedExerciseDetail ? (
-        <div className="absolute inset-0 z-[60]">
-          <div
-            className="absolute inset-0 bg-black/70"
-            onClick={() => setSelectedExerciseDetail(null)}
-          />
-          <div
-            className="absolute bottom-0 left-0 right-0 flex max-h-[88%] flex-col rounded-t-3xl"
-            style={{ background: '#1A2D42' }}
-          >
-            <div className="mx-auto mb-3 mt-4 h-1 w-10 shrink-0 rounded-full bg-[#203347]" />
-
-            <div className="overflow-y-auto">
-              {selectedExerciseDetail.animationMediaUrl ? (
-                <video
-                  key={selectedExerciseDetail.animationMediaUrl}
-                  src={selectedExerciseDetail.animationMediaUrl}
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
-                  className="w-full"
-                  style={{ maxHeight: '260px', objectFit: 'cover' }}
-                />
-              ) : null}
-
-              <div className="px-5 pb-8 pt-4">
-                <div className="mb-4 flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <h2 className="text-xl font-bold leading-tight text-white">
-                      {selectedExerciseDetail.name}
-                    </h2>
-                    {selectedExerciseDetail.titleEn ? (
-                      <p className="mt-0.5 text-sm text-[#6F859A]" style={{ fontFamily: "'Inter', sans-serif" }}>
-                        {selectedExerciseDetail.titleEn}
-                      </p>
-                    ) : null}
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setSelectedExerciseDetail(null)}
-                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[#203347] text-[#9BAEC1]"
-                  >
-                    <X size={16} />
-                  </button>
-                </div>
-
-                <div className="mb-4 flex flex-wrap gap-2">
-                  <span className="rounded-full bg-[rgba(0,201,167,0.12)] px-3 py-1 text-xs font-semibold text-[#00C9A7]">
-                    {selectedExerciseDetail.muscle}
-                  </span>
-                  {selectedExerciseDetail.secondaryMuscles?.map((m) => (
-                    <span
-                      key={m}
-                      className="rounded-full bg-[rgba(155,174,193,0.1)] px-3 py-1 text-xs font-medium text-[#9BAEC1]"
-                    >
-                      {m}
-                    </span>
-                  ))}
-                  {selectedExerciseDetail.implement ? (
-                    <span className="rounded-full bg-[rgba(127,152,255,0.12)] px-3 py-1 text-xs font-semibold text-[#7F98FF]">
-                      {selectedExerciseDetail.implement}
-                    </span>
-                  ) : null}
-                </div>
-
-                {selectedExerciseDetail.overview ? (
-                  <p className="mb-5 text-sm leading-relaxed text-[#9BAEC1]" style={{ fontFamily: "'Inter', sans-serif" }}>
-                    {selectedExerciseDetail.overview}
-                  </p>
-                ) : null}
-
-                {selectedExerciseDetail.instructions && selectedExerciseDetail.instructions.length > 0 ? (
-                  <div className="mb-5">
-                    <p className="mb-2.5 text-xs font-bold uppercase tracking-widest text-[#9BAEC1]" style={{ fontFamily: "'Inter', sans-serif" }}>
-                      Instrucciones
-                    </p>
-                    <ol className="flex flex-col gap-2.5">
-                      {selectedExerciseDetail.instructions.map((step, index) => (
-                        <li key={index} className="flex gap-3">
-                          <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[rgba(0,201,167,0.15)] text-[10px] font-bold text-[#00C9A7]">
-                            {index + 1}
-                          </span>
-                          <p className="text-sm leading-relaxed text-white" style={{ fontFamily: "'Inter', sans-serif" }}>
-                            {step}
-                          </p>
-                        </li>
-                      ))}
-                    </ol>
-                  </div>
-                ) : null}
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (showExSearch !== null) {
-                      addExercise(showExSearch, selectedExerciseDetail);
-                    }
-                    setSelectedExerciseDetail(null);
-                  }}
-                  className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#00C9A7] py-4 font-bold text-black"
-                >
-                  <Plus size={16} />
-                  Agregar a este día
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      ) : null}
+      <ExerciseDetailSheet
+        exercise={selectedExerciseDetail}
+        onClose={() => setSelectedExerciseDetail(null)}
+        onAdd={showExSearch !== null ? () => {
+          addExercise(showExSearch!, selectedExerciseDetail!);
+          setSelectedExerciseDetail(null);
+        } : undefined}
+      />
 
       {isEditingBlocked && activeWorkout ? (
         <ActiveWorkoutEditLockModal
