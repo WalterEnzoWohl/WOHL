@@ -1,0 +1,2586 @@
+{
+  "programs": [
+    {
+      "id": "super-upper-lower",
+      "slug": "super-upper-lower",
+      "split_type": "upper_lower",
+      "days_per_week": 4,
+      "variant": "standard",
+      "is_active": true,
+      "i18n": {
+        "es": {
+          "title": "Super Upper Lower",
+          "description": "División upper lower de 4 días con énfasis extra en torso y brazos."
+        },
+        "en": {
+          "title": "Super Upper Lower",
+          "description": "4-day upper lower split with extra upper-body and arms emphasis."
+        }
+      },
+      "sessions": [
+        {
+          "id": "upper-a",
+          "slug": "upper-a",
+          "order": 1,
+          "i18n": {
+            "es": {
+              "title": "Upper A"
+            },
+            "en": {
+              "title": "Upper A"
+            }
+          },
+          "exercises": [
+            {
+              "order": 1,
+              "exercise_slug": "bench-press-barbell",
+              "sets": 4,
+              "reps_min": 8,
+              "reps_max": 8,
+              "notes": null
+            },
+            {
+              "order": 2,
+              "exercise_slug": "lat-pulldown-close-grip-cable",
+              "sets": 3,
+              "reps_min": 10,
+              "reps_max": 10,
+              "notes": null
+            },
+            {
+              "order": 3,
+              "exercise_slug": "chest-dip-weighted",
+              "sets": 3,
+              "reps_min": 8,
+              "reps_max": 8,
+              "notes": null
+            },
+            {
+              "order": 4,
+              "exercise_slug": "seated-row-machine",
+              "sets": 4,
+              "reps_min": 10,
+              "reps_max": 10,
+              "notes": null
+            },
+            {
+              "order": 5,
+              "exercise_slug": "rear-delt-reverse-fly-machine",
+              "sets": 4,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 6,
+              "exercise_slug": "triceps-extension-cable",
+              "sets": 3,
+              "reps_min": 10,
+              "reps_max": 10,
+              "notes": null
+            },
+            {
+              "order": 7,
+              "exercise_slug": "preacher-curl-dumbbell",
+              "sets": 3,
+              "reps_min": 10,
+              "reps_max": 10,
+              "notes": null
+            },
+            {
+              "order": 8,
+              "exercise_slug": "triceps-pushdown",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 9,
+              "exercise_slug": "crunch-machine",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            }
+          ]
+        },
+        {
+          "id": "lower-a",
+          "slug": "lower-a",
+          "order": 2,
+          "i18n": {
+            "es": {
+              "title": "Lower A"
+            },
+            "en": {
+              "title": "Lower A"
+            }
+          },
+          "exercises": [
+            {
+              "order": 1,
+              "exercise_slug": "hack-squat-machine",
+              "sets": 4,
+              "reps_min": 8,
+              "reps_max": 8,
+              "notes": null
+            },
+            {
+              "order": 2,
+              "exercise_slug": "romanian-deadlift-barbell",
+              "sets": 3,
+              "reps_min": 8,
+              "reps_max": 8,
+              "notes": null
+            },
+            {
+              "order": 3,
+              "exercise_slug": "standing-calf-raise-smith",
+              "sets": 4,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 4,
+              "exercise_slug": "leg-extension-machine",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 5,
+              "exercise_slug": "lying-leg-curl-machine",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 6,
+              "exercise_slug": "hip-abduction-machine",
+              "sets": 3,
+              "reps_min": 15,
+              "reps_max": 15,
+              "notes": null
+            },
+            {
+              "order": 7,
+              "exercise_slug": "crunch-machine",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            }
+          ]
+        },
+        {
+          "id": "upper-b",
+          "slug": "upper-b",
+          "order": 3,
+          "i18n": {
+            "es": {
+              "title": "Upper B"
+            },
+            "en": {
+              "title": "Upper B"
+            }
+          },
+          "exercises": [
+            {
+              "order": 1,
+              "exercise_slug": "lat-pulldown-machine",
+              "sets": 4,
+              "reps_min": 8,
+              "reps_max": 8,
+              "notes": null
+            },
+            {
+              "order": 2,
+              "exercise_slug": "incline-bench-press-dumbbell",
+              "sets": 3,
+              "reps_min": 10,
+              "reps_max": 10,
+              "notes": null
+            },
+            {
+              "order": 3,
+              "exercise_slug": "seated-cable-row-v-grip-cable",
+              "sets": 3,
+              "reps_min": 8,
+              "reps_max": 8,
+              "notes": null
+            },
+            {
+              "order": 4,
+              "exercise_slug": "butterfly-pec-deck",
+              "sets": 4,
+              "reps_min": 10,
+              "reps_max": 10,
+              "notes": null
+            },
+            {
+              "order": 5,
+              "exercise_slug": "single-arm-lateral-raise-cable",
+              "sets": 4,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 6,
+              "exercise_slug": "seated-incline-curl-dumbbell",
+              "sets": 3,
+              "reps_min": 10,
+              "reps_max": 10,
+              "notes": null
+            },
+            {
+              "order": 7,
+              "exercise_slug": "triceps-pushdown",
+              "sets": 3,
+              "reps_min": 10,
+              "reps_max": 10,
+              "notes": null
+            },
+            {
+              "order": 8,
+              "exercise_slug": "hammer-curl-dumbbell",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 9,
+              "exercise_slug": "crunch-machine",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            }
+          ]
+        },
+        {
+          "id": "lower-b",
+          "slug": "lower-b",
+          "order": 4,
+          "i18n": {
+            "es": {
+              "title": "Lower B"
+            },
+            "en": {
+              "title": "Lower B"
+            }
+          },
+          "exercises": [
+            {
+              "order": 1,
+              "exercise_slug": "squat-barbell",
+              "sets": 4,
+              "reps_min": 8,
+              "reps_max": 8,
+              "notes": null
+            },
+            {
+              "order": 2,
+              "exercise_slug": "hip-thrust-barbell",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 3,
+              "exercise_slug": "standing-calf-raise",
+              "sets": 4,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 4,
+              "exercise_slug": "leg-extension-machine",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 5,
+              "exercise_slug": "lying-leg-curl-machine",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 6,
+              "exercise_slug": "hip-abduction-machine",
+              "sets": 3,
+              "reps_min": 15,
+              "reps_max": 15,
+              "notes": null
+            },
+            {
+              "order": 7,
+              "exercise_slug": "knee-raise-parallel-bars",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "upper-lower-4d",
+      "slug": "upper-lower-4d",
+      "split_type": "upper_lower",
+      "days_per_week": 4,
+      "variant": "standard",
+      "is_active": true,
+      "i18n": {
+        "es": {
+          "title": "Upper Lower 4D",
+          "description": "División torso pierna de 4 días."
+        },
+        "en": {
+          "title": "Upper Lower 4D",
+          "description": "4-day upper lower split."
+        }
+      },
+      "sessions": [
+        {
+          "id": "upper-a",
+          "slug": "upper-a",
+          "order": 1,
+          "i18n": {
+            "es": {
+              "title": "Upper A"
+            },
+            "en": {
+              "title": "Upper A"
+            }
+          },
+          "exercises": [
+            {
+              "order": 1,
+              "exercise_slug": "bench-press-barbell",
+              "sets": 4,
+              "reps_min": 8,
+              "reps_max": 8,
+              "notes": null
+            },
+            {
+              "order": 2,
+              "exercise_slug": "lat-pulldown-close-grip-cable",
+              "sets": 3,
+              "reps_min": 10,
+              "reps_max": 10,
+              "notes": null
+            },
+            {
+              "order": 3,
+              "exercise_slug": "chest-dip-weighted",
+              "sets": 3,
+              "reps_min": 8,
+              "reps_max": 8,
+              "notes": null
+            },
+            {
+              "order": 4,
+              "exercise_slug": "seated-row-machine",
+              "sets": 4,
+              "reps_min": 10,
+              "reps_max": 10,
+              "notes": null
+            },
+            {
+              "order": 5,
+              "exercise_slug": "rear-delt-reverse-fly-machine",
+              "sets": 4,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 6,
+              "exercise_slug": "hammer-curl-dumbbell",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 7,
+              "exercise_slug": "triceps-pushdown",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 8,
+              "exercise_slug": "crunch-machine",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            }
+          ]
+        },
+        {
+          "id": "lower-a",
+          "slug": "lower-a",
+          "order": 2,
+          "i18n": {
+            "es": {
+              "title": "Lower A"
+            },
+            "en": {
+              "title": "Lower A"
+            }
+          },
+          "exercises": [
+            {
+              "order": 1,
+              "exercise_slug": "hack-squat-machine",
+              "sets": 4,
+              "reps_min": 8,
+              "reps_max": 8,
+              "notes": null
+            },
+            {
+              "order": 2,
+              "exercise_slug": "romanian-deadlift-barbell",
+              "sets": 3,
+              "reps_min": 8,
+              "reps_max": 8,
+              "notes": null
+            },
+            {
+              "order": 3,
+              "exercise_slug": "standing-calf-raise-smith",
+              "sets": 4,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 4,
+              "exercise_slug": "leg-extension-machine",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 5,
+              "exercise_slug": "lying-leg-curl-machine",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 6,
+              "exercise_slug": "hip-abduction-machine",
+              "sets": 3,
+              "reps_min": 15,
+              "reps_max": 15,
+              "notes": null
+            },
+            {
+              "order": 7,
+              "exercise_slug": "crunch-machine",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            }
+          ]
+        },
+        {
+          "id": "upper-b",
+          "slug": "upper-b",
+          "order": 3,
+          "i18n": {
+            "es": {
+              "title": "Upper B"
+            },
+            "en": {
+              "title": "Upper B"
+            }
+          },
+          "exercises": [
+            {
+              "order": 1,
+              "exercise_slug": "lat-pulldown-machine",
+              "sets": 4,
+              "reps_min": 8,
+              "reps_max": 8,
+              "notes": null
+            },
+            {
+              "order": 2,
+              "exercise_slug": "incline-bench-press-dumbbell",
+              "sets": 3,
+              "reps_min": 10,
+              "reps_max": 10,
+              "notes": null
+            },
+            {
+              "order": 3,
+              "exercise_slug": "seated-cable-row-v-grip-cable",
+              "sets": 3,
+              "reps_min": 8,
+              "reps_max": 8,
+              "notes": null
+            },
+            {
+              "order": 4,
+              "exercise_slug": "butterfly-pec-deck",
+              "sets": 4,
+              "reps_min": 10,
+              "reps_max": 10,
+              "notes": null
+            },
+            {
+              "order": 5,
+              "exercise_slug": "single-arm-lateral-raise-cable",
+              "sets": 4,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 6,
+              "exercise_slug": "seated-incline-curl-dumbbell",
+              "sets": 3,
+              "reps_min": 10,
+              "reps_max": 10,
+              "notes": null
+            },
+            {
+              "order": 7,
+              "exercise_slug": "triceps-pushdown",
+              "sets": 3,
+              "reps_min": 10,
+              "reps_max": 10,
+              "notes": null
+            },
+            {
+              "order": 8,
+              "exercise_slug": "crunch-machine",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            }
+          ]
+        },
+        {
+          "id": "lower-b",
+          "slug": "lower-b",
+          "order": 4,
+          "i18n": {
+            "es": {
+              "title": "Lower B"
+            },
+            "en": {
+              "title": "Lower B"
+            }
+          },
+          "exercises": [
+            {
+              "order": 1,
+              "exercise_slug": "squat-barbell",
+              "sets": 4,
+              "reps_min": 8,
+              "reps_max": 8,
+              "notes": null
+            },
+            {
+              "order": 2,
+              "exercise_slug": "hip-thrust-barbell",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 3,
+              "exercise_slug": "standing-calf-raise",
+              "sets": 4,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 4,
+              "exercise_slug": "leg-extension-machine",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 5,
+              "exercise_slug": "lying-leg-curl-machine",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 6,
+              "exercise_slug": "hip-abduction-machine",
+              "sets": 3,
+              "reps_min": 15,
+              "reps_max": 15,
+              "notes": null
+            },
+            {
+              "order": 7,
+              "exercise_slug": "knee-raise-parallel-bars",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "push-pull-legs-3d",
+      "slug": "push-pull-legs-3d",
+      "split_type": "ppl",
+      "days_per_week": 3,
+      "variant": "standard",
+      "is_active": true,
+      "i18n": {
+        "es": {
+          "title": "Push Pull Legs 3D",
+          "description": "PPL clásico de 3 días."
+        },
+        "en": {
+          "title": "Push Pull Legs 3D",
+          "description": "Classic 3-day push pull legs split."
+        }
+      },
+      "sessions": [
+        {
+          "id": "push",
+          "slug": "push",
+          "order": 1,
+          "i18n": {
+            "es": {
+              "title": "Push"
+            },
+            "en": {
+              "title": "Push"
+            }
+          },
+          "exercises": [
+            {
+              "order": 1,
+              "exercise_slug": "bench-press-barbell",
+              "sets": 4,
+              "reps_min": 6,
+              "reps_max": 6,
+              "notes": null
+            },
+            {
+              "order": 2,
+              "exercise_slug": "incline-bench-press-dumbbell",
+              "sets": 3,
+              "reps_min": 8,
+              "reps_max": 8,
+              "notes": null
+            },
+            {
+              "order": 3,
+              "exercise_slug": "butterfly-pec-deck",
+              "sets": 4,
+              "reps_min": 10,
+              "reps_max": 10,
+              "notes": null
+            },
+            {
+              "order": 4,
+              "exercise_slug": "chest-dip-weighted",
+              "sets": 3,
+              "reps_min": 8,
+              "reps_max": 8,
+              "notes": null
+            },
+            {
+              "order": 5,
+              "exercise_slug": "single-arm-lateral-raise-cable",
+              "sets": 4,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 6,
+              "exercise_slug": "triceps-pushdown",
+              "sets": 3,
+              "reps_min": 10,
+              "reps_max": 10,
+              "notes": null
+            },
+            {
+              "order": 7,
+              "exercise_slug": "overhead-triceps-extension-cable",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 8,
+              "exercise_slug": "cable-crunch",
+              "sets": 3,
+              "reps_min": 15,
+              "reps_max": 15,
+              "notes": null
+            }
+          ]
+        },
+        {
+          "id": "pull",
+          "slug": "pull",
+          "order": 2,
+          "i18n": {
+            "es": {
+              "title": "Pull"
+            },
+            "en": {
+              "title": "Pull"
+            }
+          },
+          "exercises": [
+            {
+              "order": 1,
+              "exercise_slug": "lat-pulldown-machine",
+              "sets": 4,
+              "reps_min": 8,
+              "reps_max": 8,
+              "notes": null
+            },
+            {
+              "order": 2,
+              "exercise_slug": "iso-lateral-row-machine",
+              "sets": 4,
+              "reps_min": 8,
+              "reps_max": 8,
+              "notes": null
+            },
+            {
+              "order": 3,
+              "exercise_slug": "shrug-dumbbell",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 4,
+              "exercise_slug": "seated-cable-row-v-grip-cable",
+              "sets": 3,
+              "reps_min": 10,
+              "reps_max": 10,
+              "notes": null
+            },
+            {
+              "order": 5,
+              "exercise_slug": "face-pull",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 6,
+              "exercise_slug": "ez-bar-biceps-curl",
+              "sets": 3,
+              "reps_min": 10,
+              "reps_max": 10,
+              "notes": null
+            },
+            {
+              "order": 7,
+              "exercise_slug": "hammer-curl-dumbbell",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            }
+          ]
+        },
+        {
+          "id": "legs",
+          "slug": "legs",
+          "order": 3,
+          "i18n": {
+            "es": {
+              "title": "Legs"
+            },
+            "en": {
+              "title": "Legs"
+            }
+          },
+          "exercises": [
+            {
+              "order": 1,
+              "exercise_slug": "squat-barbell",
+              "sets": 4,
+              "reps_min": 6,
+              "reps_max": 6,
+              "notes": null
+            },
+            {
+              "order": 2,
+              "exercise_slug": "romanian-deadlift-barbell",
+              "sets": 4,
+              "reps_min": 8,
+              "reps_max": 8,
+              "notes": null
+            },
+            {
+              "order": 3,
+              "exercise_slug": "hip-thrust-barbell",
+              "sets": 3,
+              "reps_min": 10,
+              "reps_max": 10,
+              "notes": null
+            },
+            {
+              "order": 4,
+              "exercise_slug": "leg-extension-machine",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 5,
+              "exercise_slug": "seated-leg-curl-machine",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 6,
+              "exercise_slug": "standing-calf-raise-smith",
+              "sets": 4,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 7,
+              "exercise_slug": "hip-abduction-machine",
+              "sets": 3,
+              "reps_min": 15,
+              "reps_max": 15,
+              "notes": null
+            },
+            {
+              "order": 8,
+              "exercise_slug": "cable-crunch",
+              "sets": 3,
+              "reps_min": 15,
+              "reps_max": 15,
+              "notes": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "full-body-3d",
+      "slug": "full-body-3d",
+      "split_type": "full_body",
+      "days_per_week": 3,
+      "variant": "standard",
+      "is_active": true,
+      "i18n": {
+        "es": {
+          "title": "Full Body 3D",
+          "description": "Rutina full body de 3 días."
+        },
+        "en": {
+          "title": "Full Body 3D",
+          "description": "3-day full body routine."
+        }
+      },
+      "sessions": [
+        {
+          "id": "fb-a",
+          "slug": "fb-a",
+          "order": 1,
+          "i18n": {
+            "es": {
+              "title": "FB A"
+            },
+            "en": {
+              "title": "FB A"
+            }
+          },
+          "exercises": [
+            {
+              "order": 1,
+              "exercise_slug": "bench-press-barbell",
+              "sets": 4,
+              "reps_min": 6,
+              "reps_max": 6,
+              "notes": null
+            },
+            {
+              "order": 2,
+              "exercise_slug": "hack-squat-machine",
+              "sets": 4,
+              "reps_min": 8,
+              "reps_max": 8,
+              "notes": null
+            },
+            {
+              "order": 3,
+              "exercise_slug": "seated-cable-row-v-grip-cable",
+              "sets": 3,
+              "reps_min": 10,
+              "reps_max": 10,
+              "notes": null
+            },
+            {
+              "order": 4,
+              "exercise_slug": "lying-leg-curl-machine",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 5,
+              "exercise_slug": "lateral-raise-dumbbell",
+              "sets": 4,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 6,
+              "exercise_slug": "hip-thrust-barbell",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 7,
+              "exercise_slug": "preacher-curl-dumbbell",
+              "sets": 3,
+              "reps_min": 10,
+              "reps_max": 10,
+              "notes": null
+            },
+            {
+              "order": 8,
+              "exercise_slug": "triceps-pushdown",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 9,
+              "exercise_slug": "standing-calf-raise-smith",
+              "sets": 4,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            }
+          ]
+        },
+        {
+          "id": "fb-b",
+          "slug": "fb-b",
+          "order": 2,
+          "i18n": {
+            "es": {
+              "title": "FB B"
+            },
+            "en": {
+              "title": "FB B"
+            }
+          },
+          "exercises": [
+            {
+              "order": 1,
+              "exercise_slug": "hack-squat-machine",
+              "sets": 4,
+              "reps_min": 8,
+              "reps_max": 8,
+              "notes": null
+            },
+            {
+              "order": 2,
+              "exercise_slug": "bench-press-barbell",
+              "sets": 4,
+              "reps_min": 6,
+              "reps_max": 6,
+              "notes": null
+            },
+            {
+              "order": 3,
+              "exercise_slug": "lying-leg-curl-machine",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 4,
+              "exercise_slug": "seated-cable-row-v-grip-cable",
+              "sets": 3,
+              "reps_min": 10,
+              "reps_max": 10,
+              "notes": null
+            },
+            {
+              "order": 5,
+              "exercise_slug": "hip-thrust-barbell",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 6,
+              "exercise_slug": "lateral-raise-dumbbell",
+              "sets": 4,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 7,
+              "exercise_slug": "standing-calf-raise-smith",
+              "sets": 4,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 8,
+              "exercise_slug": "preacher-curl-dumbbell",
+              "sets": 3,
+              "reps_min": 10,
+              "reps_max": 10,
+              "notes": null
+            },
+            {
+              "order": 9,
+              "exercise_slug": "triceps-pushdown",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            }
+          ]
+        },
+        {
+          "id": "fb-c",
+          "slug": "fb-c",
+          "order": 3,
+          "i18n": {
+            "es": {
+              "title": "FB C"
+            },
+            "en": {
+              "title": "FB C"
+            }
+          },
+          "exercises": [
+            {
+              "order": 1,
+              "exercise_slug": "seated-cable-row-v-grip-cable",
+              "sets": 3,
+              "reps_min": 10,
+              "reps_max": 10,
+              "notes": null
+            },
+            {
+              "order": 2,
+              "exercise_slug": "hack-squat-machine",
+              "sets": 4,
+              "reps_min": 8,
+              "reps_max": 8,
+              "notes": null
+            },
+            {
+              "order": 3,
+              "exercise_slug": "bench-press-barbell",
+              "sets": 4,
+              "reps_min": 6,
+              "reps_max": 6,
+              "notes": null
+            },
+            {
+              "order": 4,
+              "exercise_slug": "lying-leg-curl-machine",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 5,
+              "exercise_slug": "lateral-raise-dumbbell",
+              "sets": 4,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 6,
+              "exercise_slug": "hip-thrust-barbell",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 7,
+              "exercise_slug": "preacher-curl-dumbbell",
+              "sets": 3,
+              "reps_min": 10,
+              "reps_max": 10,
+              "notes": null
+            },
+            {
+              "order": 8,
+              "exercise_slug": "triceps-pushdown",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 9,
+              "exercise_slug": "standing-calf-raise-smith",
+              "sets": 4,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "upper-lower-ppl-5d",
+      "slug": "upper-lower-ppl-5d",
+      "split_type": "upper_lower_ppl",
+      "days_per_week": 5,
+      "variant": "standard",
+      "is_active": true,
+      "i18n": {
+        "es": {
+          "title": "Upper Lower PPL",
+          "description": "Híbrido de 5 días entre upper lower y push pull legs."
+        },
+        "en": {
+          "title": "Upper Lower PPL",
+          "description": "5-day hybrid combining upper lower and push pull legs."
+        }
+      },
+      "sessions": [
+        {
+          "id": "upper-a",
+          "slug": "upper-a",
+          "order": 1,
+          "i18n": {
+            "es": {
+              "title": "Upper A"
+            },
+            "en": {
+              "title": "Upper A"
+            }
+          },
+          "exercises": [
+            {
+              "order": 1,
+              "exercise_slug": "lat-pulldown-close-grip-cable",
+              "sets": 4,
+              "reps_min": 8,
+              "reps_max": 8,
+              "notes": null
+            },
+            {
+              "order": 2,
+              "exercise_slug": "bench-press-barbell",
+              "sets": 4,
+              "reps_min": 8,
+              "reps_max": 8,
+              "notes": null
+            },
+            {
+              "order": 3,
+              "exercise_slug": "seated-row-machine",
+              "sets": 4,
+              "reps_min": 10,
+              "reps_max": 10,
+              "notes": null
+            },
+            {
+              "order": 4,
+              "exercise_slug": "shoulder-press-machine-plates",
+              "sets": 3,
+              "reps_min": 10,
+              "reps_max": 10,
+              "notes": null
+            },
+            {
+              "order": 5,
+              "exercise_slug": "chest-dip",
+              "sets": 3,
+              "reps_min": 8,
+              "reps_max": 8,
+              "notes": null
+            },
+            {
+              "order": 6,
+              "exercise_slug": "rear-delt-reverse-fly-machine",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 7,
+              "exercise_slug": "hammer-curl-dumbbell",
+              "sets": 3,
+              "reps_min": 10,
+              "reps_max": 10,
+              "notes": null
+            },
+            {
+              "order": 8,
+              "exercise_slug": "triceps-pushdown",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 9,
+              "exercise_slug": "crunch-machine",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            }
+          ]
+        },
+        {
+          "id": "lower-a",
+          "slug": "lower-a",
+          "order": 2,
+          "i18n": {
+            "es": {
+              "title": "Lower A"
+            },
+            "en": {
+              "title": "Lower A"
+            }
+          },
+          "exercises": [
+            {
+              "order": 1,
+              "exercise_slug": "hack-squat-machine",
+              "sets": 4,
+              "reps_min": 8,
+              "reps_max": 8,
+              "notes": null
+            },
+            {
+              "order": 2,
+              "exercise_slug": "romanian-deadlift-barbell",
+              "sets": 4,
+              "reps_min": 8,
+              "reps_max": 8,
+              "notes": null
+            },
+            {
+              "order": 3,
+              "exercise_slug": "hip-thrust-barbell",
+              "sets": 3,
+              "reps_min": 10,
+              "reps_max": 10,
+              "notes": null
+            },
+            {
+              "order": 4,
+              "exercise_slug": "leg-press-machine",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 5,
+              "exercise_slug": "lying-leg-curl-machine",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 6,
+              "exercise_slug": "hip-abduction-machine",
+              "sets": 3,
+              "reps_min": 15,
+              "reps_max": 15,
+              "notes": null
+            },
+            {
+              "order": 7,
+              "exercise_slug": "hip-adduction-machine",
+              "sets": 3,
+              "reps_min": 15,
+              "reps_max": 15,
+              "notes": null
+            },
+            {
+              "order": 8,
+              "exercise_slug": "standing-calf-raise-smith",
+              "sets": 4,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 9,
+              "exercise_slug": "hanging-knee-raise",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            }
+          ]
+        },
+        {
+          "id": "push-a",
+          "slug": "push-a",
+          "order": 3,
+          "i18n": {
+            "es": {
+              "title": "Push A"
+            },
+            "en": {
+              "title": "Push A"
+            }
+          },
+          "exercises": [
+            {
+              "order": 1,
+              "exercise_slug": "incline-bench-press-dumbbell",
+              "sets": 4,
+              "reps_min": 8,
+              "reps_max": 8,
+              "notes": null
+            },
+            {
+              "order": 2,
+              "exercise_slug": "shoulder-press-dumbbell",
+              "sets": 3,
+              "reps_min": 10,
+              "reps_max": 10,
+              "notes": null
+            },
+            {
+              "order": 3,
+              "exercise_slug": "butterfly-pec-deck",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 4,
+              "exercise_slug": "single-arm-lateral-raise-cable",
+              "sets": 4,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 5,
+              "exercise_slug": "triceps-pushdown",
+              "sets": 3,
+              "reps_min": 10,
+              "reps_max": 10,
+              "notes": null
+            },
+            {
+              "order": 6,
+              "exercise_slug": "overhead-triceps-extension-cable",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 7,
+              "exercise_slug": "chest-dip-assisted",
+              "sets": 3,
+              "reps_min": 10,
+              "reps_max": 10,
+              "notes": null
+            },
+            {
+              "order": 8,
+              "exercise_slug": "cable-crunch",
+              "sets": 3,
+              "reps_min": 15,
+              "reps_max": 15,
+              "notes": null
+            }
+          ]
+        },
+        {
+          "id": "pull-a",
+          "slug": "pull-a",
+          "order": 4,
+          "i18n": {
+            "es": {
+              "title": "Pull A"
+            },
+            "en": {
+              "title": "Pull A"
+            }
+          },
+          "exercises": [
+            {
+              "order": 1,
+              "exercise_slug": "pull-up-assisted",
+              "sets": 4,
+              "reps_min": 8,
+              "reps_max": 8,
+              "notes": null
+            },
+            {
+              "order": 2,
+              "exercise_slug": "seated-row-machine",
+              "sets": 4,
+              "reps_min": 10,
+              "reps_max": 10,
+              "notes": null
+            },
+            {
+              "order": 3,
+              "exercise_slug": "single-arm-lat-pulldown",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 4,
+              "exercise_slug": "rear-delt-reverse-fly-machine",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 5,
+              "exercise_slug": "shrug-dumbbell",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 6,
+              "exercise_slug": "seated-incline-curl-dumbbell",
+              "sets": 3,
+              "reps_min": 10,
+              "reps_max": 10,
+              "notes": null
+            },
+            {
+              "order": 7,
+              "exercise_slug": "reverse-curl-barbell",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 8,
+              "exercise_slug": "face-pull",
+              "sets": 3,
+              "reps_min": 15,
+              "reps_max": 15,
+              "notes": null
+            },
+            {
+              "order": 9,
+              "exercise_slug": "plank",
+              "sets": 3,
+              "reps_min": 30,
+              "reps_max": 30,
+              "notes": "segundos"
+            }
+          ]
+        },
+        {
+          "id": "legs-a",
+          "slug": "legs-a",
+          "order": 5,
+          "i18n": {
+            "es": {
+              "title": "Legs A"
+            },
+            "en": {
+              "title": "Legs A"
+            }
+          },
+          "exercises": [
+            {
+              "order": 1,
+              "exercise_slug": "squat-barbell",
+              "sets": 4,
+              "reps_min": 8,
+              "reps_max": 8,
+              "notes": null
+            },
+            {
+              "order": 2,
+              "exercise_slug": "romanian-deadlift-barbell",
+              "sets": 4,
+              "reps_min": 8,
+              "reps_max": 8,
+              "notes": null
+            },
+            {
+              "order": 3,
+              "exercise_slug": "leg-press-machine",
+              "sets": 3,
+              "reps_min": 10,
+              "reps_max": 10,
+              "notes": null
+            },
+            {
+              "order": 4,
+              "exercise_slug": "hip-thrust-barbell",
+              "sets": 3,
+              "reps_min": 10,
+              "reps_max": 10,
+              "notes": null
+            },
+            {
+              "order": 5,
+              "exercise_slug": "leg-extension-machine",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 6,
+              "exercise_slug": "seated-leg-curl-machine",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 7,
+              "exercise_slug": "hip-abduction-machine",
+              "sets": 3,
+              "reps_min": 15,
+              "reps_max": 15,
+              "notes": null
+            },
+            {
+              "order": 8,
+              "exercise_slug": "hip-adduction-machine",
+              "sets": 3,
+              "reps_min": 15,
+              "reps_max": 15,
+              "notes": null
+            },
+            {
+              "order": 9,
+              "exercise_slug": "standing-calf-raise-smith",
+              "sets": 4,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 10,
+              "exercise_slug": "lying-leg-raise",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "push-pull-legs-6d",
+      "slug": "push-pull-legs-6d",
+      "split_type": "ppl",
+      "days_per_week": 6,
+      "variant": "standard",
+      "is_active": true,
+      "i18n": {
+        "es": {
+          "title": "Push Pull Legs 6D",
+          "description": "PPL clásico A/B de 6 días."
+        },
+        "en": {
+          "title": "Push Pull Legs 6D",
+          "description": "Classic 6-day push pull legs A/B split."
+        }
+      },
+      "sessions": [
+        {
+          "id": "push-a",
+          "slug": "push-a",
+          "order": 1,
+          "i18n": {
+            "es": {
+              "title": "Push A"
+            },
+            "en": {
+              "title": "Push A"
+            }
+          },
+          "exercises": [
+            {
+              "order": 1,
+              "exercise_slug": "bench-press-barbell",
+              "sets": 4,
+              "reps_min": 6,
+              "reps_max": 6,
+              "notes": null
+            },
+            {
+              "order": 2,
+              "exercise_slug": "incline-bench-press-dumbbell",
+              "sets": 3,
+              "reps_min": 8,
+              "reps_max": 8,
+              "notes": null
+            },
+            {
+              "order": 3,
+              "exercise_slug": "shoulder-press-dumbbell",
+              "sets": 3,
+              "reps_min": 8,
+              "reps_max": 8,
+              "notes": null
+            },
+            {
+              "order": 4,
+              "exercise_slug": "single-arm-lateral-raise-cable",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 5,
+              "exercise_slug": "triceps-pushdown",
+              "sets": 3,
+              "reps_min": 10,
+              "reps_max": 10,
+              "notes": null
+            },
+            {
+              "order": 6,
+              "exercise_slug": "overhead-triceps-extension-cable",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            }
+          ]
+        },
+        {
+          "id": "pull-a",
+          "slug": "pull-a",
+          "order": 2,
+          "i18n": {
+            "es": {
+              "title": "Pull A"
+            },
+            "en": {
+              "title": "Pull A"
+            }
+          },
+          "exercises": [
+            {
+              "order": 1,
+              "exercise_slug": "lat-pulldown-machine",
+              "sets": 4,
+              "reps_min": 8,
+              "reps_max": 8,
+              "notes": null
+            },
+            {
+              "order": 2,
+              "exercise_slug": "t-bar-row",
+              "sets": 4,
+              "reps_min": 8,
+              "reps_max": 8,
+              "notes": null
+            },
+            {
+              "order": 3,
+              "exercise_slug": "rope-straight-arm-pulldown",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 4,
+              "exercise_slug": "face-pull",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 5,
+              "exercise_slug": "ez-bar-biceps-curl",
+              "sets": 3,
+              "reps_min": 10,
+              "reps_max": 10,
+              "notes": null
+            },
+            {
+              "order": 6,
+              "exercise_slug": "hammer-curl-dumbbell",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            }
+          ]
+        },
+        {
+          "id": "legs-a",
+          "slug": "legs-a",
+          "order": 3,
+          "i18n": {
+            "es": {
+              "title": "Legs A"
+            },
+            "en": {
+              "title": "Legs A"
+            }
+          },
+          "exercises": [
+            {
+              "order": 1,
+              "exercise_slug": "hack-squat-machine",
+              "sets": 4,
+              "reps_min": 6,
+              "reps_max": 6,
+              "notes": null
+            },
+            {
+              "order": 2,
+              "exercise_slug": "romanian-deadlift-barbell",
+              "sets": 4,
+              "reps_min": 8,
+              "reps_max": 8,
+              "notes": null
+            },
+            {
+              "order": 3,
+              "exercise_slug": "leg-extension-machine",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 4,
+              "exercise_slug": "lying-leg-curl-machine",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 5,
+              "exercise_slug": "standing-calf-raise-smith",
+              "sets": 4,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 6,
+              "exercise_slug": "hip-abduction-machine",
+              "sets": 3,
+              "reps_min": 15,
+              "reps_max": 15,
+              "notes": null
+            }
+          ]
+        },
+        {
+          "id": "push-b",
+          "slug": "push-b",
+          "order": 4,
+          "i18n": {
+            "es": {
+              "title": "Push B"
+            },
+            "en": {
+              "title": "Push B"
+            }
+          },
+          "exercises": [
+            {
+              "order": 1,
+              "exercise_slug": "chest-press-machine",
+              "sets": 4,
+              "reps_min": 8,
+              "reps_max": 8,
+              "notes": null
+            },
+            {
+              "order": 2,
+              "exercise_slug": "chest-dip-weighted",
+              "sets": 3,
+              "reps_min": 8,
+              "reps_max": 8,
+              "notes": null
+            },
+            {
+              "order": 3,
+              "exercise_slug": "seated-lateral-raise-dumbbell",
+              "sets": 4,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 4,
+              "exercise_slug": "seated-shoulder-press-machine",
+              "sets": 3,
+              "reps_min": 10,
+              "reps_max": 10,
+              "notes": null
+            },
+            {
+              "order": 5,
+              "exercise_slug": "triceps-pushdown",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 6,
+              "exercise_slug": "butterfly-pec-deck",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            }
+          ]
+        },
+        {
+          "id": "pull-b",
+          "slug": "pull-b",
+          "order": 5,
+          "i18n": {
+            "es": {
+              "title": "Pull B"
+            },
+            "en": {
+              "title": "Pull B"
+            }
+          },
+          "exercises": [
+            {
+              "order": 1,
+              "exercise_slug": "pull-up-assisted",
+              "sets": 4,
+              "reps_min": 8,
+              "reps_max": 8,
+              "notes": null
+            },
+            {
+              "order": 2,
+              "exercise_slug": "seated-cable-row-v-grip-cable",
+              "sets": 4,
+              "reps_min": 10,
+              "reps_max": 10,
+              "notes": null
+            },
+            {
+              "order": 3,
+              "exercise_slug": "shrug-dumbbell",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 4,
+              "exercise_slug": "rear-delt-reverse-fly-machine",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 5,
+              "exercise_slug": "seated-incline-curl-dumbbell",
+              "sets": 3,
+              "reps_min": 10,
+              "reps_max": 10,
+              "notes": null
+            },
+            {
+              "order": 6,
+              "exercise_slug": "preacher-curl-barbell",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            }
+          ]
+        },
+        {
+          "id": "legs-b",
+          "slug": "legs-b",
+          "order": 6,
+          "i18n": {
+            "es": {
+              "title": "Legs B"
+            },
+            "en": {
+              "title": "Legs B"
+            }
+          },
+          "exercises": [
+            {
+              "order": 1,
+              "exercise_slug": "squat-barbell",
+              "sets": 4,
+              "reps_min": 8,
+              "reps_max": 8,
+              "notes": null
+            },
+            {
+              "order": 2,
+              "exercise_slug": "hip-thrust-barbell",
+              "sets": 4,
+              "reps_min": 10,
+              "reps_max": 10,
+              "notes": null
+            },
+            {
+              "order": 3,
+              "exercise_slug": "leg-press-machine",
+              "sets": 3,
+              "reps_min": 10,
+              "reps_max": 10,
+              "notes": null
+            },
+            {
+              "order": 4,
+              "exercise_slug": "seated-leg-curl-machine",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 5,
+              "exercise_slug": "seated-calf-raise",
+              "sets": 4,
+              "reps_min": 15,
+              "reps_max": 15,
+              "notes": null
+            },
+            {
+              "order": 6,
+              "exercise_slug": "hip-adduction-machine",
+              "sets": 3,
+              "reps_min": 15,
+              "reps_max": 15,
+              "notes": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "full-body-6d",
+      "slug": "full-body-6d",
+      "split_type": "full_body",
+      "days_per_week": 6,
+      "variant": "standard",
+      "is_active": true,
+      "i18n": {
+        "es": {
+          "title": "Full Body 6D",
+          "description": "Full body de 6 días con alta frecuencia y bajo volumen diario."
+        },
+        "en": {
+          "title": "Full Body 6D",
+          "description": "6-day full body routine with high frequency and lower daily volume."
+        }
+      },
+      "sessions": [
+        {
+          "id": "fb-a",
+          "slug": "fb-a",
+          "order": 1,
+          "i18n": {
+            "es": {
+              "title": "FB A"
+            },
+            "en": {
+              "title": "FB A"
+            }
+          },
+          "exercises": [
+            {
+              "order": 1,
+              "exercise_slug": "bench-press-barbell",
+              "sets": 4,
+              "reps_min": 6,
+              "reps_max": 6,
+              "notes": null
+            },
+            {
+              "order": 2,
+              "exercise_slug": "hack-squat-machine",
+              "sets": 4,
+              "reps_min": 8,
+              "reps_max": 8,
+              "notes": null
+            },
+            {
+              "order": 3,
+              "exercise_slug": "seated-cable-row-v-grip-cable",
+              "sets": 3,
+              "reps_min": 10,
+              "reps_max": 10,
+              "notes": null
+            },
+            {
+              "order": 4,
+              "exercise_slug": "lying-leg-curl-machine",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 5,
+              "exercise_slug": "lateral-raise-dumbbell",
+              "sets": 4,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 6,
+              "exercise_slug": "hip-thrust-barbell",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 7,
+              "exercise_slug": "preacher-curl-dumbbell",
+              "sets": 3,
+              "reps_min": 10,
+              "reps_max": 10,
+              "notes": null
+            },
+            {
+              "order": 8,
+              "exercise_slug": "triceps-pushdown",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 9,
+              "exercise_slug": "standing-calf-raise-smith",
+              "sets": 4,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            }
+          ]
+        },
+        {
+          "id": "fb-b",
+          "slug": "fb-b",
+          "order": 2,
+          "i18n": {
+            "es": {
+              "title": "FB B"
+            },
+            "en": {
+              "title": "FB B"
+            }
+          },
+          "exercises": [
+            {
+              "order": 1,
+              "exercise_slug": "hack-squat-machine",
+              "sets": 4,
+              "reps_min": 8,
+              "reps_max": 8,
+              "notes": null
+            },
+            {
+              "order": 2,
+              "exercise_slug": "bench-press-barbell",
+              "sets": 4,
+              "reps_min": 6,
+              "reps_max": 6,
+              "notes": null
+            },
+            {
+              "order": 3,
+              "exercise_slug": "lying-leg-curl-machine",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 4,
+              "exercise_slug": "seated-cable-row-v-grip-cable",
+              "sets": 3,
+              "reps_min": 10,
+              "reps_max": 10,
+              "notes": null
+            },
+            {
+              "order": 5,
+              "exercise_slug": "hip-thrust-barbell",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 6,
+              "exercise_slug": "lateral-raise-dumbbell",
+              "sets": 4,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 7,
+              "exercise_slug": "standing-calf-raise-smith",
+              "sets": 4,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 8,
+              "exercise_slug": "preacher-curl-dumbbell",
+              "sets": 3,
+              "reps_min": 10,
+              "reps_max": 10,
+              "notes": null
+            },
+            {
+              "order": 9,
+              "exercise_slug": "triceps-pushdown",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            }
+          ]
+        },
+        {
+          "id": "fb-c",
+          "slug": "fb-c",
+          "order": 3,
+          "i18n": {
+            "es": {
+              "title": "FB C"
+            },
+            "en": {
+              "title": "FB C"
+            }
+          },
+          "exercises": [
+            {
+              "order": 1,
+              "exercise_slug": "seated-cable-row-v-grip-cable",
+              "sets": 3,
+              "reps_min": 10,
+              "reps_max": 10,
+              "notes": null
+            },
+            {
+              "order": 2,
+              "exercise_slug": "hack-squat-machine",
+              "sets": 4,
+              "reps_min": 8,
+              "reps_max": 8,
+              "notes": null
+            },
+            {
+              "order": 3,
+              "exercise_slug": "bench-press-barbell",
+              "sets": 4,
+              "reps_min": 6,
+              "reps_max": 6,
+              "notes": null
+            },
+            {
+              "order": 4,
+              "exercise_slug": "lying-leg-curl-machine",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 5,
+              "exercise_slug": "lateral-raise-dumbbell",
+              "sets": 4,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 6,
+              "exercise_slug": "hip-thrust-barbell",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 7,
+              "exercise_slug": "preacher-curl-dumbbell",
+              "sets": 3,
+              "reps_min": 10,
+              "reps_max": 10,
+              "notes": null
+            },
+            {
+              "order": 8,
+              "exercise_slug": "triceps-pushdown",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 9,
+              "exercise_slug": "standing-calf-raise-smith",
+              "sets": 4,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            }
+          ]
+        },
+        {
+          "id": "fb-a-2",
+          "slug": "fb-a-2",
+          "order": 4,
+          "i18n": {
+            "es": {
+              "title": "FB A"
+            },
+            "en": {
+              "title": "FB A"
+            }
+          },
+          "exercises": [
+            {
+              "order": 1,
+              "exercise_slug": "bench-press-barbell",
+              "sets": 4,
+              "reps_min": 6,
+              "reps_max": 6,
+              "notes": null
+            },
+            {
+              "order": 2,
+              "exercise_slug": "hack-squat-machine",
+              "sets": 4,
+              "reps_min": 8,
+              "reps_max": 8,
+              "notes": null
+            },
+            {
+              "order": 3,
+              "exercise_slug": "seated-cable-row-v-grip-cable",
+              "sets": 3,
+              "reps_min": 10,
+              "reps_max": 10,
+              "notes": null
+            },
+            {
+              "order": 4,
+              "exercise_slug": "lying-leg-curl-machine",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 5,
+              "exercise_slug": "lateral-raise-dumbbell",
+              "sets": 4,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 6,
+              "exercise_slug": "hip-thrust-barbell",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 7,
+              "exercise_slug": "preacher-curl-dumbbell",
+              "sets": 3,
+              "reps_min": 10,
+              "reps_max": 10,
+              "notes": null
+            },
+            {
+              "order": 8,
+              "exercise_slug": "triceps-pushdown",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 9,
+              "exercise_slug": "standing-calf-raise-smith",
+              "sets": 4,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            }
+          ]
+        },
+        {
+          "id": "fb-b-2",
+          "slug": "fb-b-2",
+          "order": 5,
+          "i18n": {
+            "es": {
+              "title": "FB B"
+            },
+            "en": {
+              "title": "FB B"
+            }
+          },
+          "exercises": [
+            {
+              "order": 1,
+              "exercise_slug": "hack-squat-machine",
+              "sets": 4,
+              "reps_min": 8,
+              "reps_max": 8,
+              "notes": null
+            },
+            {
+              "order": 2,
+              "exercise_slug": "bench-press-barbell",
+              "sets": 4,
+              "reps_min": 6,
+              "reps_max": 6,
+              "notes": null
+            },
+            {
+              "order": 3,
+              "exercise_slug": "lying-leg-curl-machine",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 4,
+              "exercise_slug": "seated-cable-row-v-grip-cable",
+              "sets": 3,
+              "reps_min": 10,
+              "reps_max": 10,
+              "notes": null
+            },
+            {
+              "order": 5,
+              "exercise_slug": "hip-thrust-barbell",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 6,
+              "exercise_slug": "lateral-raise-dumbbell",
+              "sets": 4,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 7,
+              "exercise_slug": "standing-calf-raise-smith",
+              "sets": 4,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 8,
+              "exercise_slug": "preacher-curl-dumbbell",
+              "sets": 3,
+              "reps_min": 10,
+              "reps_max": 10,
+              "notes": null
+            },
+            {
+              "order": 9,
+              "exercise_slug": "triceps-pushdown",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            }
+          ]
+        },
+        {
+          "id": "fb-c-2",
+          "slug": "fb-c-2",
+          "order": 6,
+          "i18n": {
+            "es": {
+              "title": "FB C"
+            },
+            "en": {
+              "title": "FB C"
+            }
+          },
+          "exercises": [
+            {
+              "order": 1,
+              "exercise_slug": "seated-cable-row-v-grip-cable",
+              "sets": 3,
+              "reps_min": 10,
+              "reps_max": 10,
+              "notes": null
+            },
+            {
+              "order": 2,
+              "exercise_slug": "hack-squat-machine",
+              "sets": 4,
+              "reps_min": 8,
+              "reps_max": 8,
+              "notes": null
+            },
+            {
+              "order": 3,
+              "exercise_slug": "bench-press-barbell",
+              "sets": 4,
+              "reps_min": 6,
+              "reps_max": 6,
+              "notes": null
+            },
+            {
+              "order": 4,
+              "exercise_slug": "lying-leg-curl-machine",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 5,
+              "exercise_slug": "lateral-raise-dumbbell",
+              "sets": 4,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 6,
+              "exercise_slug": "hip-thrust-barbell",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 7,
+              "exercise_slug": "preacher-curl-dumbbell",
+              "sets": 3,
+              "reps_min": 10,
+              "reps_max": 10,
+              "notes": null
+            },
+            {
+              "order": 8,
+              "exercise_slug": "triceps-pushdown",
+              "sets": 3,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            },
+            {
+              "order": 9,
+              "exercise_slug": "standing-calf-raise-smith",
+              "sets": 4,
+              "reps_min": 12,
+              "reps_max": 12,
+              "notes": null
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "unmatched_exercises": []
+}

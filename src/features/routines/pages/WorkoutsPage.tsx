@@ -1,6 +1,6 @@
 import type { MouseEvent } from 'react';
 import { useState } from 'react';
-import { BookOpen, CheckCircle2, Clock, Copy, Pencil, Plus, Settings, Target, Trash2, TrendingUp } from 'lucide-react';
+import { BookOpen, CheckCircle2, Clock, Copy, LayoutGrid, Pencil, Plus, Settings, Target, Trash2, TrendingUp } from 'lucide-react';
 import { useNavigate } from 'react-router';
 import { ActiveWorkoutEditLockModal } from '@/shared/components/layout/ActiveWorkoutEditLockModal';
 import { Header } from '@/shared/components/layout/Header';
@@ -64,7 +64,7 @@ export default function WorkoutsPage() {
       return;
     }
 
-    navigate(`/routine/${routineId}`, { state: { editMode: true } });
+    navigate(`/routine/${routineId}/edit`);
   };
 
   return (
@@ -83,8 +83,16 @@ export default function WorkoutsPage() {
             <span className="text-base font-extrabold text-black">Crear nueva rutina</span>
           </button>
           <button
-            onClick={() => navigate('/exercise-explore')}
+            onClick={() => navigate('/program-templates')}
             className="flex w-full items-center justify-center gap-2 rounded-2xl border border-[rgba(0,201,167,0.24)] bg-[rgba(0,201,167,0.08)] py-4 font-bold text-[#00C9A7] transition-colors active:bg-[rgba(0,201,167,0.14)]"
+            type="button"
+          >
+            <LayoutGrid size={18} />
+            Explorar Rutinas
+          </button>
+          <button
+            onClick={() => navigate('/exercise-explore')}
+            className="flex w-full items-center justify-center gap-2 rounded-2xl border border-[#203347] bg-[#13263A] py-4 font-bold text-[#9BAEC1] transition-colors active:bg-[#1a3047]"
             type="button"
           >
             <BookOpen size={18} />

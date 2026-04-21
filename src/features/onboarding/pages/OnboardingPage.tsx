@@ -477,7 +477,7 @@ export default function OnboardingPage() {
         onboardingCompletedAt: completedAt,
       });
 
-      navigate(destination === 'routine' ? '/routine-editor/new' : '/', { replace: true });
+      navigate(destination === 'routine' ? '/routine/new' : '/', { replace: true });
     } finally {
       setSaving(false);
     }

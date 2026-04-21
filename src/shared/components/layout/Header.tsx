@@ -11,9 +11,10 @@ interface HeaderProps {
   title?: string
   rightContent?: ReactNode
   onBack?: () => void
+  leftContent?: ReactNode
 }
 
-export function Header({ showBack, backLabel, title, rightContent, onBack }: HeaderProps) {
+export function Header({ showBack, backLabel, title, rightContent, onBack, leftContent }: HeaderProps) {
   const navigate = useNavigate()
   const { appSettings } = useAppData()
   const resolvedRightContent = rightContent !== undefined ? rightContent : (
@@ -36,7 +37,9 @@ export function Header({ showBack, backLabel, title, rightContent, onBack }: Hea
     >
       <div className="flex h-14 items-center">
         <div className="flex flex-1 items-center">
-          {showBack ? (
+          {leftContent !== undefined ? (
+            leftContent
+          ) : showBack ? (
             <button
               onClick={handleBack}
               className="flex items-center gap-2 text-[#90A4B8] transition-colors hover:text-white"

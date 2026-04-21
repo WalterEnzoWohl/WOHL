@@ -1,9 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useBeforeUnload, useBlocker, useLocation, useNavigate, useParams } from 'react-router';
-import { BookOpen, ChevronDown, ChevronUp, Dumbbell, MoreVertical, Plus, RefreshCw, Save, Timer, Trash2, TrendingUp } from 'lucide-react';
+import { ChevronDown, ChevronUp, Dumbbell, Plus, Save, Trash2 } from 'lucide-react';
 import { useAppData } from '@/core/app-data/AppDataContext';
 import { useExerciseCatalog } from '@/features/exercises/hooks/useExerciseCatalog';
-import { ExerciseDetailSheet } from '@/features/exercises/components/ExerciseDetailSheet';
 import type { CatalogExerciseItem } from '@/features/exercises/components/ExerciseDetailSheet';
 import { ActiveWorkoutEditLockModal } from '@/shared/components/layout/ActiveWorkoutEditLockModal';
 import { Header } from '@/shared/components/layout/Header';
@@ -86,8 +85,9 @@ export default function RoutineEditorPage() {
   const location = useLocation();
   const { activeWorkout, routines, saveRoutine, appSettings } = useAppData();
   const { catalog } = useExerciseCatalog();
-  const isNew = id === 'new';
+  const isNew = id === 'new' || location.pathname === '/routine/new';
   const existing = !isNew ? routines.find((routine) => routine.id === Number(id)) ?? null : null;
+  const exitEditorPath = isNew ? '/workouts' : `/routine/${id}`;
   const isEditingBlocked = Boolean(activeWorkout && !isNew && existing);
   const initialDays = buildInitialDays(existing);
 
@@ -100,9 +100,7 @@ export default function RoutineEditorPage() {
   );
   const [days, setDays] = useState<RoutineDayDraft[]>(initialDays);
   const [expandedDay, setExpandedDay] = useState(-1);
-  const [selectedExerciseDetail, setSelectedExerciseDetail] = useState<CatalogExerciseItem | null>(null);
   const [expandedExercises, setExpandedExercises] = useState<Set<string>>(new Set());
-  const [exerciseMenu, setExerciseMenu] = useState<{ dayIndex: number; exerciseIndex: number } | null>(null);
   const [restPickerTarget, setRestPickerTarget] = useState<{ dayIndex: number; exerciseIndex: number } | null>(null);
   const [restPickerDraft, setRestPickerDraft] = useState('90');
 
@@ -357,26 +355,11 @@ export default function RoutineEditorPage() {
         mode: 'add',
         existingDaySlugs: day.exercises.map((e) => e.exerciseSlug).filter(Boolean),
         currentDayExerciseCount: day.exercises.length,
-        returnTo: `/routine-editor/${id}`,
+        returnTo: isNew ? '/routine/new' : `/routine/${id}/edit`,
       },
     });
   };
 
-  const openCatalogReplace = (dayIndex: number, exerciseIndex: number) => {
-    const day = days[dayIndex];
-    if (!day) return;
-    navigate('/exercise-catalog', {
-      state: {
-        dayIndex,
-        dayName: day.name,
-        mode: 'replace',
-        replaceIndex: exerciseIndex,
-        existingDaySlugs: day.exercises.map((e) => e.exerciseSlug).filter(Boolean),
-        currentDayExerciseCount: day.exercises.length,
-        returnTo: `/routine-editor/${id}`,
-      },
-    });
-  };
 
   const handleSave = async () => {
     if (isSaving) return;
@@ -434,9 +417,11 @@ export default function RoutineEditorPage() {
     setIsSaving(true);
     setSaveError(null);
     try {
-      await saveRoutine(routineToSave);
+      const savedRoutine = await saveRoutine(routineToSave);
       skipBlockerRef.current = true;
-      navigate('/');
+      const targetRoutineId = savedRoutine?.id ?? existing?.id;
+      if (targetRoutineId) navigate(`/routine/${targetRoutineId}`, { replace: true });
+      else navigate('/workouts', { replace: true });
     } catch (error) {
       const cause = error instanceof Error ? (error.cause as Error | undefined) : undefined;
       const detail = cause ? ` (${cause instanceof Error ? cause.message : String(cause)})` : '';
@@ -448,7 +433,29 @@ export default function RoutineEditorPage() {
 
   return (
     <div className="relative flex flex-col" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-      <Header showBack title={isNew ? 'Crear rutina' : 'Editar rutina'} />
+      <Header
+        leftContent={
+          <button
+            type="button"
+            onClick={() => navigate(exitEditorPath)}
+            className="flex items-center rounded-xl px-1 text-sm font-semibold text-[#90A4B8] transition-colors hover:text-white"
+          >
+            Cancelar
+          </button>
+        }
+        title={isNew ? 'Crear rutina' : 'Editar rutina'}
+        rightContent={
+          <button
+            type="button"
+            onClick={() => void handleSave()}
+            disabled={isSaving}
+            className="flex items-center gap-1.5 rounded-xl bg-[#00C9A7] px-3 py-2 text-xs font-bold text-black disabled:opacity-50"
+          >
+            <Save size={13} />
+            {isSaving ? 'Guardando...' : 'Guardar'}
+          </button>
+        }
+      />
 
       {!isEditingBlocked ? (
         <div className="flex flex-col gap-5 px-5 py-5 pb-6">
@@ -628,14 +635,6 @@ export default function RoutineEditorPage() {
                                     </p>
                                   </button>
 
-                                  <button
-                                    type="button"
-                                    onClick={() => setExerciseMenu({ dayIndex, exerciseIndex })}
-                                    className="flex h-8 w-8 items-center justify-center rounded-lg text-[#9BAEC1] transition-colors active:bg-[#203347]"
-                                    aria-label="Opciones"
-                                  >
-                                    <MoreVertical size={16} />
-                                  </button>
 
                                   <button
                                     type="button"
@@ -843,111 +842,6 @@ export default function RoutineEditorPage() {
         </div>
       ) : null}
 
-      {/* Exercise options menu */}
-      {exerciseMenu !== null ? (
-        <div className="absolute inset-0 z-[55]">
-          <div className="absolute inset-0 bg-black/60" onClick={() => setExerciseMenu(null)} />
-          <div
-            className="absolute bottom-0 left-0 right-0 rounded-t-3xl"
-            style={{ background: '#1A2D42' }}
-          >
-            <div className="mx-auto mb-3 mt-4 h-1 w-10 rounded-full bg-[#203347]" />
-            <div className="px-5 pb-8">
-              <p className="mb-1 truncate text-base font-bold text-white">
-                {days[exerciseMenu.dayIndex]?.exercises[exerciseMenu.exerciseIndex]?.name}
-              </p>
-              <p className="mb-4 text-xs text-[#6F859A]" style={{ fontFamily: "'Inter', sans-serif" }}>
-                {days[exerciseMenu.dayIndex]?.exercises[exerciseMenu.exerciseIndex]?.muscle}
-              </p>
-
-              <button
-                type="button"
-                onClick={() => {
-                  const ex = days[exerciseMenu.dayIndex]?.exercises[exerciseMenu.exerciseIndex];
-                  if (ex?.exerciseSlug) {
-                    const entry = catalogBySlug.get(ex.exerciseSlug);
-                    if (entry) {
-                      setSelectedExerciseDetail({
-                        exerciseSlug: entry.slug,
-                        name: entry.title,
-                        muscle: entry.muscle,
-                        implement: entry.implement,
-                        secondaryMuscles: entry.secondaryMuscles,
-                        coverImageUrl: entry.coverImageUrl,
-                        animationMediaUrl: entry.animationMediaUrl,
-                        animationMediaType: entry.animationMediaType,
-                        instructions: entry.instructions,
-                        overview: entry.overview,
-                      });
-                    }
-                  }
-                  setExerciseMenu(null);
-                }}
-                className="flex w-full items-center gap-3 rounded-xl px-2 py-3 text-sm font-semibold text-[#9BAEC1] transition-colors active:bg-[#203347]"
-              >
-                <BookOpen size={18} className="shrink-0" />
-                Ver instrucciones / forma correcta
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  const ex = days[exerciseMenu.dayIndex]?.exercises[exerciseMenu.exerciseIndex];
-                  if (ex?.exerciseSlug) void navigate(`/muscle-progress/${ex.exerciseSlug}`);
-                  setExerciseMenu(null);
-                }}
-                className="flex w-full items-center gap-3 rounded-xl px-2 py-3 text-sm font-semibold text-[#9BAEC1] transition-colors active:bg-[#203347]"
-              >
-                <TrendingUp size={18} className="shrink-0" />
-                Ver historial de este ejercicio
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  const { dayIndex, exerciseIndex } = exerciseMenu;
-                  setExerciseMenu(null);
-                  openCatalogReplace(dayIndex, exerciseIndex);
-                }}
-                className="flex w-full items-center gap-3 rounded-xl px-2 py-3 text-sm font-semibold text-[#9BAEC1] transition-colors active:bg-[#203347]"
-              >
-                <RefreshCw size={18} className="shrink-0" />
-                Reemplazar ejercicio
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  const ex = days[exerciseMenu.dayIndex]?.exercises[exerciseMenu.exerciseIndex];
-                  const current = ex?.restSeconds ?? appSettings.restTimerSeconds;
-                  setRestPickerDraft(REST_VALID_VALUES.has(String(current)) ? String(current) : '90');
-                  setRestPickerTarget(exerciseMenu);
-                  setExerciseMenu(null);
-                }}
-                className="flex w-full items-center gap-3 rounded-xl px-2 py-3 text-sm font-semibold text-[#9BAEC1] transition-colors active:bg-[#203347]"
-              >
-                <Timer size={18} className="shrink-0" />
-                Tiempo de descanso
-              </button>
-
-              <div className="my-2 border-t border-[#203347]" />
-
-              <button
-                type="button"
-                onClick={() => {
-                  const { dayIndex, exerciseIndex } = exerciseMenu;
-                  removeExercise(dayIndex, exerciseIndex);
-                  setExerciseMenu(null);
-                }}
-                className="flex w-full items-center gap-3 rounded-xl px-2 py-3 text-sm font-semibold text-[#FF8E8E] transition-colors active:bg-[rgba(255,125,125,0.08)]"
-              >
-                <Trash2 size={18} className="shrink-0" />
-                Eliminar ejercicio
-              </button>
-            </div>
-          </div>
-        </div>
-      ) : null}
 
       {/* Rest timer picker */}
       <NumberWheelPicker
@@ -978,11 +872,6 @@ export default function RoutineEditorPage() {
         wholeOptions={REST_OPTIONS}
       />
 
-      {/* Exercise detail sheet (from exercise menu → Ver instrucciones) */}
-      <ExerciseDetailSheet
-        exercise={selectedExerciseDetail}
-        onClose={() => setSelectedExerciseDetail(null)}
-      />
 
       {isEditingBlocked && activeWorkout ? (
         <ActiveWorkoutEditLockModal

@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useBeforeUnload, useLocation, useNavigate, useParams } from 'react-router';
+import { useBeforeUnload, useBlocker, useLocation, useNavigate, useParams } from 'react-router';
 import {
   BookOpen, ChevronDown, ChevronLeft, ChevronRight, ChevronUp,
-  Clock, Copy, Dumbbell, MoreVertical, Pencil, Play,
-  Plus, RefreshCw, Save, Timer, Trash2, TrendingUp, X,
+  Clock, Copy, Dumbbell, History, MoreVertical, Pencil, Play,
+  Plus, RefreshCw, Save, Timer, Trash2, X,
 } from 'lucide-react';
+import { createPortal } from 'react-dom';
 import { ActiveWorkoutEditLockModal } from '@/shared/components/layout/ActiveWorkoutEditLockModal';
 import { Header } from '@/shared/components/layout/Header';
 import { useAppData } from '@/core/app-data/AppDataContext';
@@ -96,7 +97,7 @@ export default function RoutineDetailPage() {
   const { activeWorkout, appContext, routines, saveRoutine, appSettings } = useAppData();
   const { catalog } = useExerciseCatalog();
 
-  const isNew = id === 'new';
+  const isNew = location.pathname === '/routine/new' || id === 'new';
   const routine = !isNew ? (routines.find((r) => r.id === Number(id)) ?? null) : null;
 
   const catalogBySlug = useMemo(
@@ -124,9 +125,14 @@ export default function RoutineDetailPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [nameError, setNameError] = useState('');
-  const [exerciseMenu, setExerciseMenu] = useState<{ dayIndex: number; exerciseIndex: number } | null>(null);
+  const [exerciseMenu, setExerciseMenu] = useState<{
+    dayIndex: number;
+    exerciseIndex: number;
+    rect: DOMRect;
+  } | null>(null);
   const [restPickerTarget, setRestPickerTarget] = useState<{ dayIndex: number; exerciseIndex: number } | null>(null);
   const [restPickerDraft, setRestPickerDraft] = useState('90');
+  const skipBlockerRef = useRef(false);
 
   // ── Day reorder modal ────────────────────────────────────────────────────────
   const [showDayReorderModal, setShowDayReorderModal] = useState(false);
@@ -163,6 +169,9 @@ export default function RoutineDetailPage() {
     else setActiveDay((p) => Math.max(0, p - 1));
   };
 
+  const isEditRoute = /^\/routine\/[^/]+\/edit$/.test(location.pathname);
+  const exitEditorPath = isNew ? '/workouts' : routine ? `/routine/${routine.id}` : '/workouts';
+
   // Snapshot to detect changes (for cancel confirmation)
   const draftSnapshotRef = useRef({ name: draftName, days: JSON.stringify(draftDays) });
 
@@ -170,6 +179,19 @@ export default function RoutineDetailPage() {
     isEditing &&
     (draftName !== draftSnapshotRef.current.name ||
       JSON.stringify(draftDays) !== draftSnapshotRef.current.days);
+
+  const blocker = useBlocker(
+    useCallback(
+      ({ currentLocation, nextLocation }: { currentLocation: { pathname: string }; nextLocation: { pathname: string } }) => {
+        if (skipBlockerRef.current) return false;
+        if (!hasUnsavedChanges) return false;
+        if (currentLocation.pathname === nextLocation.pathname) return false;
+        if (nextLocation.pathname === '/exercise-catalog') return false;
+        return true;
+      },
+      [hasUnsavedChanges]
+    )
+  );
 
   useBeforeUnload(
     useCallback(
@@ -182,15 +204,54 @@ export default function RoutineDetailPage() {
 
   // ── Handle location state ────────────────────────────────────────────────────
   useEffect(() => {
-    if (location.state?.editMode && routine && !isEditing) {
+    skipBlockerRef.current = false;
+  }, [location.pathname]);
+
+  useEffect(() => {
+    if (isNew) {
+      const initialDays = [createEmptyDay(0), createEmptyDay(1)];
+      setDraftName('');
+      setDraftDays(initialDays);
+      draftSnapshotRef.current = { name: '', days: JSON.stringify(initialDays) };
+      setIsEditing(true);
+      setSaveError(null);
+      setNameError('');
+      setExerciseMenu(null);
+      return;
+    }
+
+    if (routine && isEditRoute) {
       const days = buildDraftDays(routine);
       setDraftName(routine.name);
       setDraftDays(days);
       draftSnapshotRef.current = { name: routine.name, days: JSON.stringify(days) };
       setIsEditing(true);
-      navigate(location.pathname, { replace: true, state: {} });
+      setSaveError(null);
+      setNameError('');
+      setExerciseMenu(null);
+      return;
     }
-  }, []);
+
+    if (!isEditRoute) {
+      setIsEditing(false);
+      setSaveError(null);
+      setNameError('');
+      setExerciseMenu(null);
+    }
+  }, [isNew, isEditRoute, routine, location.pathname]);
+
+  useEffect(() => {
+    if (!exerciseMenu) return;
+
+    const closeMenu = () => setExerciseMenu(null);
+    window.addEventListener('resize', closeMenu);
+    window.addEventListener('scroll', closeMenu, true);
+
+    return () => {
+      window.removeEventListener('resize', closeMenu);
+      window.removeEventListener('scroll', closeMenu, true);
+    };
+  }, [exerciseMenu]);
 
   useEffect(() => {
     const result = (
@@ -270,23 +331,14 @@ export default function RoutineDetailPage() {
       setShowEditLockModal(true);
       return;
     }
-    const days = routine ? buildDraftDays(routine) : [createEmptyDay(0), createEmptyDay(1)];
-    const name = routine?.name ?? '';
-    setDraftName(name);
-    setDraftDays(days);
-    draftSnapshotRef.current = { name, days: JSON.stringify(days) };
-    setIsEditing(true);
+
+    if (routine?.id) {
+      navigate(`/routine/${routine.id}/edit`);
+    }
   };
 
   const cancelEdit = () => {
-    if (hasUnsavedChanges && !window.confirm('¿Descartás los cambios?')) return;
-    if (isNew) {
-      navigate(-1);
-      return;
-    }
-    setIsEditing(false);
-    setSaveError(null);
-    setNameError('');
+    navigate(exitEditorPath);
   };
 
   const handleSave = async () => {
@@ -344,12 +396,12 @@ export default function RoutineDetailPage() {
     setSaveError(null);
     try {
       const saved = await saveRoutine(routineToSave);
-      if (isNew && saved?.id) {
-        navigate(`/routine/${saved.id}`, { replace: true });
+      const targetRoutineId = saved?.id ?? routine?.id;
+      skipBlockerRef.current = true;
+      if (targetRoutineId) {
+        navigate(`/routine/${targetRoutineId}`, { replace: true });
       } else {
-        setIsEditing(false);
-        setSaveError(null);
-        setNameError('');
+        navigate('/workouts', { replace: true });
       }
     } catch (error) {
       const cause = error instanceof Error ? (error.cause as Error | undefined) : undefined;
@@ -372,7 +424,7 @@ export default function RoutineDetailPage() {
         mode: 'add',
         existingDaySlugs: day.exercises.map((e) => e.exerciseSlug).filter(Boolean),
         currentDayExerciseCount: day.exercises.length,
-        returnTo: isNew ? '/routine/new' : `/routine/${id}`,
+        returnTo: isNew ? '/routine/new' : `/routine/${id}/edit`,
       },
     });
   };
@@ -388,7 +440,7 @@ export default function RoutineDetailPage() {
         replaceIndex: exerciseIndex,
         existingDaySlugs: day.exercises.map((e) => e.exerciseSlug).filter(Boolean),
         currentDayExerciseCount: day.exercises.length,
-        returnTo: isNew ? '/routine/new' : `/routine/${id}`,
+        returnTo: isNew ? '/routine/new' : `/routine/${id}/edit`,
       },
     });
   };
@@ -640,7 +692,7 @@ export default function RoutineDetailPage() {
   if (!isNew && !routine) {
     return (
       <div className="flex flex-col" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-        <Header showBack title="Rutina" />
+        <Header showBack title="Rutina" onBack={() => navigate('/workouts')} />
         <div className="px-5 py-5 text-sm text-[#9BAEC1]">No se encontró la rutina.</div>
       </div>
     );
@@ -650,11 +702,19 @@ export default function RoutineDetailPage() {
   return (
     <div className="relative flex flex-col" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
       <Header
-        showBack
-        onBack={() => {
-          if (isEditing) cancelEdit();
-          else navigate(-1);
-        }}
+        showBack={!isEditing}
+        leftContent={
+          isEditing ? (
+            <button
+              type="button"
+              onClick={cancelEdit}
+              className="flex items-center rounded-xl px-1 text-sm font-semibold text-[#90A4B8] transition-colors hover:text-white"
+            >
+              Cancelar
+            </button>
+          ) : undefined
+        }
+        onBack={() => navigate('/workouts')}
         title={isNew ? 'Nueva rutina' : undefined}
         rightContent={
           isEditing ? (
@@ -981,7 +1041,14 @@ export default function RoutineDetailPage() {
 
                         <button
                           type="button"
-                          onClick={() => !isBeingDragged && setExerciseMenu({ dayIndex: activeDaySafe, exerciseIndex: displayIndex })}
+                          onClick={(event) =>
+                            !isBeingDragged &&
+                            setExerciseMenu({
+                              dayIndex: activeDaySafe,
+                              exerciseIndex: displayIndex,
+                              rect: event.currentTarget.getBoundingClientRect(),
+                            })
+                          }
                           className="flex h-8 w-8 items-center justify-center rounded-lg text-[#9BAEC1] transition-colors active:bg-[#203347]"
                         >
                           <MoreVertical size={16} />
@@ -1353,95 +1420,136 @@ export default function RoutineDetailPage() {
       )}
 
       {/* ── Exercise options menu (edit mode) ────────────────────────────────── */}
-      {exerciseMenu !== null ? (
-        <div className="absolute inset-0 z-[55]">
-          <div className="absolute inset-0 bg-black/60" onClick={() => setExerciseMenu(null)} />
+      {exerciseMenu !== null && (() => {
+        if (typeof document === 'undefined') return null;
+
+        const selectedExercise = draftDays[exerciseMenu.dayIndex]?.exercises[exerciseMenu.exerciseIndex];
+        if (!selectedExercise) return null;
+
+        const shell = document.querySelector<HTMLElement>('.wohl-shell');
+        const shellRect = shell?.getBoundingClientRect() ?? {
+          top: 0,
+          left: 0,
+          width: window.innerWidth,
+          height: window.innerHeight,
+        };
+        const menuWidth = 288;
+        const menuHeight = 320;
+        const spaceBelow = shellRect.top + shellRect.height - exerciseMenu.rect.bottom;
+        const menuTop =
+          spaceBelow >= menuHeight + 8
+            ? exerciseMenu.rect.bottom - shellRect.top + 8
+            : Math.max(12, exerciseMenu.rect.top - shellRect.top - menuHeight - 8);
+        const menuLeft = Math.max(
+          12,
+          Math.min(exerciseMenu.rect.right - shellRect.left - menuWidth, shellRect.width - menuWidth - 12)
+        );
+
+        return createPortal(
           <div
-            className="absolute bottom-0 left-0 right-0 rounded-t-3xl"
-            style={{ background: '#1A2D42' }}
+            className="fixed z-[55]"
+            style={{
+              top: shellRect.top,
+              left: shellRect.left,
+              width: shellRect.width,
+              height: shellRect.height,
+            }}
           >
-            <div className="mx-auto mb-3 mt-4 h-1 w-10 rounded-full bg-[#203347]" />
-            <div className="px-5 pb-8">
-              <p className="mb-1 truncate text-base font-bold text-white">
-                {draftDays[exerciseMenu.dayIndex]?.exercises[exerciseMenu.exerciseIndex]?.name}
-              </p>
-              <p className="mb-4 text-xs text-[#6F859A]" style={{ fontFamily: "'Inter', sans-serif" }}>
-                {draftDays[exerciseMenu.dayIndex]?.exercises[exerciseMenu.exerciseIndex]?.muscle}
-              </p>
+            <button
+              type="button"
+              aria-label="Cerrar menu de ejercicio"
+              className="absolute inset-0 bg-black/20"
+              onClick={() => setExerciseMenu(null)}
+            />
+            <div
+              className="absolute w-[18rem] rounded-3xl border border-[rgba(32,51,71,0.92)] bg-[#13263A] p-3 shadow-[0_24px_60px_rgba(0,0,0,0.42)]"
+              style={{ top: menuTop, left: menuLeft }}
+            >
+              <div className="border-b border-white/6 px-2 pb-3">
+                <h3 className="text-lg font-bold tracking-tight text-white">{selectedExercise.name}</h3>
+                <p className="mt-1 text-xs text-[#90A4B8]" style={{ fontFamily: "'Inter', sans-serif" }}>
+                  {selectedExercise.muscle}
+                  {selectedExercise.implement ? ` - ${selectedExercise.implement}` : ''}
+                </p>
+              </div>
 
-              <button
-                type="button"
-                onClick={() => {
-                  const ex = draftDays[exerciseMenu.dayIndex]?.exercises[exerciseMenu.exerciseIndex];
-                  if (ex?.exerciseSlug) openExerciseDetail(ex.exerciseSlug);
-                  setExerciseMenu(null);
-                }}
-                className="flex w-full items-center gap-3 rounded-xl px-2 py-3 text-sm font-semibold text-[#9BAEC1] transition-colors active:bg-[#203347]"
-              >
-                <BookOpen size={18} className="shrink-0" />
-                Ver instrucciones / forma correcta
-              </button>
+              <div className="mt-2 flex flex-col">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (selectedExercise.exerciseSlug) {
+                      void navigate(`/muscle-progress/${selectedExercise.exerciseSlug}`);
+                    }
+                    setExerciseMenu(null);
+                  }}
+                  className="flex items-center gap-3 rounded-2xl px-3 py-3 text-left text-sm font-medium text-white transition-colors hover:bg-white/5"
+                >
+                  <History size={17} className="text-white/85" />
+                  <span>Ver historial de este ejercicio</span>
+                </button>
 
-              <button
-                type="button"
-                onClick={() => {
-                  const ex = draftDays[exerciseMenu.dayIndex]?.exercises[exerciseMenu.exerciseIndex];
-                  if (ex?.exerciseSlug) void navigate(`/muscle-progress/${ex.exerciseSlug}`);
-                  setExerciseMenu(null);
-                }}
-                className="flex w-full items-center gap-3 rounded-xl px-2 py-3 text-sm font-semibold text-[#9BAEC1] transition-colors active:bg-[#203347]"
-              >
-                <TrendingUp size={18} className="shrink-0" />
-                Ver historial de este ejercicio
-              </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const { dayIndex, exerciseIndex } = exerciseMenu;
+                    setExerciseMenu(null);
+                    openCatalogReplace(dayIndex, exerciseIndex);
+                  }}
+                  className="flex items-center gap-3 rounded-2xl px-3 py-3 text-left text-sm font-medium text-white transition-colors hover:bg-white/5"
+                >
+                  <RefreshCw size={17} className="text-white/85" />
+                  <span>Reemplazar ejercicio</span>
+                </button>
 
-              <button
-                type="button"
-                onClick={() => {
-                  const { dayIndex, exerciseIndex } = exerciseMenu;
-                  setExerciseMenu(null);
-                  openCatalogReplace(dayIndex, exerciseIndex);
-                }}
-                className="flex w-full items-center gap-3 rounded-xl px-2 py-3 text-sm font-semibold text-[#9BAEC1] transition-colors active:bg-[#203347]"
-              >
-                <RefreshCw size={18} className="shrink-0" />
-                Reemplazar ejercicio
-              </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const current = selectedExercise.restSeconds ?? appSettings.restTimerSeconds;
+                    setRestPickerDraft(REST_VALID_VALUES.has(String(current)) ? String(current) : '90');
+                    setRestPickerTarget({
+                      dayIndex: exerciseMenu.dayIndex,
+                      exerciseIndex: exerciseMenu.exerciseIndex,
+                    });
+                    setExerciseMenu(null);
+                  }}
+                  className="flex items-center gap-3 rounded-2xl px-3 py-3 text-left text-sm font-medium text-white transition-colors hover:bg-white/5"
+                >
+                  <Timer size={17} className="text-white/85" />
+                  <span>Tiempo de descanso</span>
+                </button>
 
-              <button
-                type="button"
-                onClick={() => {
-                  const ex =
-                    draftDays[exerciseMenu.dayIndex]?.exercises[exerciseMenu.exerciseIndex];
-                  const current = ex?.restSeconds ?? appSettings.restTimerSeconds;
-                  setRestPickerDraft(REST_VALID_VALUES.has(String(current)) ? String(current) : '90');
-                  setRestPickerTarget(exerciseMenu);
-                  setExerciseMenu(null);
-                }}
-                className="flex w-full items-center gap-3 rounded-xl px-2 py-3 text-sm font-semibold text-[#9BAEC1] transition-colors active:bg-[#203347]"
-              >
-                <Timer size={18} className="shrink-0" />
-                Tiempo de descanso
-              </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    removeExercise(exerciseMenu.dayIndex, exerciseMenu.exerciseIndex);
+                    setExerciseMenu(null);
+                  }}
+                  className="flex items-center gap-3 rounded-2xl px-3 py-3 text-left text-sm font-medium text-[#FF5D5D] transition-colors hover:bg-[rgba(229,57,53,0.08)]"
+                >
+                  <Trash2 size={17} className="text-[#FF5D5D]" />
+                  <span>Eliminar ejercicio</span>
+                </button>
 
-              <div className="my-2 border-t border-[#203347]" />
-
-              <button
-                type="button"
-                onClick={() => {
-                  const { dayIndex, exerciseIndex } = exerciseMenu;
-                  removeExercise(dayIndex, exerciseIndex);
-                  setExerciseMenu(null);
-                }}
-                className="flex w-full items-center gap-3 rounded-xl px-2 py-3 text-sm font-semibold text-[#FF8E8E] transition-colors active:bg-[rgba(255,125,125,0.08)]"
-              >
-                <Trash2 size={18} className="shrink-0" />
-                Eliminar ejercicio
-              </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (selectedExercise.exerciseSlug) {
+                      openExerciseDetail(selectedExercise.exerciseSlug);
+                    }
+                    setExerciseMenu(null);
+                  }}
+                  disabled={!selectedExercise.exerciseSlug}
+                  className="flex items-center gap-3 rounded-2xl px-3 py-3 text-left text-sm font-medium text-white transition-colors hover:bg-white/5 disabled:opacity-45"
+                >
+                  <BookOpen size={17} className="text-white/85" />
+                  <span>Ver instrucciones / forma correcta</span>
+                </button>
+              </div>
             </div>
-          </div>
-        </div>
-      ) : null}
+          </div>,
+          document.body
+        );
+      })()}
 
       {/* ── Rest timer picker ─────────────────────────────────────────────────── */}
       <NumberWheelPicker
@@ -1479,6 +1587,51 @@ export default function RoutineDetailPage() {
       />
 
       {/* ── Edit lock modal ───────────────────────────────────────────────────── */}
+      {/* Unsaved changes modal */}
+      {blocker.state === 'blocked' ? (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center px-5">
+          <button
+            type="button"
+            aria-label="Cerrar modal de cambios"
+            className="absolute inset-0 bg-black/70"
+            onClick={() => blocker.reset()}
+          />
+          <div className="relative z-10 w-full max-w-sm rounded-3xl bg-[#1A2D42] p-6 shadow-[0_24px_60px_rgba(0,0,0,0.42)]">
+            <h3 className="text-center text-3xl font-extrabold tracking-tight text-white">Guardar cambios?</h3>
+            <p className="mt-3 text-center text-sm text-[#90A4B8]" style={{ fontFamily: "'Inter', sans-serif" }}>
+              Hay cambios sin guardar en esta rutina.
+            </p>
+            <div className="mt-6 flex flex-col gap-3">
+              <button
+                type="button"
+                onClick={async () => {
+                  blocker.reset();
+                  await handleSave();
+                }}
+                className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#00C9A7] py-4 font-bold text-black shadow-[0_0_15px_rgba(0,201,167,0.2)]"
+              >
+                <Save size={16} />
+                Guardar
+              </button>
+              <button
+                type="button"
+                onClick={() => blocker.proceed()}
+                className="flex w-full items-center justify-center rounded-2xl border border-[rgba(255,125,125,0.22)] bg-[rgba(255,125,125,0.08)] py-4 font-bold text-[#FF8E8E]"
+              >
+                Descartar cambios
+              </button>
+              <button
+                type="button"
+                onClick={() => blocker.reset()}
+                className="flex w-full items-center justify-center rounded-2xl bg-[#2A2F3D] py-4 font-bold text-white"
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
       {showEditLockModal && activeWorkout && (
         <ActiveWorkoutEditLockModal
           activeWorkoutName={activeWorkout.sessionName}

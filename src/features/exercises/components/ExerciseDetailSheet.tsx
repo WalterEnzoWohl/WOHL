@@ -1,4 +1,6 @@
+import { useCallback, useLayoutEffect, useState } from 'react';
 import { Plus, X } from 'lucide-react';
+import { createPortal } from 'react-dom';
 
 export interface CatalogExerciseItem {
   exerciseSlug?: string;
@@ -21,14 +23,83 @@ interface Props {
   addLabel?: string;
 }
 
-export function ExerciseDetailSheet({ exercise, onClose, onAdd, addLabel = 'Agregar a este día' }: Props) {
+interface ShellBounds {
+  top: number;
+  left: number;
+  width: number;
+  height: number;
+}
+
+export function ExerciseDetailSheet({ exercise, onClose, onAdd, addLabel = 'Agregar a este dia' }: Props) {
+  const [shellBounds, setShellBounds] = useState<ShellBounds | null>(null);
+
+  const syncShellBounds = useCallback(() => {
+    if (typeof window === 'undefined') return;
+
+    const shell = document.querySelector<HTMLElement>('.wohl-shell');
+    if (shell) {
+      const rect = shell.getBoundingClientRect();
+      setShellBounds({
+        top: rect.top,
+        left: rect.left,
+        width: rect.width,
+        height: rect.height,
+      });
+      return;
+    }
+
+    setShellBounds({
+      top: 0,
+      left: 0,
+      width: window.innerWidth,
+      height: window.innerHeight,
+    });
+  }, []);
+
+  useLayoutEffect(() => {
+    if (!exercise || typeof window === 'undefined') return;
+
+    syncShellBounds();
+
+    const viewport = window.visualViewport;
+    window.addEventListener('resize', syncShellBounds);
+    viewport?.addEventListener('resize', syncShellBounds);
+    viewport?.addEventListener('scroll', syncShellBounds);
+
+    return () => {
+      window.removeEventListener('resize', syncShellBounds);
+      viewport?.removeEventListener('resize', syncShellBounds);
+      viewport?.removeEventListener('scroll', syncShellBounds);
+    };
+  }, [exercise, syncShellBounds]);
+
   if (!exercise) return null;
 
-  return (
-    <div className="absolute inset-0 z-[60]">
-      <div className="absolute inset-0 bg-black/70" onClick={onClose} />
+  const modal = (
+    <div
+      className="fixed z-[60] flex items-center justify-center px-5 py-6"
+      style={
+        shellBounds
+          ? {
+              top: shellBounds.top,
+              left: shellBounds.left,
+              width: shellBounds.width,
+              height: shellBounds.height,
+            }
+          : {
+              inset: 0,
+            }
+      }
+    >
+      <button
+        type="button"
+        aria-label="Cerrar instructivo"
+        className="absolute inset-0 bg-black/70"
+        onClick={onClose}
+      />
+
       <div
-        className="absolute bottom-0 left-0 right-0 flex max-h-[88%] flex-col rounded-t-3xl"
+        className="relative z-10 flex w-full max-h-[calc(100%-3rem)] flex-col overflow-hidden rounded-3xl shadow-[0_24px_60px_rgba(0,0,0,0.42)]"
         style={{ background: '#1A2D42' }}
       >
         <div className="mx-auto mb-3 mt-4 h-1 w-10 shrink-0 rounded-full bg-[#203347]" />
@@ -132,4 +203,6 @@ export function ExerciseDetailSheet({ exercise, onClose, onAdd, addLabel = 'Agre
       </div>
     </div>
   );
+
+  return typeof document !== 'undefined' ? createPortal(modal, document.body) : modal;
 }

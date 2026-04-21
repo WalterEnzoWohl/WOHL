@@ -6,13 +6,19 @@ import { useAppData } from '@/core/app-data/AppDataContext';
 import { hasCompletedOnboarding } from '@/shared/lib/userProfileUtils';
 import { getSupabaseClient } from '@/shared/lib/supabase';
 
-const HIDE_NAV_PATHS = ['/session', '/post-session', '/onboarding', '/exercise-catalog', '/exercise-explore'];
+const BASE_HIDE_NAV_PATHS = ['/session', '/post-session', '/onboarding', '/exercise-catalog', '/exercise-explore'];
+
+function isRoutineEditorPath(pathname: string) {
+  return pathname === '/routine/new' || /^\/routine\/[^/]+\/edit$/.test(pathname);
+}
 
 export default function Root() {
   const navigate = useNavigate();
   const location = useLocation();
   const { activeWorkout, appSettings, error, refreshAppData, routines, status, userProfile } = useAppData();
-  const hideNav = HIDE_NAV_PATHS.some((p) => location.pathname === p || location.pathname.startsWith(p + '/'));
+  const hideNav =
+    BASE_HIDE_NAV_PATHS.some((p) => location.pathname === p || location.pathname.startsWith(p + '/')) ||
+    isRoutineEditorPath(location.pathname);
   const showActiveWorkoutDock = !hideNav && status === 'ready' && Boolean(activeWorkout);
   const isLightMode = appSettings.theme === 'light';
   const onboardingComplete = hasCompletedOnboarding(userProfile);
@@ -82,7 +88,7 @@ export default function Root() {
                 Puedes arrancar con una estructura Upper/Lower, Push Pull Legs o un sistema totalmente personalizado.
               </p>
               <button
-                onClick={() => navigate('/routine-editor/new')}
+                onClick={() => navigate('/routine/new')}
                 className="mt-4 flex w-full items-center justify-center rounded-2xl bg-[#7F98FF] py-4 font-extrabold text-[#0B1020] transition-colors active:bg-[#6F89F0]"
               >
                 Crear primer sistema
