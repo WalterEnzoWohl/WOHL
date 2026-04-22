@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useBeforeUnload, useBlocker, useLocation, useNavigate, useParams } from 'react-router';
-import { ChevronDown, ChevronUp, Dumbbell, Plus, Save, Trash2 } from 'lucide-react';
+import { BookOpen, ChevronDown, ChevronUp, Dumbbell, Plus, RefreshCw, Save, Trash2 } from 'lucide-react';
 import { useAppData } from '@/core/app-data/AppDataContext';
 import { useExerciseCatalog } from '@/features/exercises/hooks/useExerciseCatalog';
+import { ExerciseDetailSheet } from '@/features/exercises/components/ExerciseDetailSheet';
 import type { CatalogExerciseItem } from '@/features/exercises/components/ExerciseDetailSheet';
 import { ActiveWorkoutEditLockModal } from '@/shared/components/layout/ActiveWorkoutEditLockModal';
 import { Header } from '@/shared/components/layout/Header';
@@ -103,6 +104,7 @@ export default function RoutineEditorPage() {
   const [expandedExercises, setExpandedExercises] = useState<Set<string>>(new Set());
   const [restPickerTarget, setRestPickerTarget] = useState<{ dayIndex: number; exerciseIndex: number } | null>(null);
   const [restPickerDraft, setRestPickerDraft] = useState('90');
+  const [selectedExerciseDetail, setSelectedExerciseDetail] = useState<CatalogExerciseItem | null>(null);
 
   const initialNameRef = useRef(existing?.name ?? '');
   const initialDaysJsonRef = useRef(JSON.stringify(initialDays));
@@ -354,6 +356,22 @@ export default function RoutineEditorPage() {
         dayName: day.name,
         mode: 'add',
         existingDaySlugs: day.exercises.map((e) => e.exerciseSlug).filter(Boolean),
+        currentDayExerciseCount: day.exercises.length,
+        returnTo: isNew ? '/routine/new' : `/routine/${id}/edit`,
+      },
+    });
+  };
+
+  const openCatalogForReplace = (dayIndex: number, exerciseIndex: number) => {
+    const day = days[dayIndex];
+    if (!day) return;
+    navigate('/exercise-catalog', {
+      state: {
+        dayIndex,
+        dayName: day.name,
+        mode: 'replace',
+        replaceIndex: exerciseIndex,
+        existingDaySlugs: [],
         currentDayExerciseCount: day.exercises.length,
         returnTo: isNew ? '/routine/new' : `/routine/${id}/edit`,
       },
@@ -722,6 +740,47 @@ export default function RoutineEditorPage() {
                                         </button>
                                       </div>
                                     </div>
+
+                                    {/* Exercise actions */}
+                                    <div className="mx-4 mt-3 flex gap-2">
+                                      <button
+                                        type="button"
+                                        onClick={() => openCatalogForReplace(dayIndex, exerciseIndex)}
+                                        className="flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-[rgba(0,201,167,0.2)] bg-[rgba(0,201,167,0.06)] py-2.5 text-xs font-semibold text-[#00C9A7] transition-colors active:bg-[rgba(0,201,167,0.12)]"
+                                      >
+                                        <RefreshCw size={13} />
+                                        Reemplazar
+                                      </button>
+                                      {catalogEntry && (
+                                        <button
+                                          type="button"
+                                          onClick={() =>
+                                            setSelectedExerciseDetail({
+                                              exerciseSlug: catalogEntry.slug,
+                                              name: catalogEntry.title,
+                                              muscle: catalogEntry.muscle,
+                                              implement: catalogEntry.implement,
+                                              secondaryMuscles: catalogEntry.secondaryMuscles,
+                                              coverImageUrl: catalogEntry.coverImageUrl,
+                                              animationMediaUrl: catalogEntry.animationMediaUrl,
+                                              instructions: catalogEntry.instructions,
+                                              overview: catalogEntry.overview,
+                                            })
+                                          }
+                                          className="flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-[rgba(127,152,255,0.2)] bg-[rgba(127,152,255,0.06)] py-2.5 text-xs font-semibold text-[#7F98FF] transition-colors active:bg-[rgba(127,152,255,0.12)]"
+                                        >
+                                          <BookOpen size={13} />
+                                          Ver instrucciones
+                                        </button>
+                                      )}
+                                      <button
+                                        type="button"
+                                        onClick={() => removeExercise(dayIndex, exerciseIndex)}
+                                        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-[rgba(255,125,125,0.18)] bg-[rgba(255,125,125,0.08)] text-[#FF8E8E] transition-colors active:bg-[rgba(255,125,125,0.14)]"
+                                      >
+                                        <Trash2 size={14} />
+                                      </button>
+                                    </div>
                                   </div>
                                 ) : null}
                               </div>
@@ -881,6 +940,11 @@ export default function RoutineEditorPage() {
           onCancel={() => navigate(-1)}
         />
       ) : null}
+
+      <ExerciseDetailSheet
+        exercise={selectedExerciseDetail}
+        onClose={() => setSelectedExerciseDetail(null)}
+      />
     </div>
   );
 }

@@ -268,22 +268,6 @@ export default function HomePage() {
                     {featuredDayLabel === 'Hoy' ? 'Sesión sugerida' : 'Próxima sesión'}
                   </p>
                   <h3 className="mt-2 text-[1.75rem] font-extrabold leading-tight tracking-tight text-white">{featuredDay.name}</h3>
-                  {featuredDayGroups.length > 0 ? (
-                    <div className="mt-2 flex flex-wrap gap-1.5">
-                      {featuredDayGroups.map((group) => (
-                        <span
-                          key={group}
-                          className="rounded-full border border-[rgba(144,164,184,0.18)] bg-[rgba(32,51,71,0.72)] px-3 py-1 text-[10px] font-semibold uppercase tracking-widest text-[#90A4B8]"
-                        >
-                          {group}
-                        </span>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="mt-2 text-sm leading-relaxed text-[#90A4B8]" style={{ fontFamily: "'Inter', sans-serif" }}>
-                      {[featuredDay.focus, featuredDay.description].filter(Boolean).join('. ')}
-                    </p>
-                  )}
                 </div>
 
                 <div className="shrink-0 rounded-2xl border border-[rgba(127,152,255,0.18)] bg-[rgba(127,152,255,0.08)] px-4 py-3 text-right">
@@ -296,6 +280,23 @@ export default function HomePage() {
                   </p>
                 </div>
               </div>
+
+              {featuredDayGroups.length > 0 ? (
+                <div className="flex flex-wrap gap-1.5">
+                  {featuredDayGroups.map((group) => (
+                    <span
+                      key={group}
+                      className="rounded-full border border-[rgba(144,164,184,0.18)] bg-[rgba(32,51,71,0.72)] px-3 py-1 text-[10px] font-semibold uppercase tracking-widest text-[#90A4B8]"
+                    >
+                      {group}
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm leading-relaxed text-[#90A4B8]" style={{ fontFamily: "'Inter', sans-serif" }}>
+                  {[featuredDay.focus, featuredDay.description].filter(Boolean).join('. ')}
+                </p>
+              )}
 
               <div className="flex items-end justify-between gap-4 border-t border-[rgba(255,255,255,0.06)] pt-4">
                 <div className="min-w-0">

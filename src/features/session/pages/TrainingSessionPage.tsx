@@ -11,7 +11,6 @@ import {
   Sparkles,
   TimerReset,
   Trash2,
-  X,
 } from 'lucide-react';
 import { DndProvider } from 'react-dnd';
 import { TouchBackend } from 'react-dnd-touch-backend';
@@ -21,9 +20,18 @@ import { brandLogoWhite } from '@/assets';
 import { NumberWheelPicker } from '@/features/onboarding/components/WheelPickers';
 import type { WheelPickerOption } from '@/features/onboarding/components/WheelPickers';
 import { buildExerciseTemplateFromCatalog } from '@/features/exercises/lib/exerciseCatalog';
+import type { CatalogExerciseItem } from '@/features/exercises/components/ExerciseDetailSheet';
 import { useExerciseCatalog } from '@/features/exercises/hooks/useExerciseCatalog';
 import { ActiveWorkoutEditLockModal } from '@/shared/components/layout/ActiveWorkoutEditLockModal';
+import { ExerciseContextMenu } from '@/shared/components/ExerciseContextMenu';
+import type { ContextMenuItem } from '@/shared/components/ExerciseContextMenu';
 import { TrainingExerciseCard } from '@/features/session/components/TrainingExerciseCard';
+import { ExerciseHistorySheet } from '@/features/session/components/ExerciseHistorySheet';
+import type { ExerciseHistoryEntry } from '@/features/session/components/ExerciseHistorySheet';
+import { ExerciseDetailModal } from '@/features/session/components/ExerciseDetailModal';
+import type { ExerciseDetailInfo } from '@/features/session/components/ExerciseDetailModal';
+import { FinishSessionModal } from '@/features/session/components/FinishSessionModal';
+import { DeleteSessionConfirmModal } from '@/features/session/components/DeleteSessionConfirmModal';
 import {
   buildExerciseState,
   buildExerciseStateFromHistorySession,
@@ -56,15 +64,6 @@ type SessionLocationState = {
 
 type SetState = ActiveWorkoutSet;
 
-type ExerciseHistoryEntry = {
-  sessionId: number;
-  sessionName: string;
-  sessionDate: string;
-  sets: SessionHistory['exercises'][number]['sets'];
-  maxKg: number;
-  notes?: string;
-};
-
 type ShellBounds = {
   top: number;
   left: number;
@@ -86,7 +85,8 @@ const REST_VALID_VALUES = new Set(REST_OPTIONS.map((option) => option.value));
 
 export default function TrainingSessionPage() {
   const navigate = useNavigate();
-  const { state } = useLocation() as { state?: SessionLocationState };
+  const location = useLocation();
+  const state = location.state as SessionLocationState | undefined;
   const {
     catalog: exerciseCatalog,
     error: exerciseCatalogError,
@@ -226,12 +226,10 @@ export default function TrainingSessionPage() {
   const [notes, setNotes] = useState(resumedWorkout?.notes ?? historicalSession?.notes ?? '');
   const [showFinishModal, setShowFinishModal] = useState(false);
   const [showExerciseHistory, setShowExerciseHistory] = useState(false);
-  const [showReplaceExercise, setShowReplaceExercise] = useState(false);
   const [showRestPicker, setShowRestPicker] = useState(false);
   const [showAddExercise, setShowAddExercise] = useState(false);
   const [showDatabaseExercisePicker, setShowDatabaseExercisePicker] = useState(false);
   const [restPickerDraft, setRestPickerDraft] = useState('90');
-  const [replaceQuery, setReplaceQuery] = useState('');
   const [databaseQuery, setDatabaseQuery] = useState('');
   const [newExerciseName, setNewExerciseName] = useState('');
   const [newExerciseMuscle, setNewExerciseMuscle] = useState('');
@@ -246,16 +244,7 @@ export default function TrainingSessionPage() {
     setIdx: number;
     rect: DOMRect;
   } | null>(null);
-  const [sessionExerciseDetail, setSessionExerciseDetail] = useState<{
-    name: string;
-    titleEn: string;
-    animationMediaUrl?: string;
-    muscle: string;
-    secondaryMuscles: string[];
-    implement?: string;
-    instructions: string[];
-    overview: string;
-  } | null>(null);
+  const [sessionExerciseDetail, setSessionExerciseDetail] = useState<ExerciseDetailInfo | null>(null);
   const [sessionOverlayBounds, setSessionOverlayBounds] = useState<ShellBounds | null>(null);
   const [reorderDragState, setReorderDragState] = useState<{ fromIndex: number; toIndex: number } | null>(null);
   const reorderDragStateRef = useRef<{ fromIndex: number; toIndex: number } | null>(null);
@@ -309,7 +298,7 @@ export default function TrainingSessionPage() {
   }, []);
 
   useLayoutEffect(() => {
-    if (!(sessionExerciseDetail || showExerciseHistory || showReplaceExercise || showReorderModal || showFinishModal || showDeleteSessionModal) || typeof window === 'undefined') {
+    if (!(sessionExerciseDetail || showExerciseHistory || showReorderModal || showFinishModal || showDeleteSessionModal) || typeof window === 'undefined') {
       return;
     }
 
@@ -325,7 +314,7 @@ export default function TrainingSessionPage() {
       viewport?.removeEventListener('resize', syncSessionOverlayBounds);
       viewport?.removeEventListener('scroll', syncSessionOverlayBounds);
     };
-  }, [sessionExerciseDetail, showExerciseHistory, showReplaceExercise, showReorderModal, showFinishModal, showDeleteSessionModal, syncSessionOverlayBounds]);
+  }, [sessionExerciseDetail, showExerciseHistory, showReorderModal, showFinishModal, showDeleteSessionModal, syncSessionOverlayBounds]);
 
   useEffect(() => {
     if (isHistoryEditSession) {
@@ -420,6 +409,31 @@ export default function TrainingSessionPage() {
   }, [isHistoryEditSession, state?.action]);
 
   useEffect(() => {
+    const locState = location.state as {
+      catalogResult?: {
+        exercises: CatalogExerciseItem[];
+        mode: 'add' | 'replace';
+        replaceIndex?: number;
+      };
+    } | null;
+    const result = locState?.catalogResult;
+    if (!result || result.mode !== 'replace' || result.replaceIndex === undefined || !result.exercises[0]) {
+      return;
+    }
+
+    navigate(location.pathname, { replace: true, state: {} });
+
+    const catalogItem = result.exercises[0];
+    const replaceIdx = result.replaceIndex;
+    const catalogEntry = exerciseCatalog.find((e) => e.slug === catalogItem.exerciseSlug);
+    if (!catalogEntry) return;
+
+    const template = buildExerciseTemplateFromCatalog(catalogEntry);
+    replaceCurrentExercise(template, replaceIdx);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.state]);
+
+  useEffect(() => {
     if (!inlineFeedback) {
       return;
     }
@@ -497,6 +511,14 @@ export default function TrainingSessionPage() {
       .map((set, setIdx) => ({ exercise, exerciseIdx, set, setIdx }))
       .filter(({ set }) => !set.completed)
   );
+  const missingSetsGrouped = (() => {
+    const uniqueIdxs = [...new Set(missingSets.map((ms) => ms.exerciseIdx))];
+    return uniqueIdxs.map((exIdx) => ({
+      exerciseName: exerciseList[exIdx]?.name ?? '',
+      exerciseIdx: exIdx,
+      count: missingSets.filter((ms) => ms.exerciseIdx === exIdx).length,
+    }));
+  })();
   const exerciseHistoryEntries: ExerciseHistoryEntry[] = currentExercise
     ? sessionHistory
         .flatMap((session) =>
@@ -516,21 +538,6 @@ export default function TrainingSessionPage() {
         .slice(0, 6)
     : [];
 
-  const replacementOptions = useMemo(() => {
-    if (!currentExercise) {
-      return [];
-    }
-
-    const currentIdentity =
-      currentExercise.exerciseSlug?.toLowerCase() ?? currentExercise.name.toLowerCase();
-
-    return exerciseCatalogTemplates.filter((exercise) => {
-      const exerciseIdentity =
-        exercise.exerciseSlug?.toLowerCase() ?? exercise.name.toLowerCase();
-      return exerciseIdentity !== currentIdentity;
-    });
-  }, [currentExercise, exerciseCatalogTemplates]);
-
   const databaseExerciseOptions = useMemo(() => {
     const currentNames = new Set(
       exerciseList.map((exercise) => exercise.exerciseSlug?.toLowerCase() ?? exercise.name.toLowerCase())
@@ -542,19 +549,6 @@ export default function TrainingSessionPage() {
       return !currentNames.has(exerciseIdentity);
     });
   }, [exerciseCatalogTemplates, exerciseList]);
-
-  const normalizedReplaceQuery = replaceQuery.trim().toLowerCase();
-  const filteredReplacementOptions = replacementOptions.filter((exercise) => {
-    if (!normalizedReplaceQuery) {
-      return true;
-    }
-
-    const haystack = [exercise.name, exercise.muscle, exercise.implement ?? '']
-      .join(' ')
-      .toLowerCase();
-
-    return haystack.includes(normalizedReplaceQuery);
-  });
 
   const normalizedDatabaseQuery = databaseQuery.trim().toLowerCase();
   const filteredDatabaseExerciseOptions = databaseExerciseOptions.filter((exercise) => {
@@ -1074,19 +1068,14 @@ export default function TrainingSessionPage() {
     closeContextMenus();
   };
 
-  const replaceCurrentExercise = (exercise: ExerciseData) => {
-    if (!currentExercise) {
-      return;
-    }
-
+  const replaceCurrentExercise = (exercise: ExerciseData, replaceIdx: number = currentExIdx) => {
     const replacement = buildExerciseStateFromTemplate(exercise, sessionHistory, appSettings.showPreviousWeight);
     const normalizedReplacement = isHistoryEditSession ? markExerciseSetsCompleted(replacement) : replacement;
 
     setExerciseList((previous) =>
-      previous.map((item, index) => (index === currentExIdx ? normalizedReplacement : item))
+      previous.map((item, index) => (index === replaceIdx ? normalizedReplacement : item))
     );
-    setReplaceQuery('');
-    setShowReplaceExercise(false);
+    setCurrentExIdx(replaceIdx);
     closeContextMenus();
   };
 
@@ -1135,8 +1124,19 @@ export default function TrainingSessionPage() {
       label: 'Reemplazar ejercicio',
       icon: RefreshCw,
       onClick: () => {
+        const targetIdx = exerciseMenuAnchor?.exerciseIdx ?? currentExIdx;
         setExerciseMenuAnchor(null);
-        setShowReplaceExercise(true);
+        void navigate('/exercise-catalog', {
+          state: {
+            mode: 'replace',
+            replaceIndex: targetIdx,
+            dayIndex: 0,
+            dayName: '',
+            existingDaySlugs: [],
+            currentDayExerciseCount: 0,
+            returnTo: '/session',
+          },
+        });
       },
     },
     {
@@ -1496,49 +1496,15 @@ export default function TrainingSessionPage() {
         wholeOptions={REST_OPTIONS}
       />
 
-      {exerciseMenuAnchor && currentExercise && (() => {
-        const exRect = exerciseMenuAnchor.rect;
-        const menuH = 260;
-        const spaceBelow = window.innerHeight - exRect.bottom;
-        const exTop = spaceBelow >= menuH + 8
-          ? exRect.bottom + 8
-          : Math.max(10, exRect.top - menuH - 8);
-        const exLeft = Math.max(12, Math.min(exRect.right - 288, window.innerWidth - 300));
-        return (
-        <div className="absolute inset-0 z-40">
-          <button aria-label="Cerrar menú" className="absolute inset-0 bg-black/20" onClick={closeContextMenus} type="button" />
-          <div
-            className="fixed z-50 w-[18rem] rounded-3xl border border-[rgba(32,51,71,0.92)] bg-[#13263A] p-3 shadow-[0_24px_60px_rgba(0,0,0,0.42)]"
-            style={{ top: exTop, left: exLeft }}
-          >
-            <div className="border-b border-white/6 px-2 pb-3">
-              <h3 className="text-lg font-bold tracking-tight text-white">{currentExercise.name}</h3>
-              <p className="mt-1 text-xs text-[#90A4B8]" style={{ fontFamily: "'Inter', sans-serif" }}>
-                {currentExercise.muscle}
-                {currentExercise.implement ? ` - ${currentExercise.implement}` : ''}
-              </p>
-            </div>
-
-            <div className="mt-2 flex flex-col">
-              {exerciseMenuItems.map(({ label, icon: Icon, onClick, danger, disabled }) => (
-                <button
-                  key={label}
-                  onClick={onClick}
-                  disabled={disabled}
-                  className={`flex items-center gap-3 rounded-2xl px-3 py-3 text-left text-sm font-medium transition-colors disabled:opacity-45 ${
-                    danger ? 'text-[#FF5D5D] hover:bg-[rgba(229,57,53,0.08)]' : 'text-white hover:bg-white/5'
-                  }`}
-                  type="button"
-                >
-                  <Icon size={17} className={danger ? 'text-[#FF5D5D]' : 'text-white/85'} />
-                  <span>{label}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-        );
-      })()}
+      {exerciseMenuAnchor && currentExercise && (
+        <ExerciseContextMenu
+          items={exerciseMenuItems as ContextMenuItem[]}
+          anchorRect={exerciseMenuAnchor.rect}
+          title={currentExercise.name}
+          subtitle={`${currentExercise.muscle}${currentExercise.implement ? ` - ${currentExercise.implement}` : ''}`}
+          onClose={closeContextMenus}
+        />
+      )}
 
       {setMenuAnchor && currentExercise && (() => {
         const setRect = setMenuAnchor.rect;
@@ -1616,181 +1582,15 @@ export default function TrainingSessionPage() {
         );
       })()}
 
-      {showExerciseHistory && currentExercise
-        ? createPortal(
-            <div
-              className="fixed z-40 flex items-center justify-center px-5 py-6"
-              style={
-                sessionOverlayBounds
-                  ? {
-                      top: sessionOverlayBounds.top,
-                      left: sessionOverlayBounds.left,
-                      width: sessionOverlayBounds.width,
-                      height: sessionOverlayBounds.height,
-                    }
-                  : {
-                      inset: 0,
-                    }
-              }
-            >
-              <button
-                aria-label="Cerrar historial"
-                className="absolute inset-0 bg-black/70"
-                onClick={() => setShowExerciseHistory(false)}
-                type="button"
-              />
-              <div className="relative z-10 flex w-full max-h-[calc(100%-3rem)] max-w-lg flex-col overflow-hidden rounded-3xl bg-[#1A2D42] shadow-[0_24px_60px_rgba(0,0,0,0.42)]">
-                <div className="mx-auto mb-3 mt-4 h-1 w-10 shrink-0 rounded-full bg-[#203347]" />
-                <div className="overflow-y-auto px-5 pb-6 pt-2">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[#00C9A7]">
-                    Historial del ejercicio
-                  </p>
-                  <h3 className="mt-2 text-2xl font-bold tracking-tight text-white">{currentExercise.name}</h3>
-                  <p className="mt-2 text-sm text-[#90A4B8]" style={{ fontFamily: "'Inter', sans-serif" }}>
-                    Tus registros recientes para este movimiento.
-                  </p>
-
-                  <div className="mt-6 flex max-h-[24rem] flex-col gap-3 overflow-y-auto pr-1">
-                    {exerciseHistoryEntries.length > 0 ? (
-                      exerciseHistoryEntries.map((entry) => (
-                        <button
-                          key={`${entry.sessionId}-${entry.sessionDate}`}
-                          onClick={() => navigate(`/session-history/${entry.sessionId}`)}
-                          className="rounded-2xl border border-[#2A2F3D] bg-[#13263A] p-4 text-left"
-                          type="button"
-                        >
-                          <div className="flex items-start justify-between gap-3">
-                            <div>
-                              <p className="text-base font-bold text-white">{entry.sessionName}</p>
-                              <p className="mt-1 text-xs text-[#90A4B8]" style={{ fontFamily: "'Inter', sans-serif" }}>
-                                {entry.sessionDate}
-                              </p>
-                            </div>
-                            <span className="rounded-full bg-[rgba(0,201,167,0.1)] px-3 py-1 text-[10px] font-semibold uppercase tracking-widest text-[#00C9A7]">
-                              PR {entry.maxKg > 0 ? `${formatWeightNumber(entry.maxKg, appSettings.weightUnit)}${weightUnitLabel}` : 'Peso corporal'}
-                            </span>
-                          </div>
-
-                          <div className="mt-4 flex flex-wrap gap-2">
-                            {entry.sets.map((set, index) => (
-                              <span
-                                key={`${entry.sessionId}-${index}`}
-                                className="rounded-full bg-[#1A2D42] px-3 py-1 text-[10px] font-semibold uppercase tracking-widest text-[#D8E4FF]"
-                              >
-                                {set.kg > 0 ? `${formatWeightNumber(set.kg, appSettings.weightUnit)}${weightUnitLabel}` : 'PC'} x {set.reps}
-                              </span>
-                            ))}
-                          </div>
-                          {entry.notes && (
-                            <p className="mt-3 text-xs text-[#90A4B8]" style={{ fontFamily: "'Inter', sans-serif" }}>
-                              {entry.notes}
-                            </p>
-                          )}
-                        </button>
-                      ))
-                    ) : (
-                      <div className="rounded-2xl border border-[#2A2F3D] bg-[#13263A] p-5 text-sm text-[#90A4B8]">
-                        Todavia no hay registros guardados para este ejercicio.
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>,
-            document.body
-          )
-        : null}
-
-      {showReplaceExercise && currentExercise
-        ? createPortal(
-            <div
-              className="fixed z-40 flex items-center justify-center px-5 py-6"
-              style={
-                sessionOverlayBounds
-                  ? {
-                      top: sessionOverlayBounds.top,
-                      left: sessionOverlayBounds.left,
-                      width: sessionOverlayBounds.width,
-                      height: sessionOverlayBounds.height,
-                    }
-                  : {
-                      inset: 0,
-                    }
-              }
-            >
-              <button
-                aria-label="Cerrar selector de reemplazo"
-                className="absolute inset-0 bg-black/70"
-                onClick={() => {
-                  setShowReplaceExercise(false);
-                  setReplaceQuery('');
-                }}
-                type="button"
-              />
-              <div className="relative z-10 flex w-full max-h-[calc(100%-3rem)] max-w-lg flex-col overflow-hidden rounded-3xl bg-[#1A2D42] shadow-[0_24px_60px_rgba(0,0,0,0.42)]">
-                <div className="mx-auto mb-3 mt-4 h-1 w-10 shrink-0 rounded-full bg-[#203347]" />
-                <div className="overflow-y-auto px-5 pb-6 pt-2">
-                  <h3 className="text-2xl font-bold tracking-tight text-white">Reemplazar ejercicio</h3>
-                  <p className="mt-2 text-sm text-[#90A4B8]" style={{ fontFamily: "'Inter', sans-serif" }}>
-                    Elegi otra variante disponible en el catalogo de WOHL.
-                  </p>
-
-                  <div className="mt-5 rounded-2xl border border-[#2A2F3D] bg-[#13263A] px-4 py-3">
-                    <div className="flex items-center gap-3">
-                      <Search size={16} className="text-[#7E8799]" />
-                      <input
-                        value={replaceQuery}
-                        onChange={(event) => setReplaceQuery(event.target.value)}
-                        placeholder="Buscar por ejercicio, musculo o implemento"
-                        className="w-full bg-transparent text-sm text-white outline-none placeholder:text-[#7E8799]"
-                        style={{ fontFamily: "'Inter', sans-serif" }}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="mt-5 flex max-h-[24rem] flex-col gap-3 overflow-y-auto pr-1">
-                    {exerciseCatalogError ? (
-                      <div className="rounded-2xl border border-[rgba(255,125,125,0.22)] bg-[rgba(255,125,125,0.08)] p-4 text-sm text-[#FFB4B4]">
-                        {exerciseCatalogError}. Mientras tanto usamos tus rutinas guardadas como respaldo.
-                      </div>
-                    ) : null}
-
-                    {isExerciseCatalogLoading && exerciseCatalog.length === 0 ? (
-                      <div className="rounded-2xl border border-[#2A2F3D] bg-[#13263A] p-5 text-sm text-[#90A4B8]">
-                        Cargando catalogo de ejercicios...
-                      </div>
-                    ) : null}
-
-                    {filteredReplacementOptions.length > 0 ? (
-                      filteredReplacementOptions.map((exercise) => (
-                        <button
-                          key={exercise.exerciseSlug ?? exercise.name}
-                          onClick={() => replaceCurrentExercise(exercise)}
-                          className="rounded-2xl border border-[#2A2F3D] bg-[#13263A] p-4 text-left"
-                          type="button"
-                        >
-                          <p className="text-lg font-bold text-white">{exercise.name}</p>
-                          <p className="mt-1 text-sm text-[#90A4B8]" style={{ fontFamily: "'Inter', sans-serif" }}>
-                            {exercise.muscle}
-                            {exercise.implement ? ` - ${exercise.implement}` : ''}
-                          </p>
-                          <div className="mt-3 inline-flex rounded-full bg-[rgba(0,201,167,0.1)] px-3 py-1 text-[10px] font-semibold uppercase tracking-widest text-[#00C9A7]">
-                            {buildExerciseOptionSummary(exercise)}
-                          </div>
-                        </button>
-                      ))
-                    ) : (
-                      <div className="rounded-2xl border border-[#2A2F3D] bg-[#13263A] p-5 text-sm text-[#90A4B8]">
-                        No encontramos ejercicios que coincidan con tu busqueda.
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>,
-            document.body
-          )
-        : null}
+      <ExerciseHistorySheet
+        isOpen={showExerciseHistory && currentExercise !== null}
+        exerciseName={currentExercise?.name ?? ''}
+        entries={exerciseHistoryEntries as ExerciseHistoryEntry[]}
+        weightUnit={appSettings.weightUnit}
+        weightUnitLabel={weightUnitLabel}
+        overlayBounds={sessionOverlayBounds}
+        onClose={() => setShowExerciseHistory(false)}
+      />
 
       {showReorderModal
         ? createPortal(
@@ -1887,282 +1687,31 @@ export default function TrainingSessionPage() {
           )
         : null}
 
-      {showFinishModal
-        ? createPortal(
-            <div
-              className="fixed z-40 flex items-center justify-center px-5 py-6"
-              style={
-                sessionOverlayBounds
-                  ? {
-                      top: sessionOverlayBounds.top,
-                      left: sessionOverlayBounds.left,
-                      width: sessionOverlayBounds.width,
-                      height: sessionOverlayBounds.height,
-                    }
-                  : { inset: 0 }
-              }
-            >
-              <button
-                aria-label="Cerrar"
-                className="absolute inset-0 bg-black/70"
-                onClick={() => setShowFinishModal(false)}
-                type="button"
-              />
-              <div className="relative z-10 flex w-full max-h-[calc(100%-3rem)] flex-col overflow-hidden rounded-3xl bg-[#1A2D42] shadow-[0_24px_60px_rgba(0,0,0,0.42)]">
-                <div className="mx-auto mb-3 mt-4 h-1 w-10 shrink-0 rounded-full bg-[#203347]" />
-                <div className="overflow-y-auto px-5 pb-6 pt-2">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[#00C9A7]">
-                    {isHistoryEditSession ? 'Edición de sesión' : 'Sesión activa'}
-                  </p>
-                  <h3 className="mt-2 text-2xl font-bold tracking-tight text-white">
-                    {isHistoryEditSession ? 'Guardar cambios' : 'Finalizar entrenamiento'}
-                  </h3>
+      <FinishSessionModal
+        isOpen={showFinishModal}
+        isHistoryEditSession={isHistoryEditSession}
+        isSubmittingSession={isSubmittingSession}
+        missingSets={missingSetsGrouped}
+        overlayBounds={sessionOverlayBounds}
+        onFinish={() => void finishSession()}
+        onDiscard={discardSession}
+        onContinue={() => setShowFinishModal(false)}
+        onDeleteSession={() => setShowDeleteSessionModal(true)}
+        onJumpToMissing={jumpToMissingSet}
+      />
 
-                  {missingSets.length > 0 && !isHistoryEditSession && (
-                    <>
-                      <p className="mt-2 text-sm text-[#90A4B8]" style={{ fontFamily: "'Inter', sans-serif" }}>
-                        Tenés {missingSets.length} {missingSets.length === 1 ? 'serie pendiente' : 'series pendientes'} sin completar:
-                      </p>
-                      <div className="mt-4 flex flex-col gap-2">
-                        {[...new Set(missingSets.map((ms) => ms.exerciseIdx))].map((exIdx) => {
-                          const ex = exerciseList[exIdx];
-                          const count = missingSets.filter((ms) => ms.exerciseIdx === exIdx).length;
-                          return (
-                            <button
-                              key={exIdx}
-                              onClick={() => jumpToMissingSet(exIdx)}
-                              className="flex items-center justify-between rounded-2xl border border-[rgba(245,185,66,0.22)] bg-[rgba(245,185,66,0.08)] px-4 py-3 text-left"
-                              type="button"
-                            >
-                              <span className="text-sm font-semibold text-white">{ex.name}</span>
-                              <span className="text-xs font-semibold text-[#F5B942]">
-                                {count} pendiente{count > 1 ? 's' : ''}
-                              </span>
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </>
-                  )}
+      <DeleteSessionConfirmModal
+        isOpen={showDeleteSessionModal}
+        overlayBounds={sessionOverlayBounds}
+        onConfirm={() => void deleteHistoricalSession()}
+        onClose={() => setShowDeleteSessionModal(false)}
+      />
 
-                  <div className="mt-5 flex flex-col gap-3">
-                    <button
-                      onClick={() => void finishSession()}
-                      disabled={isSubmittingSession}
-                      className="flex w-full items-center justify-center rounded-2xl bg-[#00C9A7] py-4 text-sm font-bold uppercase tracking-widest text-black transition-colors active:bg-[#00b092] disabled:opacity-45"
-                      type="button"
-                    >
-                      {isSubmittingSession
-                        ? 'Guardando...'
-                        : isHistoryEditSession
-                          ? 'Guardar cambios'
-                          : missingSets.length > 0
-                            ? 'Finalizar de todas formas'
-                            : 'Finalizar entrenamiento'}
-                    </button>
-
-                    <button
-                      onClick={() => setShowFinishModal(false)}
-                      className="flex w-full items-center justify-center rounded-2xl border border-[#203347] bg-[#2A2A2A] py-4 text-sm font-semibold text-white transition-colors active:bg-[#343434]"
-                      type="button"
-                    >
-                      {isHistoryEditSession ? 'Seguir editando' : 'Continuar entrenamiento'}
-                    </button>
-
-                    {isHistoryEditSession ? (
-                      <button
-                        onClick={() => setShowDeleteSessionModal(true)}
-                        className="flex w-full items-center justify-center gap-2 rounded-2xl border border-[rgba(229,57,53,0.22)] bg-[rgba(229,57,53,0.08)] py-4 text-[#FF7D7D] transition-colors active:bg-[rgba(229,57,53,0.14)]"
-                        type="button"
-                      >
-                        <Trash2 size={18} />
-                        <span className="text-sm font-bold uppercase tracking-widest">Eliminar entrenamiento</span>
-                      </button>
-                    ) : (
-                      <button
-                        onClick={discardSession}
-                        className="flex w-full items-center justify-center rounded-2xl border border-[#203347] bg-[#13263A] py-4 text-sm font-semibold text-[#FF7D7D] transition-colors active:bg-[rgba(229,57,53,0.08)]"
-                        type="button"
-                      >
-                        Descartar entrenamiento
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>,
-            document.body
-          )
-        : null}
-
-      {showDeleteSessionModal
-        ? createPortal(
-            <div
-              className="fixed z-50 flex items-center justify-center px-5 py-6"
-              style={
-                sessionOverlayBounds
-                  ? {
-                      top: sessionOverlayBounds.top,
-                      left: sessionOverlayBounds.left,
-                      width: sessionOverlayBounds.width,
-                      height: sessionOverlayBounds.height,
-                    }
-                  : { inset: 0 }
-              }
-            >
-              <button
-                aria-label="Cancelar"
-                className="absolute inset-0 bg-black/70"
-                onClick={() => setShowDeleteSessionModal(false)}
-                type="button"
-              />
-              <div className="relative z-10 flex w-full max-h-[calc(100%-3rem)] flex-col overflow-hidden rounded-3xl bg-[#1A2D42] shadow-[0_24px_60px_rgba(0,0,0,0.42)]">
-                <div className="mx-auto mb-3 mt-4 h-1 w-10 shrink-0 rounded-full bg-[#203347]" />
-                <div className="overflow-y-auto px-5 pb-6 pt-2">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[#FF7D7D]">
-                    Atención
-                  </p>
-                  <h3 className="mt-2 text-2xl font-bold tracking-tight text-white">
-                    Eliminar entrenamiento
-                  </h3>
-                  <p className="mt-2 text-sm text-[#90A4B8]" style={{ fontFamily: "'Inter', sans-serif" }}>
-                    Esta acción no se puede deshacer. El registro de esta sesión se eliminará permanentemente.
-                  </p>
-                  <div className="mt-5 flex flex-col gap-3">
-                    <button
-                      onClick={() => void deleteHistoricalSession()}
-                      className="flex w-full items-center justify-center gap-2 rounded-2xl border border-[rgba(229,57,53,0.22)] bg-[rgba(229,57,53,0.08)] py-4 text-[#FF7D7D] transition-colors active:bg-[rgba(229,57,53,0.14)]"
-                      type="button"
-                    >
-                      <Trash2 size={18} />
-                      <span className="text-sm font-bold uppercase tracking-widest">Sí, eliminar</span>
-                    </button>
-                    <button
-                      onClick={() => setShowDeleteSessionModal(false)}
-                      className="flex w-full items-center justify-center rounded-2xl border border-[#203347] bg-[#13263A] py-4 text-sm font-semibold text-white transition-colors active:bg-[rgba(255,255,255,0.04)]"
-                      type="button"
-                    >
-                      Cancelar
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>,
-            document.body
-          )
-        : null}
-
-      {sessionExerciseDetail
-        ? createPortal(
-            <div
-              className="fixed z-50 flex items-center justify-center px-5 py-6"
-              style={
-                sessionOverlayBounds
-                  ? {
-                      top: sessionOverlayBounds.top,
-                      left: sessionOverlayBounds.left,
-                      width: sessionOverlayBounds.width,
-                      height: sessionOverlayBounds.height,
-                    }
-                  : {
-                      inset: 0,
-                    }
-              }
-            >
-              <button
-                type="button"
-                aria-label="Cerrar instructivo"
-                className="absolute inset-0 bg-black/70"
-                onClick={() => setSessionExerciseDetail(null)}
-              />
-              <div
-                className="relative z-10 flex w-full max-h-[calc(100%-3rem)] flex-col overflow-hidden rounded-3xl shadow-[0_24px_60px_rgba(0,0,0,0.42)]"
-                style={{ background: '#1A2D42' }}
-              >
-                <div className="overflow-y-auto">
-                  {sessionExerciseDetail.animationMediaUrl ? (
-                    <video
-                      key={sessionExerciseDetail.animationMediaUrl}
-                      src={sessionExerciseDetail.animationMediaUrl}
-                      autoPlay
-                      loop
-                      muted
-                      playsInline
-                      className="w-full"
-                      style={{ maxHeight: '260px', objectFit: 'cover' }}
-                    />
-                  ) : null}
-
-                  <div className="px-5 pb-8 pt-4">
-                    <div className="mb-4 flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <h2 className="text-xl font-bold leading-tight text-white">
-                          {sessionExerciseDetail.name}
-                        </h2>
-                        <p className="mt-0.5 text-sm text-[#6F859A]" style={{ fontFamily: "'Inter', sans-serif" }}>
-                          {sessionExerciseDetail.titleEn}
-                        </p>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => setSessionExerciseDetail(null)}
-                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[#203347] text-[#9BAEC1]"
-                      >
-                        <X size={16} />
-                      </button>
-                    </div>
-
-                    <div className="mb-4 flex flex-wrap gap-2">
-                      <span className="rounded-full bg-[rgba(0,201,167,0.12)] px-3 py-1 text-xs font-semibold text-[#00C9A7]">
-                        {sessionExerciseDetail.muscle}
-                      </span>
-                      {sessionExerciseDetail.secondaryMuscles.map((m) => (
-                        <span
-                          key={m}
-                          className="rounded-full bg-[rgba(155,174,193,0.1)] px-3 py-1 text-xs font-medium text-[#9BAEC1]"
-                        >
-                          {m}
-                        </span>
-                      ))}
-                      {sessionExerciseDetail.implement ? (
-                        <span className="rounded-full bg-[rgba(127,152,255,0.12)] px-3 py-1 text-xs font-semibold text-[#7F98FF]">
-                          {sessionExerciseDetail.implement}
-                        </span>
-                      ) : null}
-                    </div>
-
-                    {sessionExerciseDetail.overview ? (
-                      <p className="mb-5 text-sm leading-relaxed text-[#9BAEC1]" style={{ fontFamily: "'Inter', sans-serif" }}>
-                        {sessionExerciseDetail.overview}
-                      </p>
-                    ) : null}
-
-                    {sessionExerciseDetail.instructions.length > 0 ? (
-                      <div className="mb-2">
-                        <p className="mb-2.5 text-xs font-bold uppercase tracking-widest text-[#9BAEC1]" style={{ fontFamily: "'Inter', sans-serif" }}>
-                          Instrucciones
-                        </p>
-                        <ol className="flex flex-col gap-2.5">
-                          {sessionExerciseDetail.instructions.map((step, index) => (
-                            <li key={index} className="flex gap-3">
-                              <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[rgba(0,201,167,0.15)] text-[10px] font-bold text-[#00C9A7]">
-                                {index + 1}
-                              </span>
-                              <p className="text-sm leading-relaxed text-white" style={{ fontFamily: "'Inter', sans-serif" }}>
-                                {step}
-                              </p>
-                            </li>
-                          ))}
-                        </ol>
-                      </div>
-                    ) : null}
-                  </div>
-                </div>
-              </div>
-            </div>,
-            document.body
-          )
-        : null}
+      <ExerciseDetailModal
+        detail={sessionExerciseDetail}
+        overlayBounds={sessionOverlayBounds}
+        onClose={() => setSessionExerciseDetail(null)}
+      />
     </div>
   );
 }

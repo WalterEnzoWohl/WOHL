@@ -1,5 +1,5 @@
 import { MUSCLE_GROUPS } from '@/shared/constants';
-import type { SessionHistory, UserProfile } from '@/shared/types/models';
+import type { SessionHistory, UserProfile, Routine } from '@/shared/types/models';
 
 export const GOAL_OPTIONS = ['Definición', 'Volumen', 'Mantenimiento', 'Recomposición'] as const;
 
@@ -20,6 +20,14 @@ export type MuscleProgressInsight = (typeof MUSCLE_GROUPS)[number] & {
   monthlyTarget: number;
   progressPercent: number;
   weeklyDirectCounts: number[];
+};
+
+export type MuscleSetProgressInsight = (typeof MUSCLE_GROUPS)[number] & {
+  monthlySetCount: number;
+  monthlyTarget: number;
+  progressPercent: number;
+  weeklySetCounts: number[];
+  exercises: { name: string; pr: number; unit: string }[];
 };
 
 const MONTHLY_DIRECT_TARGET = 16;
@@ -218,6 +226,69 @@ export function getMuscleProgressInsights(
       monthlyTarget: MONTHLY_DIRECT_TARGET,
       progressPercent: Math.min(100, (monthlyDirectCount / MONTHLY_DIRECT_TARGET) * 100),
       weeklyDirectCounts,
+    };
+  });
+}
+
+export function getMuscleSetProgressInsights(
+  sessions: SessionHistory[],
+  activeRoutine: Routine | null | undefined,
+  referenceIso: string
+): MuscleSetProgressInsight[] {
+  const monthKey = referenceIso.slice(0, 7);
+  const currentWeekStart = startOfWeek(parseIsoDate(referenceIso));
+  const weekStarts = Array.from({ length: 8 }, (_, index) =>
+    addDays(currentWeekStart, (index - 7) * 7)
+  );
+
+  return MUSCLE_GROUPS.map((group) => {
+    const monthlySetCount = sessions
+      .filter((session) => session.isoDate.startsWith(monthKey))
+      .reduce((total, session) => {
+        return (
+          total +
+          session.exercises
+            .filter((ex) => getDirectGroupId(ex.muscle) === group.id)
+            .reduce((setCount, ex) => setCount + ex.sets.length, 0)
+        );
+      }, 0);
+
+    const weeklyRoutineSets = activeRoutine
+      ? activeRoutine.days.reduce((total, day) => {
+          return (
+            total +
+            day.exercises
+              .filter((ex) => getDirectGroupId(ex.muscle) === group.id)
+              .reduce((setCount, ex) => setCount + ex.sets.length, 0)
+          );
+        }, 0)
+      : 0;
+    const monthlyTarget = weeklyRoutineSets * 4;
+
+    const weeklySetCounts = weekStarts.map((weekStart) => {
+      const weekEnd = addDays(weekStart, 6);
+      return sessions.reduce((total, session) => {
+        const sessionDate = parseIsoDate(session.isoDate);
+        if (sessionDate < weekStart || sessionDate > weekEnd) return total;
+        return (
+          total +
+          session.exercises
+            .filter((ex) => getDirectGroupId(ex.muscle) === group.id)
+            .reduce((setCount, ex) => setCount + ex.sets.length, 0)
+        );
+      }, 0);
+    });
+
+    const progressPercent =
+      monthlyTarget > 0 ? Math.min(100, (monthlySetCount / monthlyTarget) * 100) : 0;
+
+    return {
+      ...group,
+      exercises: buildPersonalRecords(sessions, group.id),
+      monthlySetCount,
+      monthlyTarget,
+      progressPercent,
+      weeklySetCounts,
     };
   });
 }
