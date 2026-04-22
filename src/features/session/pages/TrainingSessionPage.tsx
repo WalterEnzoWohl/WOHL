@@ -2,6 +2,7 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import {
   BookOpen,
   Check,
+  GripVertical,
   History,
   Menu,
   Plus,
@@ -17,6 +18,8 @@ import { TouchBackend } from 'react-dnd-touch-backend';
 import { createPortal } from 'react-dom';
 import { useLocation, useNavigate } from 'react-router';
 import { brandLogoWhite } from '@/assets';
+import { NumberWheelPicker } from '@/features/onboarding/components/WheelPickers';
+import type { WheelPickerOption } from '@/features/onboarding/components/WheelPickers';
 import { buildExerciseTemplateFromCatalog } from '@/features/exercises/lib/exerciseCatalog';
 import { useExerciseCatalog } from '@/features/exercises/hooks/useExerciseCatalog';
 import { ActiveWorkoutEditLockModal } from '@/shared/components/layout/ActiveWorkoutEditLockModal';
@@ -68,6 +71,18 @@ type ShellBounds = {
   width: number;
   height: number;
 };
+
+const REST_OPTIONS: WheelPickerOption[] = [
+  { value: '30', label: '30s' },
+  { value: '45', label: '45s' },
+  { value: '60', label: '1min' },
+  { value: '90', label: '1min 30s' },
+  { value: '120', label: '2min' },
+  { value: '180', label: '3min' },
+  { value: '240', label: '4min' },
+];
+
+const REST_VALID_VALUES = new Set(REST_OPTIONS.map((option) => option.value));
 
 export default function TrainingSessionPage() {
   const navigate = useNavigate();
@@ -174,7 +189,7 @@ export default function TrainingSessionPage() {
     resumedWorkout?.sessionName ??
     historicalSession?.name ??
     (isFreeSession ? FREE_SESSION_NAME : currentDay?.name ?? 'Sesión');
-  const sessionFocus =
+  const baseSessionFocus =
     resumedWorkout?.sessionFocus ??
     historicalSession?.sessionFocus ??
     (isFreeSession ? FREE_SESSION_FOCUS : currentDay?.focus ?? 'Entrenamiento guiado');
@@ -212,14 +227,17 @@ export default function TrainingSessionPage() {
   const [showFinishModal, setShowFinishModal] = useState(false);
   const [showExerciseHistory, setShowExerciseHistory] = useState(false);
   const [showReplaceExercise, setShowReplaceExercise] = useState(false);
+  const [showRestPicker, setShowRestPicker] = useState(false);
   const [showAddExercise, setShowAddExercise] = useState(false);
   const [showDatabaseExercisePicker, setShowDatabaseExercisePicker] = useState(false);
+  const [restPickerDraft, setRestPickerDraft] = useState('90');
   const [replaceQuery, setReplaceQuery] = useState('');
   const [databaseQuery, setDatabaseQuery] = useState('');
   const [newExerciseName, setNewExerciseName] = useState('');
   const [newExerciseMuscle, setNewExerciseMuscle] = useState('');
   const [newExerciseImplement, setNewExerciseImplement] = useState('');
   const [showDeleteSessionModal, setShowDeleteSessionModal] = useState(false);
+  const [showReorderModal, setShowReorderModal] = useState(false);
   const [isSubmittingSession, setIsSubmittingSession] = useState(false);
   const [inlineFeedback, setInlineFeedback] = useState<string | null>(null);
   const [exerciseMenuAnchor, setExerciseMenuAnchor] = useState<{ exerciseIdx: number; rect: DOMRect } | null>(null);
@@ -239,7 +257,33 @@ export default function TrainingSessionPage() {
     overview: string;
   } | null>(null);
   const [sessionOverlayBounds, setSessionOverlayBounds] = useState<ShellBounds | null>(null);
+  const [reorderDragState, setReorderDragState] = useState<{ fromIndex: number; toIndex: number } | null>(null);
+  const reorderDragStateRef = useRef<{ fromIndex: number; toIndex: number } | null>(null);
+  const reorderListRef = useRef<HTMLDivElement | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+  const sessionTimeLimitRef = useRef(false);
+
+  const sessionFocus = useMemo(() => {
+    const uniqueMuscles: string[] = [];
+    const seenMuscles = new Set<string>();
+
+    for (const exercise of exerciseList) {
+      const muscle = exercise.muscle?.trim();
+      if (!muscle) {
+        continue;
+      }
+
+      const normalizedMuscle = muscle.toLowerCase();
+      if (seenMuscles.has(normalizedMuscle)) {
+        continue;
+      }
+
+      seenMuscles.add(normalizedMuscle);
+      uniqueMuscles.push(muscle);
+    }
+
+    return uniqueMuscles.length > 0 ? uniqueMuscles.join(', ') : baseSessionFocus;
+  }, [baseSessionFocus, exerciseList]);
 
   const syncSessionOverlayBounds = useCallback(() => {
     if (typeof window === 'undefined') return;
@@ -265,7 +309,7 @@ export default function TrainingSessionPage() {
   }, []);
 
   useLayoutEffect(() => {
-    if (!(sessionExerciseDetail || showExerciseHistory || showReplaceExercise) || typeof window === 'undefined') {
+    if (!(sessionExerciseDetail || showExerciseHistory || showReplaceExercise || showReorderModal || showFinishModal || showDeleteSessionModal) || typeof window === 'undefined') {
       return;
     }
 
@@ -281,7 +325,7 @@ export default function TrainingSessionPage() {
       viewport?.removeEventListener('resize', syncSessionOverlayBounds);
       viewport?.removeEventListener('scroll', syncSessionOverlayBounds);
     };
-  }, [sessionExerciseDetail, showExerciseHistory, showReplaceExercise, syncSessionOverlayBounds]);
+  }, [sessionExerciseDetail, showExerciseHistory, showReplaceExercise, showReorderModal, showFinishModal, showDeleteSessionModal, syncSessionOverlayBounds]);
 
   useEffect(() => {
     if (isHistoryEditSession) {
@@ -383,6 +427,14 @@ export default function TrainingSessionPage() {
     const timeoutId = window.setTimeout(() => setInlineFeedback(null), 2200);
     return () => window.clearTimeout(timeoutId);
   }, [inlineFeedback]);
+
+  useEffect(() => {
+    if (isHistoryEditSession || elapsed < 14400 || sessionTimeLimitRef.current) {
+      return;
+    }
+    sessionTimeLimitRef.current = true;
+    setShowFinishModal(true);
+  }, [elapsed, isHistoryEditSession]);
 
   useEffect(() => {
     const container = scrollContainerRef.current;
@@ -597,6 +649,47 @@ export default function TrainingSessionPage() {
     });
 
     setCurrentExIdx(toIndex);
+  };
+
+  const reorderDisplayList = (() => {
+    if (!reorderDragState || reorderDragState.fromIndex === reorderDragState.toIndex) {
+      return exerciseList;
+    }
+    const arr = [...exerciseList];
+    const [item] = arr.splice(reorderDragState.fromIndex, 1);
+    arr.splice(reorderDragState.toIndex, 0, item);
+    return arr;
+  })();
+
+  const handleReorderPointerDown = (e: React.PointerEvent, idx: number) => {
+    e.currentTarget.setPointerCapture(e.pointerId);
+    navigator.vibrate?.(12);
+    const state = { fromIndex: idx, toIndex: idx };
+    reorderDragStateRef.current = state;
+    setReorderDragState(state);
+  };
+
+  const handleReorderPointerMove = (e: React.PointerEvent) => {
+    if (!reorderDragStateRef.current || !reorderListRef.current) return;
+    const children = Array.from(reorderListRef.current.children) as HTMLElement[];
+    let newTo = children.length - 1;
+    for (let i = 0; i < children.length; i++) {
+      const rect = children[i].getBoundingClientRect();
+      if (e.clientY < rect.top + rect.height / 2) { newTo = i; break; }
+    }
+    if (newTo !== reorderDragStateRef.current.toIndex) {
+      const updated = { ...reorderDragStateRef.current, toIndex: newTo };
+      reorderDragStateRef.current = updated;
+      setReorderDragState(updated);
+    }
+  };
+
+  const handleReorderPointerUp = () => {
+    if (!reorderDragStateRef.current) return;
+    const { fromIndex, toIndex } = reorderDragStateRef.current;
+    reorderDragStateRef.current = null;
+    setReorderDragState(null);
+    if (fromIndex !== toIndex) moveExercise(fromIndex, toIndex);
   };
 
   const updateExerciseNotes = (exerciseIdx: number, value: string) => {
@@ -1005,6 +1098,12 @@ export default function TrainingSessionPage() {
     });
   };
 
+  const openRestEditor = () => {
+    const currentValue = String(restConfig);
+    setRestPickerDraft(REST_VALID_VALUES.has(currentValue) ? currentValue : '90');
+    setShowRestPicker(true);
+  };
+
   const closeAddExercise = () => {
     setShowAddExercise(false);
     setNewExerciseName('');
@@ -1022,7 +1121,13 @@ export default function TrainingSessionPage() {
       label: 'Ver historial de este ejercicio',
       icon: History,
       onClick: () => {
+        const exerciseSlug = currentExercise?.exerciseSlug;
         setExerciseMenuAnchor(null);
+        if (exerciseSlug) {
+          void navigate(`/muscle-progress/${exerciseSlug}`);
+          return;
+        }
+
         setShowExerciseHistory(true);
       },
     },
@@ -1032,6 +1137,14 @@ export default function TrainingSessionPage() {
       onClick: () => {
         setExerciseMenuAnchor(null);
         setShowReplaceExercise(true);
+      },
+    },
+    {
+      label: 'Editar Descanso',
+      icon: TimerReset,
+      onClick: () => {
+        setExerciseMenuAnchor(null);
+        openRestEditor();
       },
     },
     {
@@ -1171,20 +1284,6 @@ export default function TrainingSessionPage() {
           </div>
 
           <div className="flex flex-col gap-3">
-            <button
-              onClick={() => setShowFinishModal(true)}
-              disabled={isSubmittingSession}
-              className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#00C9A7] py-4 transition-colors active:bg-[#00b092] disabled:opacity-45"
-              type="button"
-            >
-              <div className="flex h-4 w-4 items-center justify-center rounded-full border-2 border-[#003830]/50">
-                <div className="h-1.5 w-1.5 rounded-full bg-[#003830]/50" />
-              </div>
-              <span className="text-sm font-bold uppercase tracking-widest text-[#05231f]">
-                {isHistoryEditSession ? 'Guardar cambios' : 'Finalizar entrenamiento'}
-              </span>
-            </button>
-
             {isHistoryEditSession && (
               <button
                 onClick={() => setShowDeleteSessionModal(true)}
@@ -1281,6 +1380,10 @@ export default function TrainingSessionPage() {
                     onRemoveLastSet={(targetExerciseIdx) =>
                       removeSet(targetExerciseIdx, exerciseList[targetExerciseIdx].sets.length - 1)
                     }
+                    onOpenRestTimer={() => {
+                      openRestEditor();
+                    }}
+                    onReorderClick={() => setShowReorderModal(true)}
                   />
                   );
                 })}
@@ -1371,6 +1474,27 @@ export default function TrainingSessionPage() {
         </div>
         </div>
       )}
+
+      <NumberWheelPicker
+        open={showRestPicker}
+        title="Descanso"
+        subtitle="Tiempo entre series"
+        value={{ whole: restPickerDraft }}
+        onChange={(value) => setRestPickerDraft(value.whole)}
+        onClose={() => setShowRestPicker(false)}
+        onConfirm={() => {
+          const seconds = Number(restPickerDraft);
+          if (!Number.isFinite(seconds) || seconds <= 0) {
+            setShowRestPicker(false);
+            return;
+          }
+
+          setRestConfig(seconds);
+          setRestTime(seconds);
+          setShowRestPicker(false);
+        }}
+        wholeOptions={REST_OPTIONS}
+      />
 
       {exerciseMenuAnchor && currentExercise && (() => {
         const exRect = exerciseMenuAnchor.rect;
@@ -1660,6 +1784,266 @@ export default function TrainingSessionPage() {
                         No encontramos ejercicios que coincidan con tu busqueda.
                       </div>
                     )}
+                  </div>
+                </div>
+              </div>
+            </div>,
+            document.body
+          )
+        : null}
+
+      {showReorderModal
+        ? createPortal(
+            <div
+              className="fixed z-40 flex items-center justify-center px-5 py-6"
+              style={
+                sessionOverlayBounds
+                  ? {
+                      top: sessionOverlayBounds.top,
+                      left: sessionOverlayBounds.left,
+                      width: sessionOverlayBounds.width,
+                      height: sessionOverlayBounds.height,
+                    }
+                  : { inset: 0 }
+              }
+            >
+              <button
+                aria-label="Cerrar reordenador"
+                className="absolute inset-0 bg-black/70"
+                onClick={() => setShowReorderModal(false)}
+                type="button"
+              />
+              <div className="relative z-10 flex w-full max-h-[calc(100%-3rem)] flex-col overflow-hidden rounded-3xl bg-[#1A2D42] shadow-[0_24px_60px_rgba(0,0,0,0.42)]">
+                <div className="mx-auto mb-3 mt-4 h-1 w-10 shrink-0 rounded-full bg-[#203347]" />
+                <div className="flex min-h-0 flex-1 flex-col px-5 pb-6 pt-2">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[#00C9A7]">
+                    Sesión activa
+                  </p>
+                  <h3 className="mt-2 text-2xl font-bold tracking-tight text-white">Reordenar ejercicios</h3>
+                  <p className="mt-1 text-sm text-[#90A4B8]" style={{ fontFamily: "'Inter', sans-serif" }}>
+                    Mantené apretado una fila y arrastrálo para cambiar el orden.
+                  </p>
+                  <div
+                    ref={reorderListRef}
+                    className={`mt-5 flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto pr-1 ${reorderDragState ? 'touch-none select-none' : ''}`}
+                  >
+                    {reorderDisplayList.map((ex, displayIdx) => {
+                      const catalogEntry = ex.exerciseSlug ? catalogBySlug.get(ex.exerciseSlug) : undefined;
+                      const isActive = reorderDragState?.toIndex === displayIdx;
+                      const isDraggingAny = reorderDragState !== null;
+                      return (
+                        <div
+                          key={ex.id}
+                          onPointerDown={(e) => handleReorderPointerDown(e, displayIdx)}
+                          onPointerMove={handleReorderPointerMove}
+                          onPointerUp={handleReorderPointerUp}
+                          onPointerCancel={handleReorderPointerUp}
+                          className={`flex cursor-grab items-center gap-3 rounded-2xl border px-3 py-3 transition-all duration-100 active:cursor-grabbing ${
+                            isActive
+                              ? 'scale-[1.02] border-[rgba(0,201,167,0.45)] bg-[#0e2035] shadow-[0_6px_20px_rgba(0,0,0,0.45)]'
+                              : isDraggingAny
+                                ? 'border-[#203347] bg-[#13263A] opacity-50'
+                                : 'border-[#203347] bg-[#13263A]'
+                          }`}
+                        >
+                          <GripVertical size={16} className="shrink-0 text-[#4A6278]" />
+                          {catalogEntry?.coverImageUrl ? (
+                            <img
+                              src={catalogEntry.coverImageUrl}
+                              alt=""
+                              draggable={false}
+                              className="h-9 w-9 shrink-0 rounded-lg object-cover"
+                            />
+                          ) : (
+                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[rgba(0,81,71,0.2)]">
+                              <GripVertical size={14} className="text-[#00C9A7]" />
+                            </div>
+                          )}
+                          <span className="shrink-0 text-xs font-bold tabular-nums text-[#4A6278]">
+                            {displayIdx + 1}
+                          </span>
+                          <span className="min-w-0 flex-1 truncate text-sm font-semibold text-white">
+                            {ex.name}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <button
+                    onClick={() => {
+                      setShowReorderModal(false);
+                      setReorderDragState(null);
+                      reorderDragStateRef.current = null;
+                    }}
+                    className="mt-5 w-full rounded-2xl bg-[#00C9A7] py-4 text-sm font-bold uppercase tracking-widest text-black"
+                    type="button"
+                  >
+                    Listo
+                  </button>
+                </div>
+              </div>
+            </div>,
+            document.body
+          )
+        : null}
+
+      {showFinishModal
+        ? createPortal(
+            <div
+              className="fixed z-40 flex items-center justify-center px-5 py-6"
+              style={
+                sessionOverlayBounds
+                  ? {
+                      top: sessionOverlayBounds.top,
+                      left: sessionOverlayBounds.left,
+                      width: sessionOverlayBounds.width,
+                      height: sessionOverlayBounds.height,
+                    }
+                  : { inset: 0 }
+              }
+            >
+              <button
+                aria-label="Cerrar"
+                className="absolute inset-0 bg-black/70"
+                onClick={() => setShowFinishModal(false)}
+                type="button"
+              />
+              <div className="relative z-10 flex w-full max-h-[calc(100%-3rem)] flex-col overflow-hidden rounded-3xl bg-[#1A2D42] shadow-[0_24px_60px_rgba(0,0,0,0.42)]">
+                <div className="mx-auto mb-3 mt-4 h-1 w-10 shrink-0 rounded-full bg-[#203347]" />
+                <div className="overflow-y-auto px-5 pb-6 pt-2">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[#00C9A7]">
+                    {isHistoryEditSession ? 'Edición de sesión' : 'Sesión activa'}
+                  </p>
+                  <h3 className="mt-2 text-2xl font-bold tracking-tight text-white">
+                    {isHistoryEditSession ? 'Guardar cambios' : 'Finalizar entrenamiento'}
+                  </h3>
+
+                  {missingSets.length > 0 && !isHistoryEditSession && (
+                    <>
+                      <p className="mt-2 text-sm text-[#90A4B8]" style={{ fontFamily: "'Inter', sans-serif" }}>
+                        Tenés {missingSets.length} {missingSets.length === 1 ? 'serie pendiente' : 'series pendientes'} sin completar:
+                      </p>
+                      <div className="mt-4 flex flex-col gap-2">
+                        {[...new Set(missingSets.map((ms) => ms.exerciseIdx))].map((exIdx) => {
+                          const ex = exerciseList[exIdx];
+                          const count = missingSets.filter((ms) => ms.exerciseIdx === exIdx).length;
+                          return (
+                            <button
+                              key={exIdx}
+                              onClick={() => jumpToMissingSet(exIdx)}
+                              className="flex items-center justify-between rounded-2xl border border-[rgba(245,185,66,0.22)] bg-[rgba(245,185,66,0.08)] px-4 py-3 text-left"
+                              type="button"
+                            >
+                              <span className="text-sm font-semibold text-white">{ex.name}</span>
+                              <span className="text-xs font-semibold text-[#F5B942]">
+                                {count} pendiente{count > 1 ? 's' : ''}
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </>
+                  )}
+
+                  <div className="mt-5 flex flex-col gap-3">
+                    <button
+                      onClick={() => void finishSession()}
+                      disabled={isSubmittingSession}
+                      className="flex w-full items-center justify-center rounded-2xl bg-[#00C9A7] py-4 text-sm font-bold uppercase tracking-widest text-black transition-colors active:bg-[#00b092] disabled:opacity-45"
+                      type="button"
+                    >
+                      {isSubmittingSession
+                        ? 'Guardando...'
+                        : isHistoryEditSession
+                          ? 'Guardar cambios'
+                          : missingSets.length > 0
+                            ? 'Finalizar de todas formas'
+                            : 'Finalizar entrenamiento'}
+                    </button>
+
+                    <button
+                      onClick={() => setShowFinishModal(false)}
+                      className="flex w-full items-center justify-center rounded-2xl border border-[#203347] bg-[#2A2A2A] py-4 text-sm font-semibold text-white transition-colors active:bg-[#343434]"
+                      type="button"
+                    >
+                      {isHistoryEditSession ? 'Seguir editando' : 'Continuar entrenamiento'}
+                    </button>
+
+                    {isHistoryEditSession ? (
+                      <button
+                        onClick={() => setShowDeleteSessionModal(true)}
+                        className="flex w-full items-center justify-center gap-2 rounded-2xl border border-[rgba(229,57,53,0.22)] bg-[rgba(229,57,53,0.08)] py-4 text-[#FF7D7D] transition-colors active:bg-[rgba(229,57,53,0.14)]"
+                        type="button"
+                      >
+                        <Trash2 size={18} />
+                        <span className="text-sm font-bold uppercase tracking-widest">Eliminar entrenamiento</span>
+                      </button>
+                    ) : (
+                      <button
+                        onClick={discardSession}
+                        className="flex w-full items-center justify-center rounded-2xl border border-[#203347] bg-[#13263A] py-4 text-sm font-semibold text-[#FF7D7D] transition-colors active:bg-[rgba(229,57,53,0.08)]"
+                        type="button"
+                      >
+                        Descartar entrenamiento
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>,
+            document.body
+          )
+        : null}
+
+      {showDeleteSessionModal
+        ? createPortal(
+            <div
+              className="fixed z-50 flex items-center justify-center px-5 py-6"
+              style={
+                sessionOverlayBounds
+                  ? {
+                      top: sessionOverlayBounds.top,
+                      left: sessionOverlayBounds.left,
+                      width: sessionOverlayBounds.width,
+                      height: sessionOverlayBounds.height,
+                    }
+                  : { inset: 0 }
+              }
+            >
+              <button
+                aria-label="Cancelar"
+                className="absolute inset-0 bg-black/70"
+                onClick={() => setShowDeleteSessionModal(false)}
+                type="button"
+              />
+              <div className="relative z-10 flex w-full max-h-[calc(100%-3rem)] flex-col overflow-hidden rounded-3xl bg-[#1A2D42] shadow-[0_24px_60px_rgba(0,0,0,0.42)]">
+                <div className="mx-auto mb-3 mt-4 h-1 w-10 shrink-0 rounded-full bg-[#203347]" />
+                <div className="overflow-y-auto px-5 pb-6 pt-2">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[#FF7D7D]">
+                    Atención
+                  </p>
+                  <h3 className="mt-2 text-2xl font-bold tracking-tight text-white">
+                    Eliminar entrenamiento
+                  </h3>
+                  <p className="mt-2 text-sm text-[#90A4B8]" style={{ fontFamily: "'Inter', sans-serif" }}>
+                    Esta acción no se puede deshacer. El registro de esta sesión se eliminará permanentemente.
+                  </p>
+                  <div className="mt-5 flex flex-col gap-3">
+                    <button
+                      onClick={() => void deleteHistoricalSession()}
+                      className="flex w-full items-center justify-center gap-2 rounded-2xl border border-[rgba(229,57,53,0.22)] bg-[rgba(229,57,53,0.08)] py-4 text-[#FF7D7D] transition-colors active:bg-[rgba(229,57,53,0.14)]"
+                      type="button"
+                    >
+                      <Trash2 size={18} />
+                      <span className="text-sm font-bold uppercase tracking-widest">Sí, eliminar</span>
+                    </button>
+                    <button
+                      onClick={() => setShowDeleteSessionModal(false)}
+                      className="flex w-full items-center justify-center rounded-2xl border border-[#203347] bg-[#13263A] py-4 text-sm font-semibold text-white transition-colors active:bg-[rgba(255,255,255,0.04)]"
+                      type="button"
+                    >
+                      Cancelar
+                    </button>
                   </div>
                 </div>
               </div>

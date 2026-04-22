@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Check, GripVertical, MoreVertical, Plus, TimerReset, Trash2 } from 'lucide-react';
+import { ArrowUpDown, Check, GripVertical, MoreVertical, Plus, TimerReset, Trash2 } from 'lucide-react';
 import { useDrag, useDrop } from 'react-dnd';
 import type { ActiveWorkoutExercise } from '@/shared/types/models';
 import { formatWeightInputValue } from '@/shared/lib/unitUtils';
@@ -26,6 +26,8 @@ type SessionExerciseCardProps = {
   onExerciseNotesChange: (exerciseIdx: number, notes: string) => void;
   onAddSet: (exerciseIdx: number) => void;
   onRemoveLastSet: (exerciseIdx: number) => void;
+  onOpenRestTimer: () => void;
+  onReorderClick: () => void;
 };
 
 function isBodyweightExercise(exercise: Pick<ActiveWorkoutExercise, 'implement'>) {
@@ -53,11 +55,14 @@ export function TrainingExerciseCard({
   onExerciseNotesChange,
   onAddSet,
   onRemoveLastSet,
+  onOpenRestTimer,
+  onReorderClick,
 }: SessionExerciseCardProps) {
   const bodyweightExercise = isBodyweightExercise(exercise);
   const [weightDrafts, setWeightDrafts] = useState<Record<number, string>>({});
   const [isPressing, setIsPressing] = useState(false);
   const pressTimerRef = useRef<number | null>(null);
+  const longPressActivatedRef = useRef(false);
 
   useEffect(() => {
     setWeightDrafts({});
@@ -143,7 +148,11 @@ export function TrainingExerciseCard({
               type="button"
               onPointerDown={() => {
                 onExerciseFocus(exerciseIdx);
-                pressTimerRef.current = window.setTimeout(() => setIsPressing(true), 350);
+                pressTimerRef.current = window.setTimeout(() => {
+                  setIsPressing(true);
+                  longPressActivatedRef.current = true;
+                  onReorderClick();
+                }, 400);
               }}
               onPointerUp={() => {
                 if (pressTimerRef.current) {
@@ -158,8 +167,15 @@ export function TrainingExerciseCard({
                   pressTimerRef.current = null;
                 }
                 setIsPressing(false);
+                longPressActivatedRef.current = false;
               }}
-              onClick={() => { if (!isDragging) onThumbnailClick?.(); }}
+              onClick={() => {
+                if (longPressActivatedRef.current) {
+                  longPressActivatedRef.current = false;
+                  return;
+                }
+                if (!isDragging) onThumbnailClick?.();
+              }}
               className={`shrink-0 overflow-hidden rounded-xl transition-all duration-150 ${
                 compactForReorder ? 'h-10 w-10' : 'mt-0.5 h-11 w-11'
               } ${isPressing ? 'scale-[0.91] ring-2 ring-[rgba(0,201,167,0.8)] shadow-[0_0_16px_rgba(0,201,167,0.5)]' : ''}`}
@@ -195,19 +211,29 @@ export function TrainingExerciseCard({
         </div>
 
         {!compactForReorder && (
-          <button
-            onClick={(event) => {
-              onExerciseFocus(exerciseIdx);
-              onExerciseMenu(exerciseIdx, event.currentTarget.getBoundingClientRect());
-            }}
-            className={`rounded-lg p-2 transition-colors ${
-              currentExerciseIndex === exerciseIdx ? 'bg-[#203347]' : 'bg-[#1A2D42]'
-            }`}
-            type="button"
-            aria-label={`Abrir acciones de ${exercise.name}`}
-          >
-            <MoreVertical size={16} className="text-white" />
-          </button>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={onReorderClick}
+              className="rounded-lg p-2 transition-colors bg-[#1A2D42]"
+              type="button"
+              aria-label="Reordenar ejercicios"
+            >
+              <ArrowUpDown size={16} className="text-[#9BAEC1]" />
+            </button>
+            <button
+              onClick={(event) => {
+                onExerciseFocus(exerciseIdx);
+                onExerciseMenu(exerciseIdx, event.currentTarget.getBoundingClientRect());
+              }}
+              className={`rounded-lg p-2 transition-colors ${
+                currentExerciseIndex === exerciseIdx ? 'bg-[#203347]' : 'bg-[#1A2D42]'
+              }`}
+              type="button"
+              aria-label={`Abrir acciones de ${exercise.name}`}
+            >
+              <MoreVertical size={16} className="text-white" />
+            </button>
+          </div>
         )}
       </div>
 
@@ -256,7 +282,7 @@ export function TrainingExerciseCard({
             REPS
           </span>
           <span className="flex items-center justify-center text-[#00C9A7]">
-            <TimerReset size={14} />
+            <Check size={14} strokeWidth={3} />
           </span>
         </div>
       </div>
@@ -270,6 +296,7 @@ export function TrainingExerciseCard({
             !bodyweightExercise && suggestedWeight > 0 ? formatWeightInputValue(suggestedWeight, weightUnit) : '';
           const repsPlaceholder = suggestedReps > 0 ? String(suggestedReps) : '';
           const showWarmupLabel = set.kind === 'warmup';
+          const normalSetNumber = exercise.sets.slice(0, setIdx).filter((s) => s.kind !== 'warmup').length + 1;
 
           return (
             <div
@@ -293,7 +320,7 @@ export function TrainingExerciseCard({
                         showWarmupLabel ? 'text-base text-[#F5B942]' : 'text-lg text-white'
                       }`}
                     >
-                      {showWarmupLabel ? 'W' : setIdx + 1}
+                      {showWarmupLabel ? 'W' : normalSetNumber}
                     </span>
                     <span
                       className={`text-[9px] font-semibold uppercase tracking-widest ${
@@ -331,12 +358,7 @@ export function TrainingExerciseCard({
                         onFocus={() => onExerciseFocus(exerciseIdx)}
                         onChange={(event) => {
                           const nextValue = event.target.value.replace(',', '.');
-                          if (!/^\d{0,3}(?:\.\d{0,2})?$/.test(nextValue)) {
-                            return;
-                          }
-
-                          const parsedValue = Number.parseFloat(nextValue);
-                          if (nextValue && Number.isFinite(parsedValue) && parsedValue > 999) {
+                          if (!/^(?:0|[1-9]\d{0,2}(?:\.\d{0,2})?)?$/.test(nextValue)) {
                             return;
                           }
 
@@ -349,6 +371,10 @@ export function TrainingExerciseCard({
                         onBlur={() => {
                           setWeightDrafts((previous) => {
                             const next = { ...previous };
+                            if (next[set.id] === '0') {
+                              return next;
+                            }
+
                             delete next[set.id];
                             return next;
                           });
@@ -418,26 +444,36 @@ export function TrainingExerciseCard({
         })}
       </div>
 
-      <div className="grid grid-cols-2 gap-3 border-t border-[rgba(73,72,71,0.1)] px-4 py-4">
+      <div className="grid grid-cols-3 gap-3 border-t border-[rgba(73,72,71,0.1)] px-4 py-4">
         <button
           onClick={() => onAddSet(exerciseIdx)}
-          className="flex items-center justify-center gap-2 rounded-2xl border border-[#203347] bg-[#1A2D42] py-3 transition-colors active:bg-[#203347]"
+          className="flex flex-col items-center justify-center gap-1.5 rounded-2xl border border-[#203347] bg-[#1A2D42] py-3 transition-colors active:bg-[#203347]"
           type="button"
         >
           <div className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-[#00C9A7]">
             <Plus size={12} className="text-[#00C9A7]" />
           </div>
-          <span className="text-xs font-semibold text-white">Añadir serie</span>
+          <span className="text-[10px] font-semibold text-white">Añadir serie</span>
+        </button>
+
+        <button
+          onClick={onOpenRestTimer}
+          className="flex flex-col items-center justify-center gap-1.5 rounded-2xl border border-[rgba(0,201,167,0.22)] bg-[rgba(0,201,167,0.08)] py-3 transition-colors active:bg-[rgba(0,201,167,0.14)]"
+          type="button"
+          aria-label="Editar descanso"
+        >
+          <TimerReset size={16} className="text-[#00C9A7]" />
+          <span className="text-[10px] font-semibold text-[#00C9A7]">Editar Descanso</span>
         </button>
 
         <button
           onClick={() => onRemoveLastSet(exerciseIdx)}
           disabled={exercise.sets.length <= 1}
-          className="flex items-center justify-center gap-2 rounded-2xl border border-[rgba(229,57,53,0.18)] bg-[rgba(229,57,53,0.08)] py-3 text-[#FF7D7D] transition-colors active:bg-[rgba(229,57,53,0.14)] disabled:opacity-45"
+          className="flex flex-col items-center justify-center gap-1.5 rounded-2xl border border-[rgba(229,57,53,0.18)] bg-[rgba(229,57,53,0.08)] py-3 text-[#FF7D7D] transition-colors active:bg-[rgba(229,57,53,0.14)] disabled:opacity-45"
           type="button"
         >
-          <Trash2 size={15} />
-          <span className="text-xs font-semibold">Eliminar serie</span>
+          <Trash2 size={16} />
+          <span className="text-[10px] font-semibold">Eliminar serie</span>
         </button>
       </div>
         </>

@@ -11,9 +11,13 @@ export const FREE_SESSION_NAME = 'Entrenamiento libre';
 export const FREE_SESSION_FOCUS = 'Sesión vacía y personalizada';
 
 export function formatTime(seconds: number) {
-  const minutes = Math.floor(seconds / 60)
-    .toString()
-    .padStart(2, '0');
+  if (seconds >= 3600) {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
+    const secs = (seconds % 60).toString().padStart(2, '0');
+    return `${hours}:${minutes}:${secs}`;
+  }
+  const minutes = Math.floor(seconds / 60).toString().padStart(2, '0');
   const secs = (seconds % 60).toString().padStart(2, '0');
   return `${minutes}:${secs}`;
 }

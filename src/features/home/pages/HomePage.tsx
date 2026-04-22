@@ -1,11 +1,12 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { ChevronRight, Clock, Dumbbell, Flame, Play, Settings, Target, TrendingUp } from 'lucide-react';
 import { useNavigate } from 'react-router';
 import { Header } from '@/shared/components/layout/Header';
 import { normalizeGoal } from '@/core/domain/profileInsights';
 import { useAppData } from '@/core/app-data/AppDataContext';
-import { formatWeightNumber, getWeightUnitLabel } from '@/shared/lib/unitUtils';
+import { formatCompactWeight, formatWeightNumber, getWeightUnitLabel } from '@/shared/lib/unitUtils';
 import { getUserFirstName } from '@/shared/lib/userProfileUtils';
+import type { SessionHistory } from '@/shared/types/models';
 
 function buildFocusPreview(day: { exercises: Array<{ muscle: string }> }) {
   const counts = day.exercises.reduce<Record<string, number>>((acc, exercise) => {
@@ -22,6 +23,64 @@ function buildFocusPreview(day: { exercises: Array<{ muscle: string }> }) {
     name,
     width: `${Math.max(32, Math.round((count / maxCount) * 100))}%`,
   }));
+}
+
+function normalizeMuscleHighlight(label: string) {
+  const normalized = label
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim()
+    .toLowerCase();
+
+  if (!normalized) return null;
+  if (normalized.includes('pecho')) return 'Pecho';
+  if (normalized.includes('espalda') || normalized.includes('dorsal') || normalized.includes('trapec') || normalized.includes('romboid')) return 'Espalda';
+  if (normalized.includes('hombro') || normalized.includes('deltoid')) return 'Hombros';
+  if (normalized.includes('bicep') || normalized.includes('tricep') || normalized.includes('antebra') || normalized.includes('brazo')) return 'Brazos';
+  if (normalized.includes('core') || normalized.includes('abdominal') || normalized.includes('abdomen') || normalized.includes('oblic')) return 'Core';
+  if (normalized.includes('pierna') || normalized.includes('cuadri') || normalized.includes('femoral') || normalized.includes('glute') || normalized.includes('pantor') || normalized.includes('gemelo') || normalized.includes('aductor') || normalized.includes('abductor')) return 'Piernas';
+
+  return label.charAt(0).toUpperCase() + label.slice(1).toLowerCase();
+}
+
+function buildLatestSessionGroups(session: SessionHistory | null) {
+  if (!session) {
+    return [];
+  }
+
+  const rawGroups = session.exercises.flatMap((exercise) => [exercise.muscle, ...(exercise.secondaryMuscles ?? [])]);
+  const uniqueGroups: string[] = [];
+
+  for (const rawGroup of rawGroups) {
+    const nextGroup = normalizeMuscleHighlight(rawGroup);
+    if (!nextGroup || uniqueGroups.includes(nextGroup)) {
+      continue;
+    }
+
+    uniqueGroups.push(nextGroup);
+  }
+
+  if (uniqueGroups.length > 0) {
+    return uniqueGroups.slice(0, 5);
+  }
+
+  return session.sessionFocus
+    ? session.sessionFocus
+        .split(',')
+        .map((group) => normalizeMuscleHighlight(group))
+        .filter((group): group is string => Boolean(group))
+        .slice(0, 5)
+    : [];
+}
+
+function formatSessionDuration(minutes: number) {
+  if (minutes >= 60) {
+    const hours = Math.floor(minutes / 60);
+    const remainingMinutes = minutes % 60;
+    return remainingMinutes > 0 ? `${hours}h ${remainingMinutes}m` : `${hours}h`;
+  }
+
+  return `${minutes} min`;
 }
 
 export default function HomePage() {
@@ -124,6 +183,7 @@ export default function HomePage() {
     latestSession?.comparisonDelta !== undefined
       ? `${latestSession.comparisonDelta > 0 ? '+' : ''}${latestSession.comparisonDelta.toFixed(1)}%`
       : null;
+  const latestSessionGroups = useMemo(() => buildLatestSessionGroups(latestSession), [latestSession]);
   const statusMessage = todaySession
     ? `Hoy realizaste ${todaySession.name}. Venís con ${appContext.streakDays} días seguidos de entrenamiento.`
     : `Hoy toca ${currentDay.name}. Venís con ${appContext.streakDays} días seguidos de entrenamiento.`;
@@ -315,46 +375,75 @@ export default function HomePage() {
           {latestSession ? (
             <button
               onClick={() => navigate(`/session-history/${latestSession.id}`)}
-              className="grid w-full grid-cols-2 gap-4 transition-opacity active:opacity-80"
+              className="relative w-full overflow-hidden rounded-[1.75rem] border border-[rgba(32,51,71,0.95)] bg-[#13263A] p-5 text-left transition-opacity active:opacity-80"
               type="button"
             >
-              <div
-                className="relative overflow-hidden rounded-xl border border-[rgba(0,201,167,0.2)] bg-[#13263A] p-5 text-left"
-                style={{ borderLeftWidth: 4 }}
-              >
-                <div className="mb-3 text-[10px] font-bold uppercase tracking-widest text-[#9BAEC1]">
-                  Volumen total
-                </div>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-3xl font-normal text-white">
-                    {formatWeightNumber(latestSession.volume, appSettings.weightUnit, 0)}
-                  </span>
-                  <span className="text-sm font-bold italic text-[#9BAEC1]">{weightUnitLabel}</span>
-                </div>
-                {comparisonLabel && (
-                  <div className="mt-1 flex items-center gap-1">
-                    <TrendingUp size={12} className="text-[#00C9A7]" />
-                    <span className="text-xs font-semibold text-[#00C9A7]">{comparisonLabel} vs anterior</span>
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(0,201,167,0.14),transparent_34%),radial-gradient(circle_at_bottom_left,rgba(127,152,255,0.1),transparent_28%)]" />
+              <div className="relative z-10 flex flex-col gap-5">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-[#00C9A7]">
+                      Sesión completada
+                    </p>
+                    <h3 className="mt-2 text-[1.75rem] font-extrabold tracking-tight text-white">
+                      {latestSession.name}
+                    </h3>
+                    <p
+                      className="mt-2 text-sm leading-relaxed text-[#90A4B8]"
+                      style={{ fontFamily: "'Inter', sans-serif" }}
+                    >
+                      {latestSessionGroups.length > 0
+                        ? latestSessionGroups.join(', ')
+                        : latestSession.sessionFocus || 'Tu último entrenamiento registrado en WOHL.'}
+                    </p>
                   </div>
-                )}
-                <div className="absolute right-[-10px] top-[-10px] opacity-5">
-                  <TrendingUp size={60} className="text-white" />
-                </div>
-              </div>
 
-              <div
-                className="relative overflow-hidden rounded-xl border border-[rgba(127,152,255,0.2)] bg-[#13263A] p-5 text-left"
-                style={{ borderLeftWidth: 4 }}
-              >
-                <div className="mb-3 text-[10px] font-bold uppercase tracking-widest text-[#9BAEC1]">
-                  Tiempo
+                  <div className="shrink-0 rounded-2xl border border-[rgba(127,152,255,0.18)] bg-[rgba(127,152,255,0.08)] px-4 py-3 text-right">
+                    <div className="mb-1 flex items-center justify-end gap-2 text-[#7F98FF]">
+                      <Clock size={13} />
+                      <span className="text-[10px] font-bold uppercase tracking-[0.2em]">Tiempo</span>
+                    </div>
+                    <p className="text-2xl font-extrabold tracking-tight text-white">
+                      {formatSessionDuration(latestSession.duration)}
+                    </p>
+                  </div>
                 </div>
-                <div className="flex items-baseline gap-0.5">
-                  <span className="text-3xl font-normal text-white">{latestSession.duration}:00</span>
-                </div>
-                <div className="mt-1 text-xs text-[#9BAEC1]">{latestSession.name}</div>
-                <div className="absolute right-[-10px] top-[-10px] opacity-5">
-                  <Clock size={60} className="text-white" />
+
+                {latestSessionGroups.length > 0 ? (
+                  <div className="flex flex-wrap gap-2">
+                    {latestSessionGroups.map((group) => (
+                      <span
+                        key={group}
+                        className="rounded-full border border-[rgba(0,201,167,0.16)] bg-[rgba(0,201,167,0.08)] px-3 py-1 text-[10px] font-semibold uppercase tracking-widest text-[#00C9A7]"
+                      >
+                        {group}
+                      </span>
+                    ))}
+                  </div>
+                ) : null}
+
+                <div className="flex items-end justify-between gap-4 border-t border-[rgba(255,255,255,0.06)] pt-4">
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2 text-[#9BAEC1]">
+                      <TrendingUp size={13} />
+                      <span className="text-[10px] font-bold uppercase tracking-[0.2em]">Volumen total</span>
+                    </div>
+                    <div className="mt-2 flex items-baseline gap-2">
+                      <span className="text-lg font-bold text-white">
+                        {formatCompactWeight(latestSession.volume, appSettings.weightUnit)}
+                      </span>
+                      <span className="text-xs font-medium text-[#6F859A]">
+                        {formatWeightNumber(latestSession.volume, appSettings.weightUnit, 0)} {weightUnitLabel}
+                      </span>
+                    </div>
+                    {comparisonLabel ? (
+                      <p className="mt-1 text-xs font-semibold text-[#00C9A7]">{comparisonLabel} vs anterior</p>
+                    ) : null}
+                  </div>
+
+                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-[rgba(0,201,167,0.18)] bg-[rgba(0,201,167,0.08)]">
+                    <ChevronRight size={18} className="text-[#00C9A7]" />
+                  </div>
                 </div>
               </div>
             </button>

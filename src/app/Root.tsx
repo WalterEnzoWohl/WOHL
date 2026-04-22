@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { Navigate, Outlet, useLocation, useNavigate } from 'react-router';
 import { ActiveWorkoutDock } from '@/shared/components/layout/ActiveWorkoutDock';
 import { BottomNav } from '@/shared/components/layout/BottomNav';
@@ -26,6 +26,14 @@ export default function Root() {
   const needsOnboarding = status === 'ready' && !onboardingComplete;
   const showEmptyAccountState =
     status === 'ready' && onboardingComplete && location.pathname === '/' && routines.length === 0;
+
+  const sessionInitRedirectRef = useRef(false);
+
+  useEffect(() => {
+    if (status === 'ready') {
+      sessionInitRedirectRef.current = true;
+    }
+  }, [status]);
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', appSettings.theme === 'dark');
@@ -69,6 +77,8 @@ export default function Root() {
           <Navigate to="/onboarding" replace />
         ) : !needsOnboarding && isOnboardingRoute ? (
           <Navigate to="/" replace />
+        ) : status === 'ready' && !sessionInitRedirectRef.current && Boolean(activeWorkout) && location.pathname === '/' ? (
+          <Navigate to="/session" replace />
         ) : showEmptyAccountState ? (
           <div className="flex flex-col gap-6 px-5 py-6 pb-4">
             <div>
