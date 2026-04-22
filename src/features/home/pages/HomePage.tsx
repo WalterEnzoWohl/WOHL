@@ -4,26 +4,9 @@ import { useNavigate } from 'react-router';
 import { Header } from '@/shared/components/layout/Header';
 import { normalizeGoal } from '@/core/domain/profileInsights';
 import { useAppData } from '@/core/app-data/AppDataContext';
-import { formatCompactWeight, formatWeightNumber, getWeightUnitLabel } from '@/shared/lib/unitUtils';
+import { formatCompactWeight } from '@/shared/lib/unitUtils';
 import { getUserFirstName } from '@/shared/lib/userProfileUtils';
 import type { SessionHistory } from '@/shared/types/models';
-
-function buildFocusPreview(day: { exercises: Array<{ muscle: string }> }) {
-  const counts = day.exercises.reduce<Record<string, number>>((acc, exercise) => {
-    acc[exercise.muscle] = (acc[exercise.muscle] ?? 0) + 1;
-    return acc;
-  }, {});
-
-  const entries = Object.entries(counts)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 3);
-  const maxCount = entries[0]?.[1] ?? 1;
-
-  return entries.map(([name, count]) => ({
-    name,
-    width: `${Math.max(32, Math.round((count / maxCount) * 100))}%`,
-  }));
-}
 
 function normalizeMuscleHighlight(label: string) {
   const normalized = label
@@ -89,7 +72,7 @@ export default function HomePage() {
   const [showTrainingPicker, setShowTrainingPicker] = useState(false);
   const activeGoal = normalizeGoal(userProfile.goal).toLowerCase();
   const currentRoutine = routines.find((routine) => routine.id === appContext.activeRoutineId) ?? null;
-  const weightUnitLabel = getWeightUnitLabel(appSettings.weightUnit);
+
   const greetingName = getUserFirstName(userProfile);
   const headerSettingsAction = (
     <button
@@ -177,13 +160,32 @@ export default function HomePage() {
     sessionHistory.find((session) => session.isoDate === appContext.todayIso) ??
     null;
   const featuredDay = todaySession ? nextDay : currentDay;
-  const featuredDayPreview = buildFocusPreview(featuredDay);
+  const featuredDayGroups = Array.from(
+    new Set(
+      featuredDay.exercises
+        .flatMap((exercise) => [exercise.muscle, ...(exercise.secondaryMuscles ?? [])])
+        .map((muscle) => normalizeMuscleHighlight(muscle))
+        .filter((muscle): muscle is string => Boolean(muscle))
+    )
+  ).slice(0, 5);
   const featuredDayLabel = todaySession ? 'Próximo' : 'Hoy';
   const comparisonLabel =
     latestSession?.comparisonDelta !== undefined
       ? `${latestSession.comparisonDelta > 0 ? '+' : ''}${latestSession.comparisonDelta.toFixed(1)}%`
       : null;
   const latestSessionGroups = useMemo(() => buildLatestSessionGroups(latestSession), [latestSession]);
+  const totalSets = latestSession?.exercises.reduce((sum, ex) => sum + ex.sets.length, 0) ?? 0;
+  const prExercises = latestSession
+    ? latestSession.exercises.filter((exercise) => {
+        if (exercise.maxKg <= 0) return false;
+        const historicalMax = sessionHistory
+          .slice(1)
+          .flatMap((s) => s.exercises)
+          .filter((e) => e.name === exercise.name)
+          .reduce((max, e) => Math.max(max, e.maxKg), 0);
+        return exercise.maxKg > historicalMax;
+      })
+    : [];
   const statusMessage = todaySession
     ? `Hoy realizaste ${todaySession.name}. Venís con ${appContext.streakDays} días seguidos de entrenamiento.`
     : `Hoy toca ${currentDay.name}. Venís con ${appContext.streakDays} días seguidos de entrenamiento.`;
@@ -255,55 +257,64 @@ export default function HomePage() {
           </div>
           <button
             onClick={() => navigate(`/routine/${currentRoutine.id}`)}
-            className="w-full rounded-2xl border border-[#203347] bg-[#111111] p-5 text-left transition-colors active:bg-[#1a1a1a]"
+            className="relative w-full overflow-hidden rounded-[1.75rem] border border-[rgba(32,51,71,0.95)] bg-[#13263A] p-5 text-left transition-opacity active:opacity-80"
             type="button"
           >
-            <div className="mb-5 flex items-start justify-between">
-              <div>
-                <p className="text-2xl font-bold tracking-tight text-white">{featuredDay.name}</p>
-                <div className="mt-1 flex items-center gap-2">
-                  <Clock size={11} className="text-[#90A4B8]" />
-                  <span className="text-sm text-[#90A4B8]" style={{ fontFamily: "'Inter', sans-serif" }}>
-                    {currentRoutine.avgMinutes ?? 78} min - {featuredDay.exercises.length} ejercicios
-                  </span>
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(0,201,167,0.12),transparent_34%),radial-gradient(circle_at_bottom_left,rgba(127,152,255,0.08),transparent_28%)]" />
+            <div className="relative z-10 flex flex-col gap-4">
+              <div className="flex items-start justify-between gap-4">
+                <div className="min-w-0">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-[#00C9A7]">
+                    {featuredDayLabel === 'Hoy' ? 'Sesión sugerida' : 'Próxima sesión'}
+                  </p>
+                  <h3 className="mt-2 text-[1.75rem] font-extrabold leading-tight tracking-tight text-white">{featuredDay.name}</h3>
+                  {featuredDayGroups.length > 0 ? (
+                    <div className="mt-2 flex flex-wrap gap-1.5">
+                      {featuredDayGroups.map((group) => (
+                        <span
+                          key={group}
+                          className="rounded-full border border-[rgba(144,164,184,0.18)] bg-[rgba(32,51,71,0.72)] px-3 py-1 text-[10px] font-semibold uppercase tracking-widest text-[#90A4B8]"
+                        >
+                          {group}
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="mt-2 text-sm leading-relaxed text-[#90A4B8]" style={{ fontFamily: "'Inter', sans-serif" }}>
+                      {[featuredDay.focus, featuredDay.description].filter(Boolean).join('. ')}
+                    </p>
+                  )}
                 </div>
-                <p
-                  className="mt-3 max-w-[18rem] text-sm text-[#D4D4D4]"
-                  style={{ fontFamily: "'Inter', sans-serif" }}
-                >
-                  {featuredDay.focus}. {featuredDay.description}
-                </p>
-              </div>
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-[rgba(0,201,167,0.2)] bg-[rgba(0,201,167,0.1)]">
-                <Dumbbell size={18} strokeWidth={1.9} className="text-[#00C9A7]" />
-              </div>
-            </div>
 
-            <div className="mb-4 flex flex-col gap-3">
-              {featuredDayPreview.map(({ name, width }) => (
-                <div key={name} className="flex items-center justify-between gap-3">
-                  <span className="w-24 text-sm text-[#90A4B8]" style={{ fontFamily: "'Inter', sans-serif" }}>
-                    {name}
-                  </span>
-                  <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-[#203347]">
-                    <div
-                      className="h-full rounded-full"
-                      style={{ width, background: 'linear-gradient(to right, #00C9A7, #009F86)' }}
-                    />
+                <div className="shrink-0 rounded-2xl border border-[rgba(127,152,255,0.18)] bg-[rgba(127,152,255,0.08)] px-4 py-3 text-right">
+                  <div className="mb-1 flex items-center justify-end gap-2 text-[#7F98FF]">
+                    <Clock size={13} />
+                    <span className="text-[10px] font-bold uppercase tracking-[0.2em]">Tiempo estimado</span>
                   </div>
+                  <p className="text-2xl font-extrabold tracking-tight text-white">
+                    {currentRoutine.avgMinutes ?? 78} min
+                  </p>
                 </div>
-              ))}
-            </div>
+              </div>
 
-            <div className="flex flex-wrap items-center gap-2">
-              {featuredDay.exercises.slice(0, 3).map((exercise) => (
-                <span
-                  key={exercise.id}
-                  className="rounded-full border border-[rgba(0,201,167,0.18)] bg-[rgba(0,201,167,0.08)] px-3 py-1 text-[10px] font-semibold uppercase tracking-widest text-[#00C9A7]"
-                >
-                  {exercise.name}
-                </span>
-              ))}
+              <div className="flex items-end justify-between gap-4 border-t border-[rgba(255,255,255,0.06)] pt-4">
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2 text-[#9BAEC1]">
+                    <Dumbbell size={13} />
+                    <span className="text-[10px] font-bold uppercase tracking-[0.2em]">Estructura</span>
+                  </div>
+                  <div className="mt-2 flex items-baseline gap-2">
+                    <span className="text-lg font-bold text-white">{featuredDay.exercises.length} ejercicios</span>
+                  </div>
+                  <p className="mt-1 text-xs font-semibold text-[#00C9A7]">
+                    Rutina activa · {currentRoutine.name}
+                  </p>
+                </div>
+
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-[rgba(0,201,167,0.18)] bg-[rgba(0,201,167,0.08)]">
+                  <ChevronRight size={18} className="text-[#00C9A7]" />
+                </div>
+              </div>
             </div>
           </button>
         </div>
@@ -379,25 +390,16 @@ export default function HomePage() {
               type="button"
             >
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(0,201,167,0.14),transparent_34%),radial-gradient(circle_at_bottom_left,rgba(127,152,255,0.1),transparent_28%)]" />
-              <div className="relative z-10 flex flex-col gap-5">
+              <div className="relative z-10 flex flex-col gap-4">
                 <div className="flex items-start justify-between gap-4">
                   <div className="min-w-0">
                     <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-[#00C9A7]">
                       Sesión completada
                     </p>
-                    <h3 className="mt-2 text-[1.75rem] font-extrabold tracking-tight text-white">
+                    <h3 className="mt-2 text-[1.75rem] font-extrabold leading-tight tracking-tight text-white">
                       {latestSession.name}
                     </h3>
-                    <p
-                      className="mt-2 text-sm leading-relaxed text-[#90A4B8]"
-                      style={{ fontFamily: "'Inter', sans-serif" }}
-                    >
-                      {latestSessionGroups.length > 0
-                        ? latestSessionGroups.join(', ')
-                        : latestSession.sessionFocus || 'Tu último entrenamiento registrado en WOHL.'}
-                    </p>
                   </div>
-
                   <div className="shrink-0 rounded-2xl border border-[rgba(127,152,255,0.18)] bg-[rgba(127,152,255,0.08)] px-4 py-3 text-right">
                     <div className="mb-1 flex items-center justify-end gap-2 text-[#7F98FF]">
                       <Clock size={13} />
@@ -409,39 +411,53 @@ export default function HomePage() {
                   </div>
                 </div>
 
-                {latestSessionGroups.length > 0 ? (
-                  <div className="flex flex-wrap gap-2">
+                {latestSessionGroups.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5">
                     {latestSessionGroups.map((group) => (
                       <span
                         key={group}
-                        className="rounded-full border border-[rgba(0,201,167,0.16)] bg-[rgba(0,201,167,0.08)] px-3 py-1 text-[10px] font-semibold uppercase tracking-widest text-[#00C9A7]"
+                        className="rounded-full border border-[rgba(144,164,184,0.18)] bg-[rgba(32,51,71,0.72)] px-3 py-1 text-[10px] font-semibold uppercase tracking-widest text-[#90A4B8]"
                       >
                         {group}
                       </span>
                     ))}
                   </div>
-                ) : null}
+                )}
 
-                <div className="flex items-end justify-between gap-4 border-t border-[rgba(255,255,255,0.06)] pt-4">
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2 text-[#9BAEC1]">
-                      <TrendingUp size={13} />
-                      <span className="text-[10px] font-bold uppercase tracking-[0.2em]">Volumen total</span>
-                    </div>
-                    <div className="mt-2 flex items-baseline gap-2">
-                      <span className="text-lg font-bold text-white">
-                        {formatCompactWeight(latestSession.volume, appSettings.weightUnit)}
-                      </span>
-                      <span className="text-xs font-medium text-[#6F859A]">
-                        {formatWeightNumber(latestSession.volume, appSettings.weightUnit, 0)} {weightUnitLabel}
-                      </span>
-                    </div>
-                    {comparisonLabel ? (
-                      <p className="mt-1 text-xs font-semibold text-[#00C9A7]">{comparisonLabel} vs anterior</p>
-                    ) : null}
+                <div className="grid grid-cols-3 gap-3 border-t border-[rgba(255,255,255,0.06)] pt-4">
+                  <div>
+                    <p className="text-[10px] font-semibold uppercase tracking-widest text-[#6F859A]">Volumen</p>
+                    <p className="mt-1 text-base font-bold text-white">
+                      {formatCompactWeight(latestSession.volume, appSettings.weightUnit)}
+                    </p>
+                    {comparisonLabel && (
+                      <p className="text-[10px] font-semibold text-[#00C9A7]">{comparisonLabel}</p>
+                    )}
                   </div>
+                  <div className="border-l border-[rgba(255,255,255,0.06)] pl-3">
+                    <p className="text-[10px] font-semibold uppercase tracking-widest text-[#6F859A]">Ejercicios</p>
+                    <p className="mt-1 text-base font-bold text-white">{latestSession.exercises.length}</p>
+                  </div>
+                  <div className="border-l border-[rgba(255,255,255,0.06)] pl-3">
+                    <p className="text-[10px] font-semibold uppercase tracking-widest text-[#6F859A]">Series</p>
+                    <p className="mt-1 text-base font-bold text-white">{totalSets}</p>
+                  </div>
+                </div>
 
-                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-[rgba(0,201,167,0.18)] bg-[rgba(0,201,167,0.08)]">
+                <div className="flex items-center justify-between gap-3">
+                  {prExercises.length > 0 ? (
+                    <div className="flex min-w-0 items-center gap-2 rounded-2xl border border-[rgba(245,185,66,0.22)] bg-[rgba(245,185,66,0.08)] px-3 py-2">
+                      <TrendingUp size={13} className="shrink-0 text-[#F5B942]" />
+                      <span className="truncate text-xs font-semibold text-[#F5B942]">
+                        {prExercises.length === 1
+                          ? `Nuevo PR · ${prExercises[0].name}`
+                          : `${prExercises.length} nuevos PRs esta sesión`}
+                      </span>
+                    </div>
+                  ) : (
+                    <div />
+                  )}
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-[rgba(0,201,167,0.18)] bg-[rgba(0,201,167,0.08)]">
                     <ChevronRight size={18} className="text-[#00C9A7]" />
                   </div>
                 </div>
