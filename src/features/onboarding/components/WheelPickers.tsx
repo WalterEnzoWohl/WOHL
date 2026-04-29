@@ -3,8 +3,6 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 const VISIBLE_ROWS = 5;
 const ITEM_HEIGHT = 58;
 const CENTER_OFFSET = ((VISIBLE_ROWS - 1) / 2) * ITEM_HEIGHT;
-const LOOP_CYCLES = 40;
-const RECENTER_BUFFER = 2;
 const SETTLE_MS = 200;
 
 export type WheelPickerOption = {
@@ -20,24 +18,9 @@ type WheelColumnProps = {
   align?: 'left' | 'center' | 'right';
 };
 
-type LoopedOption = WheelPickerOption & {
-  key: string;
-  baseIndex: number;
-};
-
-function mod(n: number, length: number) {
-  return ((n % length) + length) % length;
-}
-
-function buildLoopedOptions(options: WheelPickerOption[]): LoopedOption[] {
-  if (options.length === 0) return [];
-  return Array.from({ length: LOOP_CYCLES }, (_, cycle) =>
-    options.map((option, baseIndex) => ({
-      ...option,
-      baseIndex,
-      key: `${option.value}-${cycle}-${baseIndex}`,
-    }))
-  ).flat();
+function clampIndex(index: number, length: number) {
+  if (length <= 0) return 0;
+  return Math.min(Math.max(index, 0), length - 1);
 }
 
 function WheelColumn({ active, value, options, onChange, align = 'center' }: WheelColumnProps) {
@@ -50,17 +33,15 @@ function WheelColumn({ active, value, options, onChange, align = 'center' }: Whe
   const prevActiveRef = useRef(false);
   const lastSyncedValueRef = useRef(value);
   // Tracks the last integer vi from scroll events — avoids reading scrollTop mid-CSS-snap-animation
-  const currentViRef = useRef(0);
-
-  const loopedOptions = useMemo(() => buildLoopedOptions(options), [options]);
+  const currentIndexRef = useRef(0);
 
   const [displayIndex, setDisplayIndex] = useState(() => {
     const i = options.findIndex((o) => o.value === value);
     return i >= 0 ? i : 0;
   });
 
-  function centerScrollTop(idx: number): number {
-    return (Math.floor(LOOP_CYCLES / 2) * options.length + idx) * ITEM_HEIGHT;
+  function getScrollTopForIndex(idx: number): number {
+    return clampIndex(idx, options.length) * ITEM_HEIGHT;
   }
 
   function applyScrollTop(el: HTMLDivElement, scrollTop: number) {
@@ -89,10 +70,9 @@ function WheelColumn({ active, value, options, onChange, align = 'center' }: Whe
     if (justOpened || valueChanged) {
       const i = options.findIndex((o) => o.value === value);
       const idx = i >= 0 ? i : 0;
-      const vi = Math.floor(LOOP_CYCLES / 2) * options.length + idx;
-      currentViRef.current = vi;
+      currentIndexRef.current = idx;
       setDisplayIndex(idx);
-      applyScrollTop(el, vi * ITEM_HEIGHT);
+      applyScrollTop(el, getScrollTopForIndex(idx));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active, value, options]);
@@ -114,9 +94,9 @@ function WheelColumn({ active, value, options, onChange, align = 'center' }: Whe
 
     isUserScrollingRef.current = true;
 
-    const vi = Math.round(el.scrollTop / ITEM_HEIGHT);
-    currentViRef.current = vi;
-    setDisplayIndex(mod(vi, options.length));
+    const nextIndex = clampIndex(Math.round(el.scrollTop / ITEM_HEIGHT), options.length);
+    currentIndexRef.current = nextIndex;
+    setDisplayIndex(nextIndex);
 
     if (settleRef.current) window.clearTimeout(settleRef.current);
     settleRef.current = window.setTimeout(() => {
@@ -126,18 +106,11 @@ function WheelColumn({ active, value, options, onChange, align = 'center' }: Whe
       isUserScrollingRef.current = false;
 
       // Use tracked vi (not scrollTop) — CSS snap may still be animating when this fires
-      const vi = currentViRef.current;
-      const ni = mod(vi, options.length);
+      const nextIndex = currentIndexRef.current;
+      applyScrollTop(el, getScrollTopForIndex(nextIndex));
+      setDisplayIndex(nextIndex);
 
-      // Only intervene for edge-recentering; CSS snap already placed the item correctly otherwise
-      const buffer = options.length * RECENTER_BUFFER;
-      if (vi <= buffer || vi >= loopedOptions.length - buffer - 1) {
-        applyScrollTop(el, centerScrollTop(ni));
-      }
-
-      setDisplayIndex(ni);
-
-      const nextOption = options[ni];
+      const nextOption = options[nextIndex];
       if (nextOption && nextOption.value !== value) {
         internalChangeRef.current = true;
         onChange(nextOption.value);
@@ -157,12 +130,12 @@ function WheelColumn({ active, value, options, onChange, align = 'center' }: Whe
           paddingBottom: CENTER_OFFSET,
         }}
       >
-        {loopedOptions.map((option) => {
-          const isSelected = option.baseIndex === displayIndex;
+        {options.map((option, optionIndex) => {
+          const isSelected = optionIndex === displayIndex;
           return (
             <div
-              key={option.key}
-              className={`snap-center select-none px-2 ${isSelected ? 'text-white' : 'text-[#626C7E]'}`}
+              key={`${option.value}-${optionIndex}`}
+              className={`snap-center select-none px-2 transition-none ${isSelected ? 'text-white' : 'text-[#626C7E]'}`}
               style={{ height: ITEM_HEIGHT }}
             >
               <div
@@ -171,7 +144,7 @@ function WheelColumn({ active, value, options, onChange, align = 'center' }: Whe
                 }`}
               >
                 <span
-                  className={`block truncate text-[1.2rem] font-semibold tracking-tight ${
+                  className={`block truncate text-[1.2rem] font-semibold tracking-tight transition-none ${
                     isSelected ? 'opacity-100' : 'opacity-35'
                   }`}
                 >

@@ -1,4 +1,4 @@
-import { useMemo, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import {
   ArrowLeft,
   CalendarDays,
@@ -18,6 +18,7 @@ import { brandLogoWhite } from '@/assets';
 import { DateWheelPicker, NumberWheelPicker } from '@/features/onboarding/components/WheelPickers';
 import { ACTIVITY_LEVEL_OPTIONS, TRAINING_LEVEL_OPTIONS } from '@/shared/constants';
 import { useAppData } from '@/core/app-data/AppDataContext';
+import type { UserProfile } from '@/shared/types/models';
 import {
   DEFAULT_GOAL_VALUE,
   DEFAULT_TIME,
@@ -40,6 +41,97 @@ import {
   type PickerColumn,
   type PickerState,
 } from '@/features/onboarding/onboardingConfig';
+
+type OnboardingDraftState = {
+  stepIndex: number;
+  formData: OnboardingFormState;
+  birthDraft: { day: string; month: string; year: string };
+  heightDraft: { value: string };
+  weightDraft: { whole: string; decimal: string };
+  targetWeightDraft: { whole: string; decimal: string };
+};
+
+function getOnboardingDraftStorageKey(userId: string) {
+  return `wohl.onboardingDraft.${userId}`;
+}
+
+function buildInitialOnboardingDraft(userProfile: UserProfile): OnboardingDraftState {
+  return {
+    stepIndex: 0,
+    birthDraft: getDateParts(userProfile.birthDate ?? ''),
+    heightDraft: { value: String(Math.round(userProfile.heightCm || 175)) },
+    weightDraft: getWeightParts(userProfile.weightKg || 75),
+    targetWeightDraft: getWeightParts(userProfile.targetWeightKg || userProfile.weightKg || 72),
+    formData: {
+      firstName: userProfile.firstName,
+      lastName: userProfile.lastName,
+      goal: userProfile.goal || DEFAULT_GOAL_VALUE,
+      trainingLevel: userProfile.trainingLevel || TRAINING_LEVEL_OPTIONS[0],
+      activityLevel: userProfile.activityLevel || ACTIVITY_LEVEL_OPTIONS[0].label,
+      gender: userProfile.gender || '',
+      birthDate: userProfile.birthDate || '',
+      heightCm: userProfile.heightCm || 0,
+      weightKg: userProfile.weightKg || 0,
+      targetWeightKg: userProfile.targetWeightKg || userProfile.weightKg || 0,
+      focusMuscle: userProfile.focusMuscle || 'Balanceado',
+      workoutLocation: userProfile.workoutLocation || 'Gimnasio completo',
+      preferredTrainingDays: userProfile.preferredTrainingDays || [],
+      preferredScheduleMode: userProfile.preferredScheduleMode || 'same',
+      preferredWorkoutTime: userProfile.preferredWorkoutTime || DEFAULT_TIME,
+      preferredWorkoutTimeByDay: userProfile.preferredWorkoutTimeByDay || {},
+    },
+  };
+}
+
+function readOnboardingDraft(userId: string, userProfile: UserProfile): OnboardingDraftState {
+  const baseState = buildInitialOnboardingDraft(userProfile);
+
+  if (typeof window === 'undefined') {
+    return baseState;
+  }
+
+  const stored = window.localStorage.getItem(getOnboardingDraftStorageKey(userId));
+  if (!stored) {
+    return baseState;
+  }
+
+  try {
+    const parsed = JSON.parse(stored) as Partial<OnboardingDraftState>;
+    return {
+      stepIndex:
+        typeof parsed.stepIndex === 'number'
+          ? Math.min(Math.max(parsed.stepIndex, 0), STEP_FLOW.length - 1)
+          : baseState.stepIndex,
+      birthDraft: parsed.birthDraft ?? baseState.birthDraft,
+      heightDraft: parsed.heightDraft ?? baseState.heightDraft,
+      weightDraft: parsed.weightDraft ?? baseState.weightDraft,
+      targetWeightDraft: parsed.targetWeightDraft ?? baseState.targetWeightDraft,
+      formData: {
+        ...baseState.formData,
+        ...(parsed.formData ?? {}),
+      },
+    };
+  } catch {
+    window.localStorage.removeItem(getOnboardingDraftStorageKey(userId));
+    return baseState;
+  }
+}
+
+function writeOnboardingDraft(userId: string, draft: OnboardingDraftState) {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  window.localStorage.setItem(getOnboardingDraftStorageKey(userId), JSON.stringify(draft));
+}
+
+function clearOnboardingDraft(userId: string) {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  window.localStorage.removeItem(getOnboardingDraftStorageKey(userId));
+}
 
 function SelectionCard({
   title,
@@ -326,39 +418,32 @@ function PickerSheet({
 
 export default function OnboardingPage() {
   const navigate = useNavigate();
-  const { updateUserProfile, userProfile } = useAppData();
-  const [stepIndex, setStepIndex] = useState(0);
+  const { currentUserId, updateUserProfile, userProfile } = useAppData();
+  const initialDraft = useMemo(() => readOnboardingDraft(currentUserId, userProfile), [currentUserId, userProfile]);
+  const [stepIndex, setStepIndex] = useState(initialDraft.stepIndex);
   const [saving, setSaving] = useState(false);
   const [pickerState, setPickerState] = useState<PickerState | null>(null);
-  const [birthDraft, setBirthDraft] = useState(() => getDateParts(userProfile.birthDate ?? ''));
-  const [heightDraft, setHeightDraft] = useState(() => ({ value: String(Math.round(userProfile.heightCm || 175)) }));
-  const [weightDraft, setWeightDraft] = useState(() => getWeightParts(userProfile.weightKg || 75));
-  const [targetWeightDraft, setTargetWeightDraft] = useState(() =>
-    getWeightParts(userProfile.targetWeightKg || userProfile.weightKg || 72)
-  );
-  const [formData, setFormData] = useState<OnboardingFormState>({
-    firstName: userProfile.firstName,
-    lastName: userProfile.lastName,
-    goal: userProfile.goal || DEFAULT_GOAL_VALUE,
-    trainingLevel: userProfile.trainingLevel || TRAINING_LEVEL_OPTIONS[0],
-    activityLevel: userProfile.activityLevel || ACTIVITY_LEVEL_OPTIONS[0].label,
-    gender: userProfile.gender || '',
-    birthDate: userProfile.birthDate || '',
-    heightCm: userProfile.heightCm || 0,
-    weightKg: userProfile.weightKg || 0,
-    targetWeightKg: userProfile.targetWeightKg || userProfile.weightKg || 0,
-    focusMuscle: userProfile.focusMuscle || 'Balanceado',
-    workoutLocation: userProfile.workoutLocation || 'Gimnasio completo',
-    preferredTrainingDays: userProfile.preferredTrainingDays || [],
-    preferredScheduleMode: userProfile.preferredScheduleMode || 'same',
-    preferredWorkoutTime: userProfile.preferredWorkoutTime || DEFAULT_TIME,
-    preferredWorkoutTimeByDay: userProfile.preferredWorkoutTimeByDay || {},
-  });
+  const [birthDraft, setBirthDraft] = useState(initialDraft.birthDraft);
+  const [heightDraft, setHeightDraft] = useState(initialDraft.heightDraft);
+  const [weightDraft, setWeightDraft] = useState(initialDraft.weightDraft);
+  const [targetWeightDraft, setTargetWeightDraft] = useState(initialDraft.targetWeightDraft);
+  const [formData, setFormData] = useState<OnboardingFormState>(initialDraft.formData);
 
   const currentStep = STEP_FLOW[stepIndex];
   const progressPercent = ((stepIndex + 1) / STEP_FLOW.length) * 100;
   const stepCopy = STEP_COPY[currentStep];
   const goalCards = useMemo(() => getGoalCards(formData.trainingLevel), [formData.trainingLevel]);
+
+  useEffect(() => {
+    writeOnboardingDraft(currentUserId, {
+      stepIndex,
+      formData,
+      birthDraft,
+      heightDraft,
+      weightDraft,
+      targetWeightDraft,
+    });
+  }, [birthDraft, currentUserId, formData, heightDraft, stepIndex, targetWeightDraft, weightDraft]);
 
   const setField = <K extends keyof OnboardingFormState>(field: K, value: OnboardingFormState[K]) => {
     setFormData((previous) => ({ ...previous, [field]: value }));
@@ -477,6 +562,7 @@ export default function OnboardingPage() {
         onboardingCompletedAt: completedAt,
       });
 
+      clearOnboardingDraft(currentUserId);
       navigate('/', { replace: true });
     } finally {
       setSaving(false);

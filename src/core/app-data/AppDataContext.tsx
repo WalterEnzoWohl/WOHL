@@ -31,6 +31,7 @@ import { DEFAULT_ROUTINES, DEFAULT_USER_PROFILE } from '@/core/domain/seedData';
 import { getSupabaseClient } from '@/shared/lib/supabase';
 
 type AppDataContextValue = {
+  currentUserId: string;
   status: 'loading' | 'ready' | 'error';
   error: string | null;
   userProfile: UserProfile;
@@ -330,6 +331,7 @@ export function AppDataProvider({
   return (
     <AppDataContext.Provider
       value={{
+        currentUserId: session.user.id,
         status,
         error,
         ...derivedState,
