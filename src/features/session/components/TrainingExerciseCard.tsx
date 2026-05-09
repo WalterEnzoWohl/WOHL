@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { ArrowUpDown, Check, GripVertical, MoreVertical, Plus, TimerReset, Trash2 } from 'lucide-react';
+import { ArrowUpDown, Check, GripVertical, MoreVertical, Plus, Sparkles, TimerReset, Trash2 } from 'lucide-react';
 import { useDrag, useDrop } from 'react-dnd';
 import type { ActiveWorkoutExercise } from '@/shared/types/models';
 import { formatWeightInputValue } from '@/shared/lib/unitUtils';
@@ -28,6 +28,8 @@ type SessionExerciseCardProps = {
   onRemoveLastSet: (exerciseIdx: number) => void;
   onOpenRestTimer: (exerciseIdx: number) => void;
   onReorderClick: () => void;
+  showWeightSuggestions?: boolean;
+  suggestions?: Array<{ suggestedKg: number; suggestedReps: number; increment: number } | null>;
 };
 
 function isBodyweightExercise(exercise: Pick<ActiveWorkoutExercise, 'implement'>) {
@@ -57,6 +59,8 @@ export function TrainingExerciseCard({
   onRemoveLastSet,
   onOpenRestTimer,
   onReorderClick,
+  showWeightSuggestions = false,
+  suggestions,
 }: SessionExerciseCardProps) {
   const bodyweightExercise = isBodyweightExercise(exercise);
   const [weightDrafts, setWeightDrafts] = useState<Record<number, string>>({});
@@ -290,6 +294,17 @@ export function TrainingExerciseCard({
       <div>
         {exercise.sets.map((set, setIdx) => {
           const weightDraft = weightDrafts[set.id];
+          const suggestion = suggestions?.[setIdx];
+          const hasSuggestion = showWeightSuggestions && !bodyweightExercise && !!suggestion && suggestion.suggestedKg > 0;
+          const liveKgForSuggestion = weightDraft != null
+            ? (parseFloat(weightDraft.replace(',', '.')) || 0)
+            : (set.kg > 0 ? set.kg : 0);
+          let displaySuggestedReps = suggestion?.suggestedReps ?? 0;
+          if (hasSuggestion && suggestion && liveKgForSuggestion > 0 && liveKgForSuggestion !== suggestion.suggestedKg) {
+            const diff = liveKgForSuggestion - suggestion.suggestedKg;
+            const levels = Math.floor(Math.abs(diff) / suggestion.increment) * Math.sign(diff);
+            displaySuggestedReps = Math.max(1, Math.min(12, suggestion.suggestedReps - levels));
+          }
           const suggestedWeight = set.suggestedKg ?? (showPreviousWeight ? set.prevKg : 0);
           const suggestedReps = set.suggestedReps ?? (showPreviousWeight ? set.prevReps : 0);
           const weightPlaceholder =
@@ -345,12 +360,22 @@ export function TrainingExerciseCard({
                     </div>
                   ) : (
                     <div
-                      className={`rounded-xl border px-3 py-2.5 transition-colors ${
+                      className={`relative rounded-xl border px-3 py-2.5 transition-colors ${
                         set.completed
                           ? 'border-[rgba(0,201,167,0.26)] bg-[rgba(0,201,167,0.08)]'
-                          : 'border-[rgba(153,181,215,0.12)] bg-[#1A2231]'
+                          : hasSuggestion
+                            ? 'border-[rgba(0,201,167,0.4)] bg-[#1A2231]'
+                            : 'border-[rgba(153,181,215,0.12)] bg-[#1A2231]'
                       }`}
                     >
+                      {hasSuggestion && set.kg === 0 && weightDraft == null && (
+                        <div className="pointer-events-none absolute inset-0 flex items-center justify-center gap-1.5">
+                          <Sparkles size={10} className="shrink-0 text-[#00C9A7]" />
+                          <span className="text-base font-semibold text-[#00C9A7]" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+                            {formatWeightInputValue(suggestion!.suggestedKg, weightUnit)}
+                          </span>
+                        </div>
+                      )}
                       <input
                         type="text"
                         inputMode="decimal"
@@ -379,8 +404,8 @@ export function TrainingExerciseCard({
                             return next;
                           });
                         }}
-                        placeholder={weightPlaceholder}
-                        className="w-full bg-transparent text-center text-base font-semibold text-white outline-none placeholder:text-white/35"
+                        placeholder={hasSuggestion && set.kg === 0 && weightDraft == null ? '' : weightPlaceholder}
+                        className="relative z-10 w-full bg-transparent text-center text-base font-semibold text-white outline-none placeholder:text-white/35"
                         style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
                       />
                     </div>
@@ -389,12 +414,22 @@ export function TrainingExerciseCard({
 
                 <div>
                   <div
-                    className={`rounded-xl border px-3 py-2.5 transition-colors ${
+                    className={`relative rounded-xl border px-3 py-2.5 transition-colors ${
                       set.completed
                         ? 'border-[rgba(0,201,167,0.26)] bg-[rgba(0,201,167,0.08)]'
-                        : 'border-[rgba(153,181,215,0.12)] bg-[#1A2231]'
+                        : hasSuggestion
+                          ? 'border-[rgba(0,201,167,0.4)] bg-[#1A2231]'
+                          : 'border-[rgba(153,181,215,0.12)] bg-[#1A2231]'
                     }`}
                   >
+                    {hasSuggestion && set.reps === 0 && (
+                      <div className="pointer-events-none absolute inset-0 flex items-center justify-center gap-1.5">
+                        <Sparkles size={10} className="shrink-0 text-[#00C9A7]" />
+                        <span className="text-base font-semibold text-[#00C9A7]" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+                          {displaySuggestedReps}
+                        </span>
+                      </div>
+                    )}
                     <input
                       type="text"
                       inputMode="numeric"
@@ -413,8 +448,8 @@ export function TrainingExerciseCard({
 
                         onSetValueChange(exerciseIdx, setIdx, 'reps', nextValue);
                       }}
-                      placeholder={repsPlaceholder}
-                      className="w-full bg-transparent text-center text-base font-semibold text-white outline-none placeholder:text-white/35"
+                      placeholder={hasSuggestion && set.reps === 0 ? '' : repsPlaceholder}
+                      className="relative z-10 w-full bg-transparent text-center text-base font-semibold text-white outline-none placeholder:text-white/35"
                       style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
                     />
                   </div>
@@ -439,6 +474,7 @@ export function TrainingExerciseCard({
                   </button>
                 </div>
               </div>
+
             </div>
           );
         })}

@@ -7,14 +7,29 @@ import {
   type PointerEvent as ReactPointerEvent,
   type WheelEvent as ReactWheelEvent,
 } from 'react';
-import { Bell, Camera, ChevronRight, Flame, LogOut, Pencil, Settings, X } from 'lucide-react';
+import {
+  Activity,
+  BarChart2,
+  Beef,
+  CalendarDays,
+  Camera,
+  ChevronRight,
+  Clock,
+  Droplet,
+  Dumbbell,
+  Flame,
+  Pencil,
+  Settings,
+  Wheat,
+  X,
+} from 'lucide-react';
 import { useNavigate } from 'react-router';
 import { Header } from '@/shared/components/layout/Header';
 import { UserAvatar } from '@/features/profile/components/UserAvatar';
-import { calculateNutritionTargets, GOAL_OPTIONS } from '@/core/domain/profileInsights';
+import { calculateNutritionTargets } from '@/core/domain/profileInsights';
 import { useAppData } from '@/core/app-data/AppDataContext';
 import { formatWeightNumber, getWeightUnitLabel } from '@/shared/lib/unitUtils';
-import { getSupabaseClient } from '@/shared/lib/supabase';
+import type { SessionHistory } from '@/shared/types/models';
 
 const AVATAR_EDITOR_SIZE = 280;
 const AVATAR_OUTPUT_SIZE = 512;
@@ -81,6 +96,50 @@ function canvasToAvatarBlob(canvas: HTMLCanvasElement) {
   });
 }
 
+function getWeeklySummary(sessions: SessionHistory[], todayIso: string) {
+  const today = new Date(`${todayIso}T12:00:00`);
+  const day = today.getDay();
+  const diff = day === 0 ? -6 : 1 - day;
+  const weekStart = new Date(today);
+  weekStart.setDate(today.getDate() + diff);
+  weekStart.setHours(0, 0, 0, 0);
+  const weekEnd = new Date(weekStart);
+  weekEnd.setDate(weekStart.getDate() + 6);
+  weekEnd.setHours(23, 59, 59, 999);
+
+  const thisWeek = sessions.filter((s) => {
+    const d = new Date(`${s.isoDate}T12:00:00`);
+    return d >= weekStart && d <= weekEnd;
+  });
+
+  return {
+    count: thisWeek.length,
+    totalMinutes: thisWeek.reduce((sum, s) => sum + s.duration, 0),
+    totalVolume: thisWeek.reduce((sum, s) => sum + s.volume, 0),
+  };
+}
+
+function formatDuration(totalMinutes: number): string {
+  if (totalMinutes === 0) return '—';
+  const h = Math.floor(totalMinutes / 60);
+  const m = totalMinutes % 60;
+  if (h === 0) return `${m}min`;
+  if (m === 0) return `${h}h`;
+  return `${h}h ${m}min`;
+}
+
+function formatVolume(volume: number): string {
+  if (volume === 0) return '—';
+  if (volume >= 1000) return `${(volume / 1000).toFixed(1)}k`;
+  return volume.toString();
+}
+
+function formatSessionDate(isoDate: string): string {
+  const [, monthStr, dayStr] = isoDate.split('-');
+  const months = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'];
+  return `${parseInt(dayStr)} ${months[parseInt(monthStr) - 1]}`;
+}
+
 export default function ProfilePage() {
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -88,11 +147,7 @@ export default function ProfilePage() {
   const avatarGestureRef = useRef<AvatarGesture | null>(null);
   const avatarZoomRef = useRef(1);
   const avatarOffsetRef = useRef({ x: 0, y: 0 });
-  const { appContext, appSettings, historyDays, sessionHistory, updateProfileAvatar, updateUserProfile, userProfile } =
-    useAppData();
-  const [selectedDate, setSelectedDate] = useState(sessionHistory[0]?.isoDate ?? appContext.todayIso);
-  const [showObjectiveModal, setShowObjectiveModal] = useState(false);
-  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const { appContext, appSettings, sessionHistory, updateProfileAvatar, userProfile } = useAppData();
   const [showAvatarEditor, setShowAvatarEditor] = useState(false);
   const [pendingAvatar, setPendingAvatar] = useState<PendingAvatarImage | null>(null);
   const [avatarZoom, setAvatarZoom] = useState(1);
@@ -101,14 +156,16 @@ export default function ProfilePage() {
   const [avatarError, setAvatarError] = useState<string | null>(null);
   const [isSavingAvatar, setIsSavingAvatar] = useState(false);
 
-  const filteredSessions = sessionHistory.filter((session) => session.isoDate === selectedDate);
   const nutritionTargets = calculateNutritionTargets(userProfile);
   const weightUnitLabel = getWeightUnitLabel(appSettings.weightUnit);
-  const avatarBaseScale = useMemo(() => {
-    if (!pendingAvatar) {
-      return 1;
-    }
+  const weeklySummary = useMemo(
+    () => getWeeklySummary(sessionHistory, appContext.todayIso),
+    [sessionHistory, appContext.todayIso]
+  );
+  const lastSession = sessionHistory[0] ?? null;
 
+  const avatarBaseScale = useMemo(() => {
+    if (!pendingAvatar) return 1;
     return Math.max(AVATAR_EDITOR_SIZE / pendingAvatar.width, AVATAR_EDITOR_SIZE / pendingAvatar.height);
   }, [pendingAvatar]);
   const avatarScale = avatarBaseScale * avatarZoom;
@@ -118,10 +175,7 @@ export default function ProfilePage() {
   const avatarMaxOffsetY = Math.max(0, (avatarDisplayHeight - AVATAR_EDITOR_SIZE) / 2);
 
   useEffect(() => {
-    if (!pendingAvatar) {
-      return;
-    }
-
+    if (!pendingAvatar) return;
     setAvatarOffsetX((previous) => clamp(previous, -avatarMaxOffsetX, avatarMaxOffsetX));
     setAvatarOffsetY((previous) => clamp(previous, -avatarMaxOffsetY, avatarMaxOffsetY));
   }, [avatarMaxOffsetX, avatarMaxOffsetY, pendingAvatar]);
@@ -130,27 +184,6 @@ export default function ProfilePage() {
     avatarZoomRef.current = avatarZoom;
     avatarOffsetRef.current = { x: avatarOffsetX, y: avatarOffsetY };
   }, [avatarOffsetX, avatarOffsetY, avatarZoom]);
-
-  useEffect(() => {
-    if (historyDays.length === 0) {
-      return;
-    }
-
-    const weekContainsSelected = historyDays.some((day) => day.isoDate === selectedDate);
-    if (weekContainsSelected) {
-      return;
-    }
-
-    const latestSessionThisWeek = sessionHistory.find((session) =>
-      historyDays.some((day) => day.isoDate === session.isoDate)
-    );
-
-    setSelectedDate(latestSessionThisWeek?.isoDate ?? appContext.todayIso);
-  }, [appContext.todayIso, historyDays, selectedDate, sessionHistory]);
-
-  const signOut = async () => {
-    await getSupabaseClient().auth.signOut();
-  };
 
   const closeAvatarEditor = () => {
     avatarPointersRef.current.clear();
@@ -169,11 +202,7 @@ export default function ProfilePage() {
   const loadPendingAvatar = (src: string) => {
     const image = new Image();
     image.onload = () => {
-      setPendingAvatar({
-        src,
-        width: image.naturalWidth,
-        height: image.naturalHeight,
-      });
+      setPendingAvatar({ src, width: image.naturalWidth, height: image.naturalHeight });
       setAvatarZoom(1);
       setAvatarOffsetX(0);
       setAvatarOffsetY(0);
@@ -193,21 +222,14 @@ export default function ProfilePage() {
   const handleAvatarFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     event.target.value = '';
-
-    if (!file) {
-      return;
-    }
-
+    if (!file) return;
     if (!file.type.startsWith('image/')) {
       setAvatarError('Elegí un archivo de imagen válido.');
       return;
     }
-
     const reader = new FileReader();
     reader.onload = () => {
-      if (typeof reader.result === 'string') {
-        loadPendingAvatar(reader.result);
-      }
+      if (typeof reader.result === 'string') loadPendingAvatar(reader.result);
     };
     reader.onerror = () => {
       setAvatarError('No pudimos leer esa imagen. Probá de nuevo.');
@@ -218,16 +240,11 @@ export default function ProfilePage() {
   const getAvatarGestureMetrics = (element: HTMLDivElement) => {
     const pointerValues = Array.from(avatarPointersRef.current.values());
     const [firstPointer, secondPointer] = pointerValues;
-
-    if (!firstPointer || !secondPointer) {
-      return null;
-    }
-
+    if (!firstPointer || !secondPointer) return null;
     const rect = element.getBoundingClientRect();
     const centerX = (firstPointer.x + secondPointer.x) / 2 - rect.left - rect.width / 2;
     const centerY = (firstPointer.y + secondPointer.y) / 2 - rect.top - rect.height / 2;
     const distance = Math.hypot(secondPointer.x - firstPointer.x, secondPointer.y - firstPointer.y);
-
     return { centerX, centerY, distance };
   };
 
@@ -239,10 +256,7 @@ export default function ProfilePage() {
     baseOffsetX = avatarOffsetRef.current.x,
     baseOffsetY = avatarOffsetRef.current.y
   ) => {
-    if (!pendingAvatar) {
-      return;
-    }
-
+    if (!pendingAvatar) return;
     const clampedZoom = clamp(nextZoomValue, 1, 2.5);
     const zoomRatio = clampedZoom / baseZoom;
     const nextScale = avatarBaseScale * clampedZoom;
@@ -252,7 +266,6 @@ export default function ProfilePage() {
     const nextMaxOffsetY = Math.max(0, (nextDisplayHeight - AVATAR_EDITOR_SIZE) / 2);
     const nextOffsetX = clamp(focalX - (focalX - baseOffsetX) * zoomRatio, -nextMaxOffsetX, nextMaxOffsetX);
     const nextOffsetY = clamp(focalY - (focalY - baseOffsetY) * zoomRatio, -nextMaxOffsetY, nextMaxOffsetY);
-
     avatarZoomRef.current = clampedZoom;
     avatarOffsetRef.current = { x: nextOffsetX, y: nextOffsetY };
     setAvatarZoom(clampedZoom);
@@ -263,7 +276,6 @@ export default function ProfilePage() {
   const handleAvatarPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
     avatarPointersRef.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
     event.currentTarget.setPointerCapture(event.pointerId);
-
     if (avatarPointersRef.current.size === 1) {
       avatarGestureRef.current = {
         type: 'pan',
@@ -275,14 +287,9 @@ export default function ProfilePage() {
       };
       return;
     }
-
     if (avatarPointersRef.current.size >= 2) {
       const metrics = getAvatarGestureMetrics(event.currentTarget);
-
-      if (!metrics) {
-        return;
-      }
-
+      if (!metrics) return;
       avatarGestureRef.current = {
         type: 'pinch',
         startDistance: metrics.distance,
@@ -296,36 +303,23 @@ export default function ProfilePage() {
   };
 
   const handleAvatarPointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (!avatarPointersRef.current.has(event.pointerId)) {
-      return;
-    }
-
+    if (!avatarPointersRef.current.has(event.pointerId)) return;
     avatarPointersRef.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
-
     const activeGesture = avatarGestureRef.current;
-    if (!activeGesture) {
-      return;
-    }
-
+    if (!activeGesture) return;
     if (activeGesture.type === 'pan' && avatarPointersRef.current.size === 1) {
       const deltaX = event.clientX - activeGesture.startX;
       const deltaY = event.clientY - activeGesture.startY;
       const nextOffsetX = clamp(activeGesture.startOffsetX + deltaX, -avatarMaxOffsetX, avatarMaxOffsetX);
       const nextOffsetY = clamp(activeGesture.startOffsetY + deltaY, -avatarMaxOffsetY, avatarMaxOffsetY);
-
       avatarOffsetRef.current = { x: nextOffsetX, y: nextOffsetY };
       setAvatarOffsetX(nextOffsetX);
       setAvatarOffsetY(nextOffsetY);
       return;
     }
-
     if (activeGesture.type === 'pinch' && avatarPointersRef.current.size >= 2) {
       const metrics = getAvatarGestureMetrics(event.currentTarget);
-
-      if (!metrics || activeGesture.startDistance === 0) {
-        return;
-      }
-
+      if (!metrics || activeGesture.startDistance === 0) return;
       const nextZoomValue = clamp(
         activeGesture.startZoom * (metrics.distance / activeGesture.startDistance),
         1,
@@ -347,7 +341,6 @@ export default function ProfilePage() {
         -nextMaxOffsetY,
         nextMaxOffsetY
       );
-
       avatarZoomRef.current = nextZoomValue;
       avatarOffsetRef.current = { x: nextOffsetX, y: nextOffsetY };
       setAvatarZoom(nextZoomValue);
@@ -358,11 +351,9 @@ export default function ProfilePage() {
 
   const handleAvatarPointerEnd = (event: ReactPointerEvent<HTMLDivElement>) => {
     avatarPointersRef.current.delete(event.pointerId);
-
     if (event.currentTarget.hasPointerCapture(event.pointerId)) {
       event.currentTarget.releasePointerCapture(event.pointerId);
     }
-
     if (avatarPointersRef.current.size === 1) {
       const [remainingPointerId, remainingPointer] = Array.from(avatarPointersRef.current.entries())[0];
       avatarGestureRef.current = {
@@ -375,14 +366,9 @@ export default function ProfilePage() {
       };
       return;
     }
-
     if (avatarPointersRef.current.size >= 2) {
       const metrics = getAvatarGestureMetrics(event.currentTarget);
-
-      if (!metrics) {
-        return;
-      }
-
+      if (!metrics) return;
       avatarGestureRef.current = {
         type: 'pinch',
         startDistance: metrics.distance,
@@ -394,47 +380,33 @@ export default function ProfilePage() {
       };
       return;
     }
-
     avatarGestureRef.current = null;
   };
 
   const handleAvatarWheel = (event: ReactWheelEvent<HTMLDivElement>) => {
     event.preventDefault();
-
     const rect = event.currentTarget.getBoundingClientRect();
     const focalX = event.clientX - rect.left - rect.width / 2;
     const focalY = event.clientY - rect.top - rect.height / 2;
-    const zoomDelta = Math.exp(-event.deltaY * 0.0025);
-
-    applyAvatarZoom(avatarZoomRef.current * zoomDelta, focalX, focalY);
+    applyAvatarZoom(avatarZoomRef.current * Math.exp(-event.deltaY * 0.0025), focalX, focalY);
   };
 
   const saveAvatar = async () => {
-    if (!pendingAvatar) {
-      return;
-    }
-
+    if (!pendingAvatar) return;
     setIsSavingAvatar(true);
     setAvatarError(null);
-
     try {
       const image = new Image();
-
       await new Promise<void>((resolve, reject) => {
         image.onload = () => resolve();
         image.onerror = () => reject(new Error('No pudimos guardar la imagen. Probá otra vez.'));
         image.src = pendingAvatar.src;
       });
-
       const canvas = document.createElement('canvas');
       canvas.width = AVATAR_OUTPUT_SIZE;
       canvas.height = AVATAR_OUTPUT_SIZE;
-
       const context = canvas.getContext('2d');
-      if (!context) {
-        throw new Error('No pudimos preparar la imagen para guardarla.');
-      }
-
+      if (!context) throw new Error('No pudimos preparar la imagen para guardarla.');
       const sourceWidth = AVATAR_EDITOR_SIZE / avatarScale;
       const sourceHeight = AVATAR_EDITOR_SIZE / avatarScale;
       const sourceX = clamp(
@@ -447,20 +419,8 @@ export default function ProfilePage() {
         0,
         Math.max(0, pendingAvatar.height - sourceHeight)
       );
-
       context.clearRect(0, 0, AVATAR_OUTPUT_SIZE, AVATAR_OUTPUT_SIZE);
-      context.drawImage(
-        image,
-        sourceX,
-        sourceY,
-        sourceWidth,
-        sourceHeight,
-        0,
-        0,
-        AVATAR_OUTPUT_SIZE,
-        AVATAR_OUTPUT_SIZE
-      );
-
+      context.drawImage(image, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, AVATAR_OUTPUT_SIZE, AVATAR_OUTPUT_SIZE);
       const avatarBlob = await canvasToAvatarBlob(canvas);
       await updateProfileAvatar(avatarBlob);
       closeAvatarEditor();
@@ -493,291 +453,191 @@ export default function ProfilePage() {
         }
       />
 
-      <div className="flex flex-col gap-6 px-5 py-5 pb-4">
-        <div className="relative overflow-hidden rounded-2xl">
-          <div className="flex items-center gap-4 pt-4 pb-5">
-            <div className="flex flex-shrink-0 items-center justify-center">
-              <div className="relative h-[130px] w-[130px]">
-                <UserAvatar
-                  alt={userProfile.fullName}
-                  className="h-full w-full overflow-hidden rounded-full bg-[#1A2D42]"
-                  imageClassName="theme-preserve h-full w-full object-cover"
-                />
-                <button
-                  onClick={() => fileInputRef.current?.click()}
-                  className="absolute bottom-1 right-1 flex h-8 w-8 items-center justify-center rounded-full border border-[rgba(0,201,167,0.32)] bg-[#0B1F33] shadow-[0_0_12px_rgba(0,201,167,0.18)] transition-colors active:bg-[#1A2D42]"
-                  type="button"
-                  aria-label="Cambiar foto de perfil"
-                >
-                  <Camera size={14} className="text-[#00C9A7]" />
-                </button>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={handleAvatarFileChange}
-                />
-              </div>
-            </div>
-            <div className="flex min-w-0 flex-1 flex-col gap-1">
-              <h1 className="text-4xl font-extrabold tracking-tight text-white">{userProfile.fullName}</h1>
-            </div>
+      <div className="flex flex-col gap-5 px-5 py-5 pb-6">
+        {/* Hero */}
+        <div className="flex items-center gap-5 py-2">
+          <div className="relative h-[88px] w-[88px] flex-shrink-0">
+            <UserAvatar
+              alt={userProfile.fullName}
+              className="h-full w-full overflow-hidden rounded-full bg-[#1A2D42]"
+              imageClassName="theme-preserve h-full w-full object-cover"
+            />
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="absolute bottom-0 right-0 flex h-7 w-7 items-center justify-center rounded-full border border-[rgba(0,201,167,0.32)] bg-[#0B1F33] shadow-[0_0_10px_rgba(0,201,167,0.18)] transition-colors active:bg-[#1A2D42]"
+              type="button"
+              aria-label="Cambiar foto de perfil"
+            >
+              <Camera size={12} className="text-[#00C9A7]" />
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleAvatarFileChange}
+            />
           </div>
-        </div>
-
-        <div className="grid grid-cols-3 gap-3">
-          {[
-            {
-              label: 'PESO',
-              value: formatWeightNumber(userProfile.weightKg, appSettings.weightUnit),
-              unit: weightUnitLabel,
-            },
-            { label: 'ALTURA', value: userProfile.heightCm.toString(), unit: 'cm' },
-            { label: 'EDAD', value: userProfile.age.toString(), unit: 'años' },
-          ].map(({ label, value, unit }) => (
-            <div key={label} className="rounded-xl border border-[rgba(255,255,255,0.05)] bg-[#13263A] p-4">
-              <p
-                className="mb-2 text-[10px] font-bold uppercase tracking-widest text-[#9BAEC1]"
-                style={{ fontFamily: "'Inter', sans-serif" }}
-              >
-                {label}
-              </p>
-              <div className="flex items-baseline gap-1">
-                <span className="text-2xl font-extrabold text-white">{value}</span>
-                <span className="text-sm font-bold text-[#00C9A7]">{unit}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <div className="grid grid-cols-2 gap-3">
-          <div className="rounded-xl bg-[#203347] p-4">
-            <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-[#9BAEC1]">
-              Actividad
+          <div className="flex min-w-0 flex-1 flex-col gap-1">
+            <h1 className="text-[28px] font-extrabold leading-tight tracking-tight text-white">
+              {userProfile.fullName}
+            </h1>
+            <p className="text-sm font-semibold text-[#00C9A7]">
+              {userProfile.goal} · {userProfile.trainingLevel}
             </p>
-            <div className="flex items-center gap-2">
-              <Flame size={16} className="text-[#00C9A7]" />
-              <div>
-                <span className="block text-lg font-bold text-white">{userProfile.activityLevel}</span>
-                <span className="text-xs text-[#00C9A7]">Factor {userProfile.activityFactor}</span>
-              </div>
+            <div className="mt-0.5 flex items-center gap-1.5">
+              <CalendarDays size={11} className="shrink-0 text-[#546880]" />
+              <p className="text-xs text-[#546880]">
+                Miembro desde {userProfile.memberSince}
+              </p>
             </div>
           </div>
-          <button
-            onClick={() => setShowObjectiveModal(true)}
-            className="rounded-xl border border-[rgba(0,201,167,0.2)] bg-[#005147] p-4 text-left transition-colors active:bg-[#006257]"
-          >
-            <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-[#00C9A7]">Objetivo</p>
-            <span className="text-lg font-extrabold text-white">{userProfile.goal}</span>
-            <span className="mt-1.5 block text-[10px] font-bold uppercase tracking-widest text-[rgba(0,201,167,0.7)]">{userProfile.trainingLevel}</span>
-          </button>
         </div>
 
-        <div className="rounded-2xl border border-[rgba(255,255,255,0.05)] bg-[#13263A] p-4">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-[#00C9A7]">
-                Calorias recomendadas para {nutritionTargets.goalTitle}
-              </p>
-              <p className="text-sm leading-6 text-white" style={{ fontFamily: "'Inter', sans-serif" }}>
-                Estimado con Harris-Benedict y tu factor de actividad {userProfile.activityFactor}. Tu mantenimiento ronda las {nutritionTargets.maintenanceCalories} kcal.
+        {/* Datos físicos */}
+        <div className="rounded-2xl border border-[rgba(255,255,255,0.06)] bg-[#13263A] px-4 py-4">
+          <div className="mb-3 flex items-center gap-2">
+            <Activity size={13} className="text-[#00C9A7]" />
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#00C9A7]">
+              Datos físicos
+            </p>
+          </div>
+          <div className="grid grid-cols-3">
+            {[
+              {
+                label: 'Peso',
+                value: formatWeightNumber(userProfile.weightKg, appSettings.weightUnit),
+                unit: weightUnitLabel,
+              },
+              { label: 'Altura', value: userProfile.heightCm.toString(), unit: 'cm' },
+              { label: 'Edad', value: userProfile.age > 0 ? userProfile.age.toString() : '—', unit: 'años' },
+            ].map(({ label, value, unit }, i) => (
+              <div
+                key={label}
+                className={`flex flex-col items-center py-1 ${
+                  i < 2 ? 'border-r border-[rgba(255,255,255,0.07)]' : ''
+                }`}
+              >
+                <div className="flex items-baseline gap-1">
+                  <span className="text-2xl font-extrabold text-white">{value}</span>
+                  <span className="text-sm font-bold text-[#00C9A7]">{unit}</span>
+                </div>
+                <p className="mt-0.5 text-xs text-[#546880]">{label}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Macros sugeridos */}
+        <div className="rounded-2xl border border-[rgba(255,255,255,0.06)] bg-[#13263A] px-4 py-4">
+          <div className="mb-3 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Flame size={13} className="text-[#00C9A7]" />
+              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#00C9A7]">
+                Macros sugeridos
               </p>
             </div>
-            <div className="rounded-2xl border border-[rgba(0,201,167,0.18)] bg-[rgba(0,201,167,0.1)] px-4 py-3 text-right">
-              <span className="block text-2xl font-extrabold text-white">{nutritionTargets.targetCalories}</span>
-              <span className="text-xs font-bold uppercase tracking-widest text-[#00C9A7]">kcal</span>
+            <div className="flex items-baseline gap-1">
+              <span className="text-xl font-extrabold text-white">{nutritionTargets.targetCalories}</span>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-[#00C9A7]">kcal</span>
             </div>
           </div>
-
-          <div className="mt-4 grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-3 gap-2">
             {[
-              { label: 'Proteinas', value: nutritionTargets.proteinGrams, unit: 'g' },
-              { label: 'Carbos', value: nutritionTargets.carbGrams, unit: 'g' },
-              { label: 'Grasas', value: nutritionTargets.fatGrams, unit: 'g' },
-            ].map(({ label, value, unit }) => (
-              <div key={label} className="rounded-xl bg-[#1A2D42] px-3 py-3">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-[#9BAEC1]">{label}</p>
-                <div className="mt-2 flex items-baseline gap-1">
+              { label: 'PROTEÍNAS', value: nutritionTargets.proteinGrams, icon: <Beef size={13} className="text-[#00C9A7]" /> },
+              { label: 'CARBOS', value: nutritionTargets.carbGrams, icon: <Wheat size={13} className="text-[#00C9A7]" /> },
+              { label: 'GRASAS', value: nutritionTargets.fatGrams, icon: <Droplet size={13} className="text-[#00C9A7]" /> },
+            ].map(({ label, value, icon }) => (
+              <div key={label} className="flex flex-col gap-2 rounded-xl bg-[#1A2D42] px-3 py-3">
+                <div className="flex items-center gap-1.5">
+                  {icon}
+                  <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-[#546880]">{label}</p>
+                </div>
+                <div className="flex items-baseline gap-0.5">
                   <span className="text-xl font-extrabold text-white">{value}</span>
-                  <span className="text-xs font-bold text-[#00C9A7]">{unit}</span>
+                  <span className="text-xs font-bold text-[#00C9A7]">g</span>
                 </div>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="flex flex-col gap-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold tracking-tight text-white">Historial de sesiones</h2>
-            <button
-              onClick={() => navigate('/history')}
-              className="text-[10px] font-bold uppercase tracking-widest text-[#00C9A7]"
-            >
-              Ver todo
-            </button>
+        {/* Resumen semanal */}
+        <div className="rounded-2xl border border-[rgba(255,255,255,0.06)] bg-[#13263A] px-4 py-4">
+          <div className="mb-4 flex items-center gap-2">
+            <BarChart2 size={13} className="text-[#00C9A7]" />
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#00C9A7]">
+              Resumen semanal
+            </p>
           </div>
-
-          <div className="grid grid-cols-7 gap-2">
-            {historyDays.map(({ day, num, isoDate }) => {
-              const hasSession = sessionHistory.some((session) => session.isoDate === isoDate);
-              const isSelected = selectedDate === isoDate;
-
-              return (
-                <button
-                  key={isoDate}
-                  onClick={() => setSelectedDate(isoDate)}
-                  className={`flex min-w-0 flex-col items-center gap-1 rounded-xl py-2 transition-all ${
-                    isSelected
-                      ? 'bg-[#00C9A7]'
-                      : hasSession
-                      ? 'border border-[rgba(0,201,167,0.3)] bg-[#203347]'
-                      : 'border border-[rgba(255,255,255,0.05)] bg-[#13263A]'
-                  }`}
-                >
-                  <span
-                    className={`text-[9px] font-bold uppercase tracking-wider ${
-                      isSelected ? 'text-black' : 'text-[#9BAEC1]'
-                    }`}
-                  >
-                    {day}
-                  </span>
-                  <span className={`text-base font-extrabold ${isSelected ? 'text-black' : 'text-white'}`}>
-                    {num}
-                  </span>
-                  {hasSession && !isSelected && <div className="h-1 w-1 rounded-full bg-[#00C9A7]" />}
-                </button>
-              );
-            })}
-          </div>
-
-          <div className="flex flex-col gap-3">
-            {filteredSessions.length > 0 ? (
-              filteredSessions.map((session) => (
-                <button
-                  key={session.id}
-                  onClick={() => navigate(`/session-history/${session.id}`)}
-                  className="flex w-full items-center gap-4 rounded-2xl border border-[rgba(255,255,255,0.05)] bg-[#13263A] px-5 py-4 text-left transition-colors active:bg-[#1a1a1a]"
-                >
-                  <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl border border-[rgba(0,201,167,0.2)] bg-[rgba(0,201,167,0.1)]">
-                    <svg width="18" height="18" viewBox="0 0 18 18" fill="#00C9A7">
-                      <path d="M3 9h12M9 3v12" stroke="#00C9A7" strokeWidth="2" strokeLinecap="round" fill="none" />
-                    </svg>
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-semibold text-white">{session.name}</p>
-                    <p className="mt-0.5 text-xs text-[#9BAEC1]" style={{ fontFamily: "'Inter', sans-serif" }}>
-                      {session.date} - {session.duration} min - {session.muscle}
-                    </p>
-                  </div>
-                  <span className="text-sm font-bold text-[#00C9A7]">{session.kcal} kcal</span>
-                </button>
-              ))
-            ) : (
-              <div className="rounded-2xl border border-[rgba(255,255,255,0.05)] bg-[#13263A] p-5">
-                <p className="text-center text-sm text-[#9BAEC1]" style={{ fontFamily: "'Inter', sans-serif" }}>
-                  No hay sesiones registradas para ese día.
+          <div className="grid grid-cols-3">
+            {[
+              {
+                icon: <Dumbbell size={17} className="text-[#00C9A7]" />,
+                value: weeklySummary.count > 0 ? weeklySummary.count.toString() : '—',
+                label: 'Sesiones\nesta semana',
+              },
+              {
+                icon: <Clock size={17} className="text-[#00C9A7]" />,
+                value: formatDuration(weeklySummary.totalMinutes),
+                label: 'Tiempo\ntotal',
+              },
+              {
+                icon: <Activity size={17} className="text-[#00C9A7]" />,
+                value: weeklySummary.totalVolume > 0 ? `${formatVolume(weeklySummary.totalVolume)} kg` : '—',
+                label: 'Volumen\ntotal',
+              },
+            ].map(({ icon, value, label }, i) => (
+              <div
+                key={label}
+                className={`flex flex-col items-center gap-2.5 ${
+                  i < 2 ? 'border-r border-[rgba(255,255,255,0.07)]' : ''
+                }`}
+              >
+                <div className="flex h-10 w-10 items-center justify-center rounded-full border border-[rgba(0,201,167,0.22)] bg-[rgba(0,201,167,0.08)]">
+                  {icon}
+                </div>
+                <span className="text-lg font-extrabold leading-none text-white">{value}</span>
+                <p className="whitespace-pre-line text-center text-[10px] leading-tight text-[#546880]">
+                  {label}
                 </p>
               </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Historial CTA */}
+        <button
+          onClick={() => navigate('/metrics')}
+          className="flex w-full items-center gap-4 rounded-2xl border border-[rgba(0,201,167,0.3)] px-4 py-4 text-left transition-all active:bg-[rgba(0,201,167,0.06)]"
+          style={{ background: 'linear-gradient(135deg, rgba(0,201,167,0.09) 0%, rgba(11,31,51,0) 100%)' }}
+        >
+          <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl border border-[rgba(0,201,167,0.25)] bg-[rgba(0,201,167,0.13)]">
+            <CalendarDays size={24} className="text-[#00C9A7]" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <h3 className="text-[17px] font-bold leading-tight text-white">Historial de sesiones</h3>
+            {lastSession ? (
+              <>
+                <p className="mt-0.5 text-xs text-[#00C9A7]">
+                  Última sesión: {lastSession.name} · {formatSessionDate(lastSession.isoDate)} · {lastSession.duration} min
+                </p>
+                <p
+                  className="mt-1 text-[10px] font-semibold uppercase tracking-widest text-[rgba(0,201,167,0.65)]"
+                  style={{ fontFamily: "'Inter', sans-serif" }}
+                >
+                  Ver historial completo
+                </p>
+              </>
+            ) : (
+              <p className="mt-0.5 text-xs text-[#546880]">Todavía no registraste sesiones</p>
             )}
           </div>
-        </div>
-
-        <div className="flex flex-col gap-4 pb-2">
-          <h2 className="text-2xl font-bold tracking-tight text-white">Configuracion</h2>
-          <div className="overflow-hidden rounded-2xl border border-[rgba(255,255,255,0.05)] bg-[#13263A]">
-            {[
-              { label: 'Ajustes de cuenta', icon: <Settings size={18} className="text-[#00C9A7]" />, path: '/config' },
-              { label: 'Notificaciones', icon: <Bell size={18} className="text-[#00C9A7]" />, path: '/config' },
-            ].map(({ label, icon, path }) => (
-              <button
-                key={label}
-                onClick={() => navigate(path)}
-                className="flex w-full items-center justify-between border-b border-[rgba(255,255,255,0.05)] px-4 py-4 transition-colors last:border-b-0 hover:bg-white/5"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#203347]">
-                    {icon}
-                  </div>
-                  <span className="text-base font-medium text-white">{label}</span>
-                </div>
-                <ChevronRight size={16} className="text-[#9BAEC1]" />
-              </button>
-            ))}
-            <button
-              onClick={() => setShowLogoutModal(true)}
-              className="flex w-full items-center justify-between px-4 py-4 transition-colors hover:bg-white/5"
-            >
-              <div className="flex items-center gap-4">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[rgba(229,57,53,0.1)]">
-                  <LogOut size={18} className="text-[#E53935]" />
-                </div>
-                <span className="text-base font-medium text-[#E53935]">Cerrar sesión</span>
-              </div>
-            </button>
-          </div>
-        </div>
+          <ChevronRight size={20} className="shrink-0 text-[#00C9A7]" />
+        </button>
       </div>
 
-      {showObjectiveModal && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center px-3 py-6 sm:px-6">
-          <div className="absolute inset-0 bg-black/70" onClick={() => setShowObjectiveModal(false)} />
-          <div className="relative w-full rounded-3xl p-6" style={{ background: '#1A2D42' }}>
-            <div className="mb-5 flex items-center justify-between">
-              <h3 className="text-xl font-bold text-white">Cambiar objetivo</h3>
-              <button onClick={() => setShowObjectiveModal(false)}>
-                <X size={20} className="text-[#9BAEC1]" />
-              </button>
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              {GOAL_OPTIONS.map((objective) => (
-                <button
-                  key={objective}
-                  onClick={() => {
-                    void updateUserProfile({ goal: objective });
-                    setShowObjectiveModal(false);
-                  }}
-                  className={`flex items-center justify-between rounded-2xl px-4 py-4 text-left transition-all ${
-                    userProfile.goal === objective
-                      ? 'bg-[#00C9A7] text-black'
-                      : 'bg-[#203347] text-white hover:bg-[#333]'
-                  }`}
-                >
-                  <span className="text-sm font-bold uppercase tracking-widest">{objective}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {showLogoutModal && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center px-3 py-6 sm:px-6">
-          <div className="absolute inset-0 bg-black/70" onClick={() => setShowLogoutModal(false)} />
-          <div className="relative w-full rounded-3xl p-6" style={{ background: '#1A2D42' }}>
-            <h3 className="mb-2 text-center text-xl font-bold text-white">Cerrar sesión</h3>
-            <p className="mb-6 text-center text-sm text-[#9BAEC1]" style={{ fontFamily: "'Inter', sans-serif" }}>
-              Vas a salir de tu cuenta de WOHL en este dispositivo.
-            </p>
-            <div className="flex flex-col gap-3">
-              <button
-                onClick={() => void signOut()}
-                className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#E53935] py-4 font-bold text-white"
-              >
-                <LogOut size={16} />
-                Cerrar sesión
-              </button>
-              <button
-                onClick={() => setShowLogoutModal(false)}
-                className="w-full rounded-2xl bg-[#203347] py-4 font-semibold text-white"
-              >
-                Cancelar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
+      {/* Avatar editor modal */}
       {showAvatarEditor && pendingAvatar && (
         <div className="absolute inset-0 z-50 flex items-center justify-center px-3 py-6 sm:px-6">
           <div className="absolute inset-0 bg-[rgba(4,7,18,0.78)] backdrop-blur-[4px]" onClick={closeAvatarEditor} />
@@ -791,24 +651,17 @@ export default function ProfilePage() {
               <X size={20} />
             </button>
             <div className="mb-5 text-center text-white">
-              <div>
-                <h3 className="text-xl font-bold text-white sm:text-2xl">Ajustá tu foto de perfil</h3>
-                <p className="mt-2 text-sm text-[#98A2B3] sm:text-[15px]" style={{ fontFamily: "'Inter', sans-serif" }}>
-                  Elegí el encuadre antes de guardarla.
-                </p>
-              </div>
+              <h3 className="text-xl font-bold text-white sm:text-2xl">Ajustá tu foto de perfil</h3>
+              <p className="mt-2 text-sm text-[#98A2B3] sm:text-[15px]" style={{ fontFamily: "'Inter', sans-serif" }}>
+                Elegí el encuadre antes de guardarla.
+              </p>
             </div>
-
             <div className="flex flex-col items-center">
               <div className="mt-5 flex w-full justify-center">
                 <div className="relative w-full max-w-[560px] overflow-hidden rounded-[24px] border border-[rgba(0,201,167,0.12)] bg-[#0F1324] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] sm:p-5">
                   <div
                     className="relative mx-auto cursor-move overflow-hidden rounded-[18px] bg-[#1A2034]"
-                    style={{
-                      width: `${AVATAR_EDITOR_SIZE}px`,
-                      height: `${AVATAR_EDITOR_SIZE}px`,
-                      touchAction: 'none',
-                    }}
+                    style={{ width: `${AVATAR_EDITOR_SIZE}px`, height: `${AVATAR_EDITOR_SIZE}px`, touchAction: 'none' }}
                     onWheel={handleAvatarWheel}
                     onPointerDown={handleAvatarPointerDown}
                     onPointerMove={handleAvatarPointerMove}
@@ -837,7 +690,6 @@ export default function ProfilePage() {
                 </div>
               </div>
             </div>
-
             <div className="mt-5 w-full max-w-[560px]">
               <label className="flex flex-col gap-2">
                 <div className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-[0.24em] text-[#00C9A7]">
@@ -855,13 +707,11 @@ export default function ProfilePage() {
                 />
               </label>
             </div>
-
             {avatarError && (
               <div className="mt-5 rounded-2xl border border-[#FECACA] bg-[#FEF2F2] px-4 py-3 text-sm text-[#B42318]">
                 {avatarError}
               </div>
             )}
-
             <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
               <button
                 onClick={closeAvatarEditor}

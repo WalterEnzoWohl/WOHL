@@ -27,6 +27,9 @@ function getSectionBase(pathname: string): string | null {
   return null;
 }
 
+// Detail pages that should not override the section's remembered entry point
+const DETAIL_PREFIXES = ['/session-history/', '/muscle-progress/'];
+
 // Module-level so it survives BottomNav unmount/remount (e.g. while nav is hidden)
 const rememberedPaths: Record<string, string> = {};
 
@@ -36,7 +39,8 @@ export function BottomNav() {
 
   useEffect(() => {
     const base = getSectionBase(location.pathname);
-    if (base) rememberedPaths[base] = location.pathname;
+    const isDetailPage = DETAIL_PREFIXES.some((p) => location.pathname.startsWith(p));
+    if (base && !isDetailPage) rememberedPaths[base] = location.pathname;
   }, [location.pathname]);
 
   const isActive = (path: string) => {
@@ -46,7 +50,12 @@ export function BottomNav() {
 
   const handleNav = (basePath: string) => {
     const target = rememberedPaths[basePath] ?? basePath;
-    if (target !== location.pathname) navigate(target);
+    if (target === location.pathname) {
+      // Already at the remembered path; if it's not the section root, go to root
+      if (location.pathname !== basePath) navigate(basePath);
+      return;
+    }
+    navigate(target);
   };
 
   return (

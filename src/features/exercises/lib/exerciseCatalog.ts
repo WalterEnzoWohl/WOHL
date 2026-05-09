@@ -139,8 +139,9 @@ const TITLE_REPLACEMENTS: Array<[RegExp, string]> = [
   [/Front Squat/gi, 'Sentadilla frontal'],
   [/Bulgarian Split Squat/gi, 'Sentadilla bulgara'],
   [/Goblet Squat/gi, 'Sentadilla goblet'],
-  [/Walking Lunge/gi, 'Zancadas caminando'],
-  [/Reverse Lunge/gi, 'Zancada reversa'],
+  [/Walking Lunge/gi, 'Estocadas caminando'],
+  [/Reverse Lunge/gi, 'Estocada reversa'],
+  [/Lunge/gi, 'Estocada'],
   [/Step Up/gi, 'Step up'],
   [/Hip Abduction/gi, 'Abduccion de cadera'],
   [/Hip Adduction/gi, 'Aduccion de cadera'],
@@ -295,6 +296,11 @@ function translateEnglishTitle(englishTitle: string, slug: string) {
   }
 
   let title = englishTitle;
+
+  // Extract "a una mano" before translating so it can be appended at the end
+  let unilateralSuffix = '';
+  title = title.replace(/\b(Single Arm|One Arm)\b/gi, () => { unilateralSuffix = ' a una mano'; return ''; });
+
   for (const [pattern, replacement] of TITLE_REPLACEMENTS) {
     title = title.replace(pattern, replacement);
   }
@@ -304,13 +310,23 @@ function translateEnglishTitle(englishTitle: string, slug: string) {
   title = title.replace(/\bWide Grip\b/gi, 'agarre amplio');
   title = title.replace(/\bAssisted\b/gi, 'asistido');
   title = title.replace(/\bWeighted\b/gi, 'lastrado');
-  title = title.replace(/\bSingle Arm\b/gi, 'a una mano');
-  title = title.replace(/\bOne Arm\b/gi, 'a una mano');
   title = title.replace(/\bStanding\b/gi, 'de pie');
   title = title.replace(/\bSeated\b/gi, 'sentado');
   title = title.replace(/\bLying\b/gi, 'acostado');
 
-  return title.replace(/\s+/g, ' ').trim();
+  // Move leading positional modifiers to before the qualifier in parens (or to end)
+  for (const prefix of ['de pie', 'sentado', 'acostado']) {
+    if (title.toLowerCase().startsWith(prefix + ' ')) {
+      const rest = title.slice(prefix.length).trim();
+      const parenIdx = rest.indexOf('(');
+      title = parenIdx > 0
+        ? `${rest.slice(0, parenIdx).trim()} ${prefix} ${rest.slice(parenIdx)}`
+        : `${rest} ${prefix}`;
+      break;
+    }
+  }
+
+  return (title + unilateralSuffix).replace(/\s+/g, ' ').trim();
 }
 
 function buildTitleAliases(title: string) {

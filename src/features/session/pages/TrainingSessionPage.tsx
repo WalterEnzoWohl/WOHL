@@ -32,6 +32,13 @@ import { ExerciseDetailModal } from '@/features/session/components/ExerciseDetai
 import type { ExerciseDetailInfo } from '@/features/session/components/ExerciseDetailModal';
 import { FinishSessionModal } from '@/features/session/components/FinishSessionModal';
 import { DeleteSessionConfirmModal } from '@/features/session/components/DeleteSessionConfirmModal';
+import { UpdateRoutineAfterWorkoutSheet } from '@/features/session/components/UpdateRoutineAfterWorkoutSheet';
+import {
+  applySessionStructureToRoutine,
+  detectRoutineChanges,
+  type RoutineChangeSummary,
+} from '@/features/session/lib/routineUpdateHelpers';
+import { getProgressionIncrement, getProgressionSuggestion } from '@/features/session/lib/progressionSuggestions';
 import {
   buildExerciseState,
   buildExerciseStateFromHistorySession,
@@ -48,6 +55,7 @@ import {
 import { useAppData } from '@/core/app-data/AppDataContext';
 import type {
   ActiveWorkoutDraft,
+  ActiveWorkoutExercise,
   ActiveWorkoutSet,
   ExerciseData,
   SessionHistory,
@@ -63,6 +71,15 @@ type SessionLocationState = {
 };
 
 type SetState = ActiveWorkoutSet;
+
+type SetSuggestion = {
+  suggestedKg: number;
+  suggestedReps: number;
+  increment: number;
+  reason: 'increase_reps' | 'increase_weight';
+  explanation: string;
+};
+type ExerciseSuggestions = Array<SetSuggestion | null>;
 
 type ShellBounds = {
   top: number;
@@ -113,6 +130,25 @@ function buildExerciseTemplateFromCatalogResult(item: CatalogExerciseItem): Exer
   };
 }
 
+function getImplementIncrement(implement?: string): number {
+  const impl = (implement ?? '').toLowerCase();
+  if (impl.includes('barra') || impl.includes('barbell')) return 2.5;
+  if (impl.includes('mancuerna') || impl.includes('dumbbell')) return 1.25;
+  return 2;
+}
+
+function buildExerciseSuggestions(exercise: ActiveWorkoutExercise): ExerciseSuggestions {
+  const increment = getImplementIncrement(exercise.implement);
+  return exercise.sets.map((set) => {
+    if (!set.prevKg || set.prevKg <= 0) return null;
+    const progression = getProgressionSuggestion(
+      { kg: set.prevKg, reps: set.prevReps },
+      { weightIncrement: getProgressionIncrement(exercise.implement) }
+    );
+    return { ...progression, increment };
+  });
+}
+
 export default function TrainingSessionPage() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -131,6 +167,7 @@ export default function TrainingSessionPage() {
     deleteSession: deleteSessionRecord,
     routines,
     saveActiveWorkout,
+    saveRoutine: saveRoutineRecord,
     sessionHistory,
     updateSession: updateSessionRecord,
   } = useAppData();
@@ -255,6 +292,8 @@ export default function TrainingSessionPage() {
   const [restConfig, setRestConfig] = useState(appSettings.restTimerSeconds || DEFAULT_REST);
   const [notes, setNotes] = useState(resumedWorkout?.notes ?? historicalSession?.notes ?? '');
   const [showFinishModal, setShowFinishModal] = useState(false);
+  const [showUpdateRoutineSheet, setShowUpdateRoutineSheet] = useState(false);
+  const [pendingRoutineChanges, setPendingRoutineChanges] = useState<RoutineChangeSummary | null>(null);
   const [showExerciseHistory, setShowExerciseHistory] = useState(false);
   const [showRestPicker, setShowRestPicker] = useState(false);
   const [restTargetExerciseIdx, setRestTargetExerciseIdx] = useState<number | null>(null);
@@ -269,6 +308,7 @@ export default function TrainingSessionPage() {
   const [showReorderModal, setShowReorderModal] = useState(false);
   const [isSubmittingSession, setIsSubmittingSession] = useState(false);
   const [inlineFeedback, setInlineFeedback] = useState<string | null>(null);
+  const [showWeightSuggestions, setShowWeightSuggestions] = useState(false);
   const [exerciseMenuAnchor, setExerciseMenuAnchor] = useState<{ exerciseIdx: number; rect: DOMRect } | null>(null);
   const [setMenuAnchor, setSetMenuAnchor] = useState<{
     exerciseIdx: number;
@@ -306,6 +346,11 @@ export default function TrainingSessionPage() {
     return uniqueMuscles.length > 0 ? uniqueMuscles.join(', ') : baseSessionFocus;
   }, [baseSessionFocus, exerciseList]);
 
+  const allExerciseSuggestions = useMemo<ExerciseSuggestions[]>(
+    () => exerciseList.map((ex) => buildExerciseSuggestions(ex)),
+    [exerciseList]
+  );
+
   const syncSessionOverlayBounds = useCallback(() => {
     if (typeof window === 'undefined') return;
 
@@ -330,7 +375,7 @@ export default function TrainingSessionPage() {
   }, []);
 
   useLayoutEffect(() => {
-    if (!(sessionExerciseDetail || showExerciseHistory || showReorderModal || showFinishModal || showDeleteSessionModal) || typeof window === 'undefined') {
+    if (!(sessionExerciseDetail || showExerciseHistory || showReorderModal || showFinishModal || showDeleteSessionModal || showUpdateRoutineSheet) || typeof window === 'undefined') {
       return;
     }
 
@@ -346,7 +391,7 @@ export default function TrainingSessionPage() {
       viewport?.removeEventListener('resize', syncSessionOverlayBounds);
       viewport?.removeEventListener('scroll', syncSessionOverlayBounds);
     };
-  }, [sessionExerciseDetail, showExerciseHistory, showReorderModal, showFinishModal, showDeleteSessionModal, syncSessionOverlayBounds]);
+  }, [sessionExerciseDetail, showExerciseHistory, showReorderModal, showFinishModal, showDeleteSessionModal, showUpdateRoutineSheet, syncSessionOverlayBounds]);
 
   useEffect(() => {
     if (isHistoryEditSession) {
@@ -950,7 +995,14 @@ export default function TrainingSessionPage() {
           return exercise;
         }
 
-        const nextSetValues = getEffectiveSetValues(targetSet);
+        const baseValues = getEffectiveSetValues(targetSet);
+        const progressionSuggestion =
+          showWeightSuggestions && targetSet.kg === 0 && targetSet.reps === 0
+            ? (allExerciseSuggestions[exerciseIdx]?.[setIdx] ?? null)
+            : null;
+        const nextSetValues = progressionSuggestion
+          ? { kg: progressionSuggestion.suggestedKg, reps: progressionSuggestion.suggestedReps }
+          : baseValues;
 
         return {
           ...exercise,
@@ -1030,6 +1082,70 @@ export default function TrainingSessionPage() {
   const jumpToMissingSet = (exerciseIdx: number) => {
     setShowFinishModal(false);
     scrollToExercise(exerciseIdx);
+  };
+
+  const saveSessionAndNavigate = async () => {
+    await completeSessionRecord({
+      routineId,
+      routineName: routine?.name,
+      dayName: sessionName,
+      sessionFocus,
+      durationSeconds: elapsed,
+      notes,
+      exercises: exerciseList,
+    });
+    shouldPersistDraftRef.current = false;
+    clearActiveWorkout();
+    navigate('/post-session', {
+      state: {
+        duration: elapsed,
+        volume: totalVolume,
+        setsCompleted: totalSetsCompleted,
+        totalSets,
+        exercises: exerciseList,
+        notes,
+        sessionName,
+        sessionFocus,
+        previousVolume: previousSession?.volume ?? 0,
+      },
+    });
+  };
+
+  const handleFinishRequest = () => {
+    if (isHistoryEditSession || isFreeSession || !routine || !currentDay) {
+      void finishSession();
+      return;
+    }
+    const changes = detectRoutineChanges(currentDay, exerciseList);
+    if (!changes.hasChanges) {
+      void finishSession();
+      return;
+    }
+    setShowFinishModal(false);
+    setPendingRoutineChanges(changes);
+    setShowUpdateRoutineSheet(true);
+  };
+
+  const handleUpdateRoutineAndFinish = async () => {
+    if (isSubmittingSession || !routine || !currentDay) return;
+    setIsSubmittingSession(true);
+    try {
+      const updatedRoutine = applySessionStructureToRoutine(routine, currentDay, exerciseList);
+      await saveRoutineRecord(updatedRoutine);
+      await saveSessionAndNavigate();
+    } finally {
+      setIsSubmittingSession(false);
+    }
+  };
+
+  const handleKeepOriginalAndFinish = async () => {
+    if (isSubmittingSession) return;
+    setIsSubmittingSession(true);
+    try {
+      await saveSessionAndNavigate();
+    } finally {
+      setIsSubmittingSession(false);
+    }
   };
 
   const finishSession = async () => {
@@ -1353,6 +1469,21 @@ export default function TrainingSessionPage() {
             </div>
           </div>
 
+          {!isHistoryEditSession && (
+            <button
+              onClick={() => setShowWeightSuggestions((prev) => !prev)}
+              className={`flex w-full items-center justify-center gap-2 rounded-2xl border py-3 text-sm font-bold transition-colors ${
+                showWeightSuggestions
+                  ? 'border-[rgba(0,201,167,0.4)] bg-[rgba(0,201,167,0.12)] text-[#00C9A7] shadow-[0_0_12px_rgba(0,201,167,0.15)]'
+                  : 'border-[#203347] bg-[#13263A] text-[#9BAEC1]'
+              }`}
+              type="button"
+            >
+              <Sparkles size={15} />
+              {showWeightSuggestions ? 'Pesos sugeridos activos' : 'Activar pesos sugeridos'}
+            </button>
+          )}
+
           <div className="flex flex-col gap-3">
             {isHistoryEditSession && (
               <button
@@ -1454,6 +1585,8 @@ export default function TrainingSessionPage() {
                       openRestEditor(targetExerciseIdx);
                     }}
                     onReorderClick={() => setShowReorderModal(true)}
+                    showWeightSuggestions={showWeightSuggestions}
+                    suggestions={allExerciseSuggestions[exerciseIdx]}
                   />
                   );
                 })}
@@ -1794,7 +1927,7 @@ export default function TrainingSessionPage() {
         isSubmittingSession={isSubmittingSession}
         missingSets={missingSetsGrouped}
         overlayBounds={sessionOverlayBounds}
-        onFinish={() => void finishSession()}
+        onFinish={handleFinishRequest}
         onDiscard={discardSession}
         onContinue={() => setShowFinishModal(false)}
         onDeleteSession={() => setShowDeleteSessionModal(true)}
@@ -1807,6 +1940,18 @@ export default function TrainingSessionPage() {
         onConfirm={() => void deleteHistoricalSession()}
         onClose={() => setShowDeleteSessionModal(false)}
       />
+
+      {pendingRoutineChanges && routine && (
+        <UpdateRoutineAfterWorkoutSheet
+          open={showUpdateRoutineSheet}
+          routineName={routine.name}
+          changeSummary={pendingRoutineChanges}
+          isSubmitting={isSubmittingSession}
+          overlayBounds={sessionOverlayBounds}
+          onUpdateRoutine={() => void handleUpdateRoutineAndFinish()}
+          onKeepOriginal={() => void handleKeepOriginalAndFinish()}
+        />
+      )}
 
       <ExerciseDetailModal
         detail={sessionExerciseDetail}
