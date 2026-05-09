@@ -1,20 +1,215 @@
 import type { MouseEvent } from 'react';
 import { useState } from 'react';
-import { BookOpen, CheckCircle2, Clock, Copy, LayoutGrid, Pencil, Plus, Settings, Target, Trash2, TrendingUp } from 'lucide-react';
+import { AlertCircle, BookOpen, Bot, CheckCircle2, Clock, Copy, Download, FileUp, LayoutGrid, Pencil, Plus, Settings, Target, Trash2, TrendingUp, X } from 'lucide-react';
 import { useNavigate } from 'react-router';
 import { ActiveWorkoutEditLockModal } from '@/shared/components/layout/ActiveWorkoutEditLockModal';
 import { Header } from '@/shared/components/layout/Header';
 import type { Routine } from '@/shared/types/models';
 import { useAppData } from '@/core/app-data/AppDataContext';
 import { formatCompactWeight } from '@/shared/lib/unitUtils';
+import { WeeklyMuscleLoad } from '@/features/home/components/WeeklyMuscleLoad';
+import { loadExerciseCatalog, buildExerciseTemplateFromCatalog } from '@/features/exercises/lib/exerciseCatalog';
+
+// ─── Import Routine Modal ──────────────────────────────────────────────────────
+
+const ROUTINE_COLORS = ['#00C9A7', '#7F98FF', '#FF7A8C', '#F5B942', '#54D62C', '#A855F7'];
+
+type ImportState = 'idle' | 'loading' | 'success' | 'error';
+
+interface RawImportDay {
+  name?: unknown;
+  focus?: unknown;
+  description?: unknown;
+  exercises?: unknown[];
+}
+
+interface RawImportExercise {
+  slug?: unknown;
+  sets?: unknown;
+  reps?: unknown;
+}
+
+function ImportRoutineModal({ onClose, onSave }: { onClose: () => void; onSave: (r: Routine) => Promise<void> }) {
+  const [json, setJson] = useState('');
+  const [state, setState] = useState<ImportState>('idle');
+  const [error, setError] = useState<string | null>(null);
+  const [warnings, setWarnings] = useState<string[]>([]);
+
+  const handleImport = async () => {
+    setState('loading');
+    setError(null);
+    setWarnings([]);
+
+    try {
+      let parsed: unknown;
+      try {
+        parsed = JSON.parse(json.trim());
+      } catch {
+        throw new Error('El JSON tiene un error de formato. Copiá el bloque completo desde ChatGPT (empezando con { y terminando con }).');
+      }
+
+      if (!parsed || typeof parsed !== 'object') throw new Error('El contenido pegado no es un JSON válido.');
+      const raw = parsed as Record<string, unknown>;
+      if (!raw.wohl_routine) throw new Error('Este JSON no tiene la firma Wohl. Asegurate de usar el prompt oficial y copiar el JSON completo que genera ChatGPT.');
+      if (!raw.name || typeof raw.name !== 'string') throw new Error('La rutina no tiene nombre.');
+      if (!Array.isArray(raw.days) || raw.days.length === 0) throw new Error('La rutina no tiene días de entrenamiento.');
+
+      const catalog = await loadExerciseCatalog();
+      const bySlug = new Map(catalog.map((e) => [e.slug, e]));
+      const missedSlugs: string[] = [];
+
+      const color = ROUTINE_COLORS[Math.floor(Math.random() * ROUTINE_COLORS.length)];
+
+      const routine: Routine = {
+        id: 0,
+        name: (raw.name as string).trim(),
+        daysPerWeek: Math.max(1, Math.min(7, Number(raw.daysPerWeek) || (raw.days as unknown[]).length)),
+        color,
+        categories: [],
+        description: typeof raw.description === 'string' ? raw.description.trim() : undefined,
+        avgMinutes: Number(raw.avgMinutes) > 0 ? Number(raw.avgMinutes) : undefined,
+        days: (raw.days as RawImportDay[]).map((day, di) => ({
+          name: typeof day.name === 'string' ? day.name.trim() : `Día ${di + 1}`,
+          focus: typeof day.focus === 'string' ? day.focus.trim() : '',
+          description: typeof day.description === 'string' ? day.description.trim() : undefined,
+          exercises: (Array.isArray(day.exercises) ? day.exercises as RawImportExercise[] : [])
+            .map((ex, ei) => {
+              const slug = typeof ex.slug === 'string' ? ex.slug.trim() : '';
+              const sets = Math.max(1, Math.min(8, Number(ex.sets) || 3));
+              const reps = Math.max(1, Math.min(30, Number(ex.reps) || 10));
+              const entry = bySlug.get(slug);
+              if (!entry && slug) missedSlugs.push(slug);
+              if (entry) return buildExerciseTemplateFromCatalog(entry, sets, reps);
+              const humanName = slug
+                ? slug.split('-').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+                : `Ejercicio ${ei + 1}`;
+              return {
+                id: ei + 1,
+                exerciseSlug: slug || undefined,
+                name: humanName,
+                muscle: 'Pecho',
+                sets: Array.from({ length: sets }, (_, i) => ({
+                  id: i + 1, kg: 0, reps, rpe: 0, completed: false, kind: 'normal' as const,
+                })),
+              };
+            }),
+        })),
+      };
+
+      await onSave(routine);
+      if (missedSlugs.length > 0) setWarnings([`${missedSlugs.length} ejercicio(s) no encontrados en el catálogo y se importaron sin detalles: ${missedSlugs.slice(0, 3).join(', ')}${missedSlugs.length > 3 ? '...' : ''}`]);
+      setState('success');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error desconocido al importar.');
+      setState('error');
+    }
+  };
+
+  return (
+    <div className="absolute inset-0 z-50 flex items-end">
+      <div className="absolute inset-0 bg-black/75" onClick={state !== 'loading' ? onClose : undefined} />
+      <div className="relative w-full rounded-t-[2rem] border-t border-[rgba(0,201,167,0.18)] bg-[#0E1F30] px-5 pb-8 pt-5"
+        style={{ boxShadow: '0 -24px 60px rgba(0,0,0,0.55)', maxHeight: '92dvh', overflowY: 'auto' }}>
+
+        {/* Header */}
+        <div className="relative mb-5 flex items-center justify-center">
+          <div className="h-1.5 w-12 rounded-full bg-[#3A3F50]" />
+          {state !== 'loading' && (
+            <button type="button" onClick={onClose}
+              className="absolute right-0 flex h-8 w-8 items-center justify-center rounded-full border border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.06)]"
+              aria-label="Cerrar">
+              <X size={15} className="text-[#9BAEC1]" />
+            </button>
+          )}
+        </div>
+
+        <div className="mb-1 flex items-center gap-2">
+          <Bot size={18} className="text-[#00C9A7]" />
+          <h2 className="text-xl font-bold tracking-tight text-white">Importar rutina IA</h2>
+        </div>
+        <p className="mb-5 text-sm text-[#9BAEC1]" style={{ fontFamily: "'Inter', sans-serif" }}>
+          Generá tu rutina con ChatGPT usando el prompt oficial de Wohl y pegá el JSON aquí.
+        </p>
+
+        {/* Download prompt CTA */}
+        <a href="/wohl_ia_prompt.txt" download="wohl_ia_prompt.txt"
+          className="mb-5 flex items-center gap-3 rounded-2xl border border-[rgba(0,201,167,0.22)] bg-[rgba(0,201,167,0.07)] px-4 py-3.5 transition-colors active:bg-[rgba(0,201,167,0.12)]">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-[rgba(0,201,167,0.3)] bg-[rgba(0,201,167,0.12)]">
+            <Download size={16} className="text-[#00C9A7]" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-bold text-white">Descargar prompt para ChatGPT</p>
+            <p className="text-xs text-[#00C9A7]">Subilo a ChatGPT · te va a armar la rutina</p>
+          </div>
+        </a>
+
+        {/* JSON textarea */}
+        {state !== 'success' ? (
+          <>
+            <label className="mb-2 block text-[10px] font-bold uppercase tracking-[0.2em] text-[#9BAEC1]">
+              Pegá el JSON que generó ChatGPT
+            </label>
+            <textarea
+              value={json}
+              onChange={(e) => { setJson(e.target.value); if (state === 'error') setState('idle'); }}
+              placeholder={'{\n  "wohl_routine": true,\n  "name": "Mi rutina",\n  ...\n}'}
+              rows={10}
+              className="mb-4 w-full resize-none rounded-2xl border border-[rgba(255,255,255,0.1)] bg-[#0A1824] px-4 py-3 font-mono text-xs text-[#C8D1DB] outline-none focus:border-[rgba(0,201,167,0.45)] focus:ring-0"
+              style={{ fontFamily: 'monospace' }}
+              disabled={state === 'loading'}
+            />
+
+            {error && (
+              <div className="mb-4 flex items-start gap-3 rounded-2xl border border-[rgba(255,122,140,0.3)] bg-[rgba(255,122,140,0.08)] px-4 py-3">
+                <AlertCircle size={15} className="mt-0.5 shrink-0 text-[#FF7A8C]" />
+                <p className="text-sm text-[#FF7A8C]">{error}</p>
+              </div>
+            )}
+
+            <button
+              type="button"
+              onClick={() => void handleImport()}
+              disabled={!json.trim() || state === 'loading'}
+              className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#00C9A7] py-4 font-extrabold text-[#041016] shadow-[0_0_20px_rgba(0,201,167,0.2)] transition-colors active:bg-[#009F86] disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <FileUp size={18} />
+              {state === 'loading' ? 'Importando...' : 'Importar rutina'}
+            </button>
+          </>
+        ) : (
+          <div className="flex flex-col items-center gap-4 py-6 text-center">
+            <div className="flex h-16 w-16 items-center justify-center rounded-full border border-[rgba(0,201,167,0.3)] bg-[rgba(0,201,167,0.12)]">
+              <CheckCircle2 size={32} className="text-[#00C9A7]" />
+            </div>
+            <div>
+              <p className="text-lg font-bold text-white">Rutina importada</p>
+              <p className="mt-1 text-sm text-[#9BAEC1]">Ya aparece en tu lista de rutinas.</p>
+            </div>
+            {warnings.length > 0 && (
+              <div className="flex items-start gap-2 rounded-xl border border-[rgba(245,185,66,0.3)] bg-[rgba(245,185,66,0.08)] px-4 py-3 text-left">
+                <AlertCircle size={14} className="mt-0.5 shrink-0 text-[#F5B942]" />
+                <p className="text-xs text-[#F5B942]">{warnings[0]}</p>
+              </div>
+            )}
+            <button type="button" onClick={onClose}
+              className="mt-2 w-full rounded-2xl bg-[#00C9A7] py-4 font-extrabold text-[#041016]">
+              Listo
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
 
 export default function WorkoutsPage() {
   const navigate = useNavigate();
-  const { activeWorkout, appContext, appSettings, copyRoutine, deleteRoutine, routines, sessionHistory, setActiveRoutine } =
+  const { activeWorkout, appContext, appSettings, copyRoutine, deleteRoutine, routines, saveRoutine, sessionHistory, setActiveRoutine } =
     useAppData();
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [blockedRoutineId, setBlockedRoutineId] = useState<number | null>(null);
   const [switchingRoutineId, setSwitchingRoutineId] = useState<number | null>(null);
+  const [showImportModal, setShowImportModal] = useState(false);
 
   const activeRoutine = routines.find((routine) => routine.id === appContext.activeRoutineId) ?? null;
   const hasRoutines = routines.length > 0;
@@ -98,6 +293,14 @@ export default function WorkoutsPage() {
             <BookOpen size={18} />
             Explorar ejercicios
           </button>
+          <button
+            onClick={() => setShowImportModal(true)}
+            className="flex w-full items-center justify-center gap-2 rounded-2xl border border-[rgba(127,152,255,0.25)] bg-[rgba(127,152,255,0.07)] py-4 font-bold text-[#7F98FF] transition-colors active:bg-[rgba(127,152,255,0.14)]"
+            type="button"
+          >
+            <Bot size={18} />
+            Importar rutina IA
+          </button>
         </div>
 
         {hasRoutines ? (
@@ -179,6 +382,8 @@ export default function WorkoutsPage() {
             Todavía no tenés rutinas creadas. Creá una nueva para empezar a entrenar.
           </div>
         )}
+
+        <WeeklyMuscleLoad />
 
         <div className="flex items-center justify-between">
           <span className="text-xl font-bold tracking-tight text-white">Cambiar rutina</span>
@@ -369,6 +574,15 @@ export default function WorkoutsPage() {
           onResume={() => navigate('/session')}
           onFinish={() => navigate('/session', { state: { action: 'finish' } })}
           onCancel={() => setBlockedRoutineId(null)}
+        />
+      )}
+
+      {showImportModal && (
+        <ImportRoutineModal
+          onClose={() => setShowImportModal(false)}
+          onSave={async (routine) => {
+            await saveRoutine(routine);
+          }}
         />
       )}
 

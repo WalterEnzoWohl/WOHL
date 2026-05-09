@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { ChevronRight, Clock, Dumbbell, Flame, Play, Settings, Target, TrendingUp } from 'lucide-react';
+import { ChevronRight, Clock, Dumbbell, Flame, Play, Settings, Target, TrendingUp, X } from 'lucide-react';
 import { useNavigate } from 'react-router';
 import { Header } from '@/shared/components/layout/Header';
 import { normalizeGoal } from '@/core/domain/profileInsights';
@@ -7,7 +7,6 @@ import { useAppData } from '@/core/app-data/AppDataContext';
 import { formatCompactWeight } from '@/shared/lib/unitUtils';
 import { getUserFirstName } from '@/shared/lib/userProfileUtils';
 import type { SessionHistory } from '@/shared/types/models';
-import { WeeklyMuscleLoad } from '../components/WeeklyMuscleLoad';
 
 function normalizeMuscleHighlight(label: string) {
   const normalized = label
@@ -321,8 +320,6 @@ export default function HomePage() {
           </button>
         </div>
 
-        <WeeklyMuscleLoad />
-
         <div className="flex flex-col gap-4">
           <span className="text-xl font-bold tracking-tight text-white">Resumen semanal</span>
           <div className="rounded-2xl border border-[#203347] bg-[#111111] p-4">
@@ -482,7 +479,17 @@ export default function HomePage() {
             className="relative w-full rounded-t-[2rem] border-t border-[rgba(0,201,167,0.14)] bg-[#1A2D42] px-5 pb-6 pt-5"
             style={{ boxShadow: '0 -20px 60px rgba(0, 0, 0, 0.45)' }}
           >
-            <div className="mx-auto mb-5 h-1.5 w-12 rounded-full bg-[#3A3F50]" />
+            <div className="relative mb-5 flex items-center justify-center">
+              <div className="h-1.5 w-12 rounded-full bg-[#3A3F50]" />
+              <button
+                type="button"
+                onClick={() => setShowTrainingPicker(false)}
+                className="absolute right-0 flex h-8 w-8 items-center justify-center rounded-full border border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.06)] transition-colors active:bg-[rgba(255,255,255,0.12)]"
+                aria-label="Cerrar"
+              >
+                <X size={15} className="text-[#9BAEC1]" />
+              </button>
+            </div>
 
             <div className="mb-5">
               <span className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[#00C9A7]">

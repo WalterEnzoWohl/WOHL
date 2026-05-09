@@ -29,6 +29,7 @@ import { UserAvatar } from '@/features/profile/components/UserAvatar';
 import { calculateNutritionTargets } from '@/core/domain/profileInsights';
 import { useAppData } from '@/core/app-data/AppDataContext';
 import { formatWeightNumber, getWeightUnitLabel } from '@/shared/lib/unitUtils';
+import { buildWeeklyFrequency } from '@/core/domain/metricsInsights';
 import type { SessionHistory } from '@/shared/types/models';
 
 const AVATAR_EDITOR_SIZE = 280;
@@ -138,6 +139,56 @@ function formatSessionDate(isoDate: string): string {
   const [, monthStr, dayStr] = isoDate.split('-');
   const months = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'];
   return `${parseInt(dayStr)} ${months[parseInt(monthStr) - 1]}`;
+}
+
+function FrequencyBarsProfile({ sessionHistory, todayIso }: { sessionHistory: SessionHistory[]; todayIso: string }) {
+  const weeks = buildWeeklyFrequency(sessionHistory, todayIso);
+  const max = Math.max(...weeks.map((w) => w.sessions), 1);
+
+  return (
+    <div style={{ display: 'flex', gap: 6 }}>
+      <div style={{
+        width: 14, height: 120, display: 'flex', flexDirection: 'column',
+        justifyContent: 'space-between', fontSize: 9, color: '#65758A',
+        fontWeight: 700, alignItems: 'flex-end', paddingTop: 2,
+      }}>
+        {[max + 1, Math.round((max + 1) * 0.75), Math.round((max + 1) * 0.5), Math.round((max + 1) * 0.25), 0].map((v) => (
+          <span key={v}>{v}</span>
+        ))}
+      </div>
+      <div style={{ flex: 1 }}>
+        <div style={{ display: 'flex', alignItems: 'flex-end', gap: 4, height: 120, position: 'relative' }}>
+          {[0, 0.25, 0.5, 0.75].map((g, i) => (
+            <div key={i} style={{ position: 'absolute', left: 0, right: 0, bottom: `${g * 100}%`, height: 1, background: 'rgba(144,164,184,0.10)' }} />
+          ))}
+          {weeks.map((w, i) => {
+            const pct = (w.sessions / (max + 1)) * 100;
+            const isTop = w.sessions === max && w.sessions > 0;
+            return (
+              <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, height: '100%', justifyContent: 'flex-end', position: 'relative', zIndex: 1 }}>
+                <div style={{ fontSize: 10, color: isTop ? '#00C9A7' : '#fff', fontWeight: 800 }}>
+                  {w.sessions > 0 ? w.sessions : ''}
+                </div>
+                <div style={{
+                  width: '78%', height: `${pct}%`, borderRadius: '6px 6px 2px 2px',
+                  background: w.sessions > 0 ? 'linear-gradient(180deg, #00C9A7, rgba(0,201,167,0.42))' : 'rgba(144,164,184,0.08)',
+                  border: w.sessions > 0 ? '1px solid rgba(0,201,167,0.55)' : '1px solid rgba(144,164,184,0.12)',
+                  minHeight: 2,
+                }} />
+              </div>
+            );
+          })}
+        </div>
+        <div style={{ display: 'flex', gap: 4, marginTop: 6 }}>
+          {weeks.map((w, i) => (
+            <div key={i} style={{ flex: 1, textAlign: 'center' as const, fontSize: 8, color: '#9BAEC1', lineHeight: 1.25, whiteSpace: 'pre-line' as const, fontWeight: 700 }}>
+              {w.week}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default function ProfilePage() {
@@ -606,35 +657,29 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* Historial CTA */}
-        <button
-          onClick={() => navigate('/metrics')}
-          className="flex w-full items-center gap-4 rounded-2xl border border-[rgba(0,201,167,0.3)] px-4 py-4 text-left transition-all active:bg-[rgba(0,201,167,0.06)]"
-          style={{ background: 'linear-gradient(135deg, rgba(0,201,167,0.09) 0%, rgba(11,31,51,0) 100%)' }}
-        >
-          <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl border border-[rgba(0,201,167,0.25)] bg-[rgba(0,201,167,0.13)]">
-            <CalendarDays size={24} className="text-[#00C9A7]" />
+        {/* Frecuencia semanal */}
+        <div className="rounded-2xl border border-[rgba(255,255,255,0.06)] bg-[#13263A] px-4 py-4">
+          <div className="mb-3 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <BarChart2 size={13} className="text-[#00C9A7]" />
+              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#00C9A7]">
+                Frecuencia semanal
+              </p>
+            </div>
+            <span style={{ fontSize: 10, fontWeight: 800, letterSpacing: '.16em', color: '#00C9A7' }}>
+              ÚLTIMAS 8 SEMANAS
+            </span>
           </div>
-          <div className="min-w-0 flex-1">
-            <h3 className="text-[17px] font-bold leading-tight text-white">Historial de sesiones</h3>
-            {lastSession ? (
-              <>
-                <p className="mt-0.5 text-xs text-[#00C9A7]">
-                  Última sesión: {lastSession.name} · {formatSessionDate(lastSession.isoDate)} · {lastSession.duration} min
-                </p>
-                <p
-                  className="mt-1 text-[10px] font-semibold uppercase tracking-widest text-[rgba(0,201,167,0.65)]"
-                  style={{ fontFamily: "'Inter', sans-serif" }}
-                >
-                  Ver historial completo
-                </p>
-              </>
-            ) : (
-              <p className="mt-0.5 text-xs text-[#546880]">Todavía no registraste sesiones</p>
-            )}
-          </div>
-          <ChevronRight size={20} className="shrink-0 text-[#00C9A7]" />
-        </button>
+          <FrequencyBarsProfile sessionHistory={sessionHistory} todayIso={appContext.todayIso} />
+          <button
+            type="button"
+            onClick={() => navigate('/metrics')}
+            className="mt-3 flex w-full items-center justify-center gap-1 rounded-xl py-2 text-[10px] font-bold uppercase tracking-[0.18em] text-[rgba(0,201,167,0.6)] transition-colors active:bg-[rgba(0,201,167,0.06)]"
+          >
+            Ver métricas completas
+            <ChevronRight size={12} className="text-[rgba(0,201,167,0.6)]" />
+          </button>
+        </div>
       </div>
 
       {/* Avatar editor modal */}
