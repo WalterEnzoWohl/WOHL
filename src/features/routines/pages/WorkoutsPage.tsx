@@ -1,6 +1,6 @@
 import type { MouseEvent } from 'react';
 import { useState } from 'react';
-import { AlertCircle, BookOpen, Bot, CheckCircle2, Clock, Copy, Download, FileUp, LayoutGrid, Pencil, Plus, Settings, Target, Trash2, TrendingUp, X } from 'lucide-react';
+import { AlertCircle, BookOpen, Bot, CheckCircle2, Clock, Copy, ExternalLink, FileUp, LayoutGrid, Pencil, Plus, Settings, Target, Trash2, TrendingUp, X } from 'lucide-react';
 import { useNavigate } from 'react-router';
 import { ActiveWorkoutEditLockModal } from '@/shared/components/layout/ActiveWorkoutEditLockModal';
 import { Header } from '@/shared/components/layout/Header';
@@ -34,6 +34,20 @@ function ImportRoutineModal({ onClose, onSave }: { onClose: () => void; onSave: 
   const [state, setState] = useState<ImportState>('idle');
   const [error, setError] = useState<string | null>(null);
   const [warnings, setWarnings] = useState<string[]>([]);
+  const [copyState, setCopyState] = useState<'idle' | 'copying' | 'copied'>('idle');
+
+  const handleOpenChatGPT = async () => {
+    setCopyState('copying');
+    try {
+      const res = await fetch('/wohl_ia_prompt.txt');
+      const text = await res.text();
+      await navigator.clipboard.writeText(text);
+      setCopyState('copied');
+      window.open('https://chatgpt.com/', '_blank', 'noopener,noreferrer');
+    } catch {
+      setCopyState('idle');
+    }
+  };
 
   const handleImport = async () => {
     setState('loading');
@@ -106,9 +120,9 @@ function ImportRoutineModal({ onClose, onSave }: { onClose: () => void; onSave: 
   };
 
   return (
-    <div className="absolute inset-0 z-50 flex items-end">
-      <div className="absolute inset-0 bg-black/75" onClick={state !== 'loading' ? onClose : undefined} />
-      <div className="relative w-full rounded-t-[2rem] border-t border-[rgba(0,201,167,0.18)] bg-[#0E1F30] px-5 pb-8 pt-5"
+    <div className="fixed inset-0 z-50 flex items-end justify-center">
+      <div className="fixed inset-0 bg-black/75" onClick={state !== 'loading' ? onClose : undefined} />
+      <div className="relative w-full max-w-[430px] rounded-t-[2rem] border-t border-[rgba(0,201,167,0.18)] bg-[#0E1F30] px-5 pb-8 pt-5"
         style={{ boxShadow: '0 -24px 60px rgba(0,0,0,0.55)', maxHeight: '92dvh', overflowY: 'auto' }}>
 
         {/* Header */}
@@ -125,23 +139,57 @@ function ImportRoutineModal({ onClose, onSave }: { onClose: () => void; onSave: 
 
         <div className="mb-1 flex items-center gap-2">
           <Bot size={18} className="text-[#00C9A7]" />
-          <h2 className="text-xl font-bold tracking-tight text-white">Importar rutina IA</h2>
+          <h2 className="text-xl font-bold tracking-tight text-white">Rutina con IA</h2>
         </div>
-        <p className="mb-5 text-sm text-[#9BAEC1]" style={{ fontFamily: "'Inter', sans-serif" }}>
-          Generá tu rutina con ChatGPT usando el prompt oficial de Wohl y pegá el JSON aquí.
-        </p>
 
-        {/* Download prompt CTA */}
-        <a href="/wohl_ia_prompt.txt" download="wohl_ia_prompt.txt"
-          className="mb-5 flex items-center gap-3 rounded-2xl border border-[rgba(0,201,167,0.22)] bg-[rgba(0,201,167,0.07)] px-4 py-3.5 transition-colors active:bg-[rgba(0,201,167,0.12)]">
+        {/* Steps */}
+        <div className="mb-5 mt-3 flex flex-col gap-2">
+          {[
+            { n: '1', text: 'Hacé clic en el botón → se copia el prompt y se abre ChatGPT' },
+            { n: '2', text: 'En ChatGPT, pegá el texto (Ctrl+V) y enviá el mensaje' },
+            { n: '3', text: 'Copiá el JSON que te devuelve y pegalo en el campo de abajo' },
+          ].map(({ n, text }) => (
+            <div key={n} className="flex items-start gap-3">
+              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[rgba(0,201,167,0.15)] text-[10px] font-bold text-[#00C9A7]">{n}</span>
+              <p className="text-xs leading-relaxed text-[#9BAEC1]">{text}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Open ChatGPT CTA */}
+        <button
+          type="button"
+          onClick={handleOpenChatGPT}
+          disabled={copyState === 'copying'}
+          className="mb-3 flex w-full items-center gap-3 rounded-2xl border border-[rgba(0,201,167,0.22)] bg-[rgba(0,201,167,0.07)] px-4 py-3.5 text-left transition-colors active:bg-[rgba(0,201,167,0.12)] disabled:opacity-60"
+        >
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-[rgba(0,201,167,0.3)] bg-[rgba(0,201,167,0.12)]">
-            <Download size={16} className="text-[#00C9A7]" />
+            {copyState === 'copied'
+              ? <CheckCircle2 size={16} className="text-[#00C9A7]" />
+              : copyState === 'copying'
+                ? <Copy size={16} className="animate-pulse text-[#00C9A7]" />
+                : <ExternalLink size={16} className="text-[#00C9A7]" />
+            }
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-bold text-white">Descargar prompt para ChatGPT</p>
-            <p className="text-xs text-[#00C9A7]">Subilo a ChatGPT · te va a armar la rutina</p>
+            <p className="text-sm font-bold text-white">
+              {copyState === 'copied' ? '¡Prompt copiado! ChatGPT abierto' : 'Copiar prompt y abrir ChatGPT'}
+            </p>
+            <p className="text-xs text-[#00C9A7]">
+              {copyState === 'copying' ? 'Copiando...' : 'Paso 1 de 3'}
+            </p>
           </div>
-        </a>
+        </button>
+
+        {/* Post-copy instruction */}
+        {copyState === 'copied' && (
+          <div className="mb-5 rounded-2xl border border-[rgba(0,201,167,0.25)] bg-[rgba(0,201,167,0.08)] px-4 py-3">
+            <p className="mb-1 text-xs font-bold text-[#00C9A7]">Siguiente paso →</p>
+            <p className="text-xs leading-relaxed text-[#C8D1DB]">
+              En la pestaña de ChatGPT que se abrió, hacé clic en el campo de texto y presioná <span className="font-bold text-white">Ctrl+V</span> para pegar el prompt. Luego enviá el mensaje y esperá la respuesta.
+            </p>
+          </div>
+        )}
 
         {/* JSON textarea */}
         {state !== 'success' ? (
@@ -540,9 +588,9 @@ export default function WorkoutsPage() {
       </div>
 
       {deleteId !== null && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center px-6">
-          <div className="absolute inset-0 bg-black/70" onClick={() => setDeleteId(null)} />
-          <div className="relative w-full rounded-3xl p-6" style={{ background: '#1A2D42' }}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-6">
+          <div className="fixed inset-0 bg-black/70" onClick={() => setDeleteId(null)} />
+          <div className="relative w-full max-w-[430px] rounded-3xl p-6" style={{ background: '#1A2D42' }}>
             <h3 className="mb-2 text-center text-xl font-bold text-white">Eliminar rutina</h3>
             <p className="mb-6 text-center text-sm text-[#9BAEC1]" style={{ fontFamily: "'Inter', sans-serif" }}>
               Esta acción no se puede deshacer. ¿Estás seguro?
