@@ -1,6 +1,7 @@
 import { useMemo, useState, type ReactNode } from 'react';
 import { useNavigate } from 'react-router';
-import { ChevronDown, ChevronUp, Download, Dumbbell, Loader2, Plus } from 'lucide-react';
+import { ChevronDown, ChevronUp, Download, Dumbbell, Loader2, Plus, Sparkles } from 'lucide-react';
+import { ImportRoutineModal } from '@/features/routines/components/ImportRoutineModal';
 import { Header } from '@/shared/components/layout/Header';
 import { useAppData } from '@/core/app-data/AppDataContext';
 import { useExerciseCatalog } from '@/features/exercises/hooks/useExerciseCatalog';
@@ -180,6 +181,7 @@ export function ProgramSelectionScreen({
   const { templates, isLoading: templatesLoading, error } = useProgramTemplates();
   const [savingId, setSavingId] = useState<string | null>(null);
   const [selectedExerciseDetail, setSelectedExerciseDetail] = useState<CatalogExerciseItem | null>(null);
+  const [showImportModal, setShowImportModal] = useState(false);
 
   const catalogBySlug = useMemo(() => new Map(catalog.map((e) => [e.slug, e])), [catalog]);
 
@@ -235,25 +237,47 @@ export function ProgramSelectionScreen({
         </div>
 
         {includeCreateCustomButton && (
-          <button
-            onClick={() => navigate('/routine/new')}
-            className="group relative overflow-hidden rounded-2xl border border-[rgba(0,201,167,0.18)] bg-[linear-gradient(180deg,#163146_0%,#102235_100%)] px-5 py-5 text-left transition-all active:scale-[0.99]"
-            type="button"
-          >
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(0,201,167,0.18),transparent_32%)]" />
-            <div className="relative flex items-center justify-between gap-4">
-              <div className="min-w-0">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[#00C9A7]">Personalizado</p>
-                <h2 className="mt-2 text-xl font-bold tracking-tight text-white">Crear mi propio programa</h2>
-                <p className="mt-1 text-sm text-[#9BAEC1]" style={{ fontFamily: "'Inter', sans-serif" }}>
-                  Arrancá desde cero y armalo exactamente a tu manera.
-                </p>
+          <>
+            <button
+              onClick={() => navigate('/routine/new')}
+              className="group relative overflow-hidden rounded-2xl border border-[rgba(0,201,167,0.18)] bg-[linear-gradient(180deg,#163146_0%,#102235_100%)] px-5 py-5 text-left transition-all active:scale-[0.99]"
+              type="button"
+            >
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(0,201,167,0.18),transparent_32%)]" />
+              <div className="relative flex items-center justify-between gap-4">
+                <div className="min-w-0">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[#00C9A7]">Personalizado</p>
+                  <h2 className="mt-2 text-xl font-bold tracking-tight text-white">Crear mi propio programa</h2>
+                  <p className="mt-1 text-sm text-[#9BAEC1]" style={{ fontFamily: "'Inter', sans-serif" }}>
+                    Arrancá desde cero y armalo exactamente a tu manera.
+                  </p>
+                </div>
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-[rgba(0,201,167,0.18)] bg-[rgba(0,201,167,0.08)] text-[#00C9A7]">
+                  <Plus size={22} />
+                </div>
               </div>
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-[rgba(0,201,167,0.18)] bg-[rgba(0,201,167,0.08)] text-[#00C9A7]">
-                <Plus size={22} />
+            </button>
+
+            <button
+              onClick={() => setShowImportModal(true)}
+              className="group relative overflow-hidden rounded-2xl border border-[rgba(127,152,255,0.22)] bg-[linear-gradient(180deg,#141E35_0%,#0E1728_100%)] px-5 py-5 text-left transition-all active:scale-[0.99]"
+              type="button"
+            >
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(127,152,255,0.14),transparent_32%)]" />
+              <div className="relative flex items-center justify-between gap-4">
+                <div className="min-w-0">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[#7F98FF]">Inteligencia artificial</p>
+                  <h2 className="mt-2 text-xl font-bold tracking-tight text-white">Crear rutina con IA</h2>
+                  <p className="mt-1 text-sm text-[#9BAEC1]" style={{ fontFamily: "'Inter', sans-serif" }}>
+                    Usá ChatGPT para armar tu rutina personalizada e importarla directo.
+                  </p>
+                </div>
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-[rgba(127,152,255,0.2)] bg-[rgba(127,152,255,0.1)] text-[#7F98FF]">
+                  <Sparkles size={22} />
+                </div>
               </div>
-            </div>
-          </button>
+            </button>
+          </>
         )}
 
         {isLoading && (
@@ -289,6 +313,16 @@ export function ProgramSelectionScreen({
         exercise={selectedExerciseDetail}
         onClose={() => setSelectedExerciseDetail(null)}
       />
+
+      {showImportModal && (
+        <ImportRoutineModal
+          onClose={() => setShowImportModal(false)}
+          onSave={async (routine) => {
+            const saved = await saveRoutine(routine);
+            if (saved) await setActiveRoutine(saved.id);
+          }}
+        />
+      )}
     </div>
   );
 }
