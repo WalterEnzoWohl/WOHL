@@ -44,7 +44,18 @@ export function ImportRoutineModal({ onClose, onSave }: { onClose: () => void; o
       const text = await res.text();
       await navigator.clipboard.writeText(text);
       setCopyState('copied');
-      window.open('https://chatgpt.com/', '_blank', 'noopener,noreferrer');
+
+      // Try native app first via URL scheme; fall back to web if app isn't installed
+      let appOpened = false;
+      const onBlur = () => { appOpened = true; };
+      window.addEventListener('blur', onBlur, { once: true });
+      window.location.href = 'chatgpt://';
+      setTimeout(() => {
+        window.removeEventListener('blur', onBlur);
+        if (!appOpened) {
+          window.open('https://chatgpt.com/', '_blank', 'noopener,noreferrer');
+        }
+      }, 1200);
     } catch {
       setCopyState('idle');
     }
