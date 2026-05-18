@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { ChevronRight } from 'lucide-react';
 import { useAppData } from '@/core/app-data/AppDataContext';
 import type { SessionHistory, WeekDayStatus } from '@/shared/types/models';
 
@@ -127,7 +128,7 @@ const LEGEND = [
 
 let svgCache: string | null = null;
 
-export function WeeklyMuscleLoad() {
+export function WeeklyMuscleLoad({ onOpenDetails }: { onOpenDetails?: () => void }) {
   const { sessionHistory, weekDays } = useAppData();
   const [svgHtml, setSvgHtml] = useState<string | null>(null);
 
@@ -159,11 +160,25 @@ export function WeeklyMuscleLoad() {
   const totalSets = Object.values(muscleSets).reduce((s, v) => s + v, 0);
 
   return (
-    <div className="flex flex-col gap-4">
+    <div
+      className={`flex flex-col gap-4 ${onOpenDetails ? 'cursor-pointer rounded-[1.75rem] transition-transform active:scale-[0.99]' : ''}`}
+      onClick={onOpenDetails}
+      onKeyDown={(event) => {
+        if (!onOpenDetails) return;
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          onOpenDetails();
+        }
+      }}
+      role={onOpenDetails ? 'button' : undefined}
+      tabIndex={onOpenDetails ? 0 : undefined}
+      aria-label={onOpenDetails ? 'Abrir carga muscular' : undefined}
+    >
       <div className="flex items-baseline justify-between">
         <span className="text-xl font-bold tracking-tight text-white">Carga muscular</span>
-        <span className="text-xs font-semibold uppercase tracking-widest text-[#00C9A7]">
+        <span className="inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-widest text-[#00C9A7]">
           Esta semana
+          {onOpenDetails ? <ChevronRight size={14} strokeWidth={2.6} /> : null}
         </span>
       </div>
 

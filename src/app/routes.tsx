@@ -139,6 +139,7 @@ export const router = createBrowserRouter([
       { path: 'muscle-progress/:id', lazy: lazyPage(() => import('@/features/history/pages/MuscleProgressPage')) },
       { path: 'history', lazy: lazyPage(() => import('@/features/history/pages/HistoryPage')) },
       { path: 'metrics', lazy: lazyPage(() => import('@/features/history/pages/MetricsPage')) },
+      { path: 'metrics/muscle-load', lazy: lazyPage(() => import('@/features/history/pages/MuscleLoadPage')) },
       { path: 'exercise-catalog', lazy: lazyPage(() => import('@/features/exercises/pages/ExerciseCatalogPage')) },
       { path: 'exercise-explore', lazy: lazyPage(() => import('@/features/exercises/pages/ExerciseExplorePage')) },
       { path: 'program-templates', lazy: lazyPage(() => import('@/features/routines/pages/ProgramTemplatesPage')) },

@@ -812,11 +812,19 @@ function ActivityTab({
 
 // ─── Resumen tab (renamed from General) ──────────────────────────────────────
 
-function ResumenTab({ sessionHistory, todayIso }: { sessionHistory: SessionHistory[]; todayIso: string }) {
+function ResumenTab({
+  sessionHistory,
+  todayIso,
+  onOpenMuscleLoad,
+}: {
+  sessionHistory: SessionHistory[];
+  todayIso: string;
+  onOpenMuscleLoad: () => void;
+}) {
   return (
     <>
       <div style={{ marginBottom: 14 }}>
-        <WeeklyMuscleLoad />
+        <WeeklyMuscleLoad onOpenDetails={onOpenMuscleLoad} />
       </div>
       <Card>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
@@ -1023,7 +1031,13 @@ export default function MetricsPage() {
               onNavigateToDetail={(id) => navigate(`/session-history/${id}`)}
             />
           )}
-          {tab === 'resumen' && <ResumenTab sessionHistory={sessionHistory} todayIso={appContext.todayIso} />}
+          {tab === 'resumen' && (
+            <ResumenTab
+              sessionHistory={sessionHistory}
+              todayIso={appContext.todayIso}
+              onOpenMuscleLoad={() => navigate('/metrics/muscle-load')}
+            />
+          )}
           {tab === 'fuerza' && <FuerzaTab sessionHistory={sessionHistory} />}
         </div>
 
